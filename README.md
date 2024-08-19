@@ -9,41 +9,57 @@
 <!-- badges: end -->
 
 - [Quickstart](#Quickstart)
+- [Overview](#Overview)
 - [User Guide](#UserGuide)
 - [Case Studies](#CaseStudies)
 - [Support](#Support)
 
 ## Quickstart
 
-Step 1: Pre-install Required Packages
+### Step 1: Pre-install Required Packages
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.19")
    BiocManager::install("qvalue")
    ```
-Step 2: Install the ShiNyP Package from GitHub
+### Step 2: Install the ShiNyP Package from GitHub
    ```R
    install.packages("remotes")
    remotes::install_github("TeddYenn/ShiNyP", force = TRUE)
    library(ShiNyP)
    ```
-Step 3: Start the ShiNyP Platform
+### Step 3: Start the ShiNyP Platform
    ```R
    ShiNyP::run_ShiNyP()
    ```
 
-### 7. 贡献指南
-- 如果希望其他开发者为你的项目做出贡献，提供贡献指南。
+## Overview
+**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF) file format.
 
-## 贡献
+**Analysis:** Data QC, Population genetics analysis, Core collection…
 
-欢迎任何形式的贡献！请阅读 [贡献指南](CONTRIBUTING.md) 了解更多信息。
+**Output:** Publication-ready figures, tables, analyzed data objects, and AI driven report.
+- Statistical and computational exploration
+- Customizable visualization options
+- Download publication-ready figures and tables
+- Download analyzed data objects
+- Auto-generate customized preliminary results
+- AI-driven report - powered by OpenAI
 
-## 许可证
+  
+## User Guide
+Visit the User Guide for detailed instructions on using each feature.
 
-MIT © [你的名字](https://your-website.com)
+[User Guide]([https://openai.com/research/whisper](https://teddy-tw.notion.site/ShiNyP-User-Guide-68b21f9bd4d94152b85feda55452d2a3?pvs=4))
 
-## 联系我们
+## Case Studies
+Explore how ShiNyP has been applied in WGS SNP datasets: wild rice & chicken. Check it out!
 
-如果有任何问题，请通过 [email@example.com](mailto:email@example.com) 联系我们。
+[Case Studies]([https://openai.com/research/whisper](https://teddy-tw.notion.site/ShiNyP-Case-Studies-a8117cb6e8c44280a25686f9cdddca1c?pvs=4))
+
+## Support
+If you encounter any issues or have suggestions for new features, please submit a report through our feedback form
+
+[Feedback Form]([[https://openai.com/research/whisper](https://teddy-tw.notion.site/ShiNyP-Case-Studies-a8117cb6e8c44280a25686f9cdddca1c?pvs=4](https://docs.google.com/forms/d/e/1FAIpQLScbMJILRWTJC_5AsbslVH59uPqHZJunur7wag8A2h7YYN4wVw/viewform?usp=send_form)))
+
 
