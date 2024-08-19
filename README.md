@@ -20,31 +20,12 @@
    git clone https://github.com/username/repository.git
 
 
-### 5. 使用方法
-- 说明如何运行项目、主要功能的使用方法。可使用代码块和截图增强说明。
-
-## 使用方法
-
-1. 启动项目：
-   ```bash
-   npm start
-
-
-### 6. 示例（Examples）
-- 如果项目涉及复杂的使用场景，提供具体示例或用例。
-
-```markdown
-## 示例
-
-```bash
-curl -X POST "http://api.example.com/resource" -d '{"key":"value"}'
 
 
 
 ### 7. 贡献指南
 - 如果希望其他开发者为你的项目做出贡献，提供贡献指南。
 
-```markdown
 ## 贡献
 
 欢迎任何形式的贡献！请阅读 [贡献指南](CONTRIBUTING.md) 了解更多信息。
