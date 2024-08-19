@@ -1,4 +1,4 @@
-export(runShiNyP)
+export(run_ShiNyP)
 import(shiny)
 export(vcf2df)
 export(vcf2Site_Info)
