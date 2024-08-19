@@ -6,20 +6,24 @@
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
 
-## 目录
+- [Quickstart](#Quickstart)
+- [User Guide](#UserGuide)
+- [Case Studies](#CaseStudies)
+- [Support](#Support)
 
-- [安装](#安装)
-- [使用方法](#使用方法)
-- [贡献](#贡献)
-- [许可证](#许可证)
+## Quickstart
 
-## 安装
+Step 1: Pre-install Required Packages
+   ```R
+   install.packages("BiocManager")
+   BiocManager::install(version = "3.19")
+   BiocManager::install("qvalue")
 
-1. 克隆仓库：
+克隆仓库：
    ```bash
-   git clone https://github.com/username/repository.git
-
-
+   install.packages("BiocManager")
+   BiocManager::install(version = "3.19")
+   BiocManager::install("qvalue")
 
 
 
