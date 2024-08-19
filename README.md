@@ -4,7 +4,10 @@
 # ShiNyP: A Shiny-Based Interactive Platform for Genome-Wide SNP Analysis and Visualization
 
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
+[![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
+![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/openai?color=brightgreen)](https://cranlogs.r-pkg.org/badges/grand-total/openai?color=brightgreen)
+<!-- badges: end -->
 
 - [Quickstart](#Quickstart)
 - [User Guide](#UserGuide)
@@ -18,14 +21,17 @@ Step 1: Pre-install Required Packages
    install.packages("BiocManager")
    BiocManager::install(version = "3.19")
    BiocManager::install("qvalue")
-
-克隆仓库：
-   ```bash
-   install.packages("BiocManager")
-   BiocManager::install(version = "3.19")
-   BiocManager::install("qvalue")
-
-
+   ```
+Step 2: Install the ShiNyP Package from GitHub
+   ```R
+   install.packages("remotes")
+   remotes::install_github("TeddYenn/ShiNyP", force = TRUE)
+   library(ShiNyP)
+   ```
+Step 3: Start the ShiNyP Platform
+   ```R
+   ShiNyP::run_ShiNyP()
+   ```
 
 ### 7. 贡献指南
 - 如果希望其他开发者为你的项目做出贡献，提供贡献指南。
