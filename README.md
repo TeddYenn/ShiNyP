@@ -6,7 +6,6 @@
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
 [![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
 ![Version](https://img.shields.io/badge/version-1.0-blue)
-![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/openai?color=brightgreen)]
 <!-- badges: end -->
 
 - [Quickstart](#Quickstart)
