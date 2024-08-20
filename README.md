@@ -17,7 +17,7 @@
 
 ## Quickstart
 
-### Step 1: Pre-install Required Packages
+### Step 1: Pre-install Required Package
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.19")
@@ -36,7 +36,7 @@
 
 ## Overview
 
-**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF) file format.
+**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF) file format. [*Demo SNP datasets*](https://drive.google.com/drive/folders/18enzKdE1cb-JXxNFkKCVLWDRTCJ39C00?usp=drive_link)
 
 **Analysis:** Data QC, Population genetics analysis, Core collection…
 
@@ -60,7 +60,7 @@ Explore how ShiNyP has been applied in WGS SNP datasets: wild rice & chicken. Ch
 [Case Studies](https://teddy-tw.notion.site/ShiNyP-Case-Studies-a8117cb6e8c44280a25686f9cdddca1c?pvs=4)
 
 ## Support
-If you encounter any issues or have suggestions for new features, please submit a report through our feedback form
+If you encounter any issues or have suggestions for new features, please submit a report through our feedback form.
 
 [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLScbMJILRWTJC_5AsbslVH59uPqHZJunur7wag8A2h7YYN4wVw/viewform?usp=send_form)
 
