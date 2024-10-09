@@ -1,7 +1,7 @@
 
 <img src="https://github.com/user-attachments/assets/2140e02f-f35b-4f04-bc41-e53d302d3485" alt="icon-removebg-preview" width="100"/>
 
-# ShiNyP: A Shiny-Based Interactive Platform for Genome-Wide SNP Analysis and Visualization
+# _ShiNyP_: A Shiny-Based Interactive Platform for Genome-Wide SNP Analysis and Visualization
 
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
 [![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
@@ -10,10 +10,10 @@
 
 - [Quickstart](#Quickstart)
 - [Overview](#Overview)
-- [User Guide](#User-Guide)
-- [Case Studies](#Case-Studies)
+- [Instructions](#Instructions)
 - [Support](#Support)
 - [Citation](#Citation)
+- [URLs](#URLs)
 
 ## Quickstart
 
@@ -23,49 +23,57 @@
    BiocManager::install(version = "3.19")
    BiocManager::install("qvalue")
    ```
-### Step 2: Install the ShiNyP Package from GitHub
+### Step 2: Install the _ShiNyP_ Package from GitHub
    ```R
    install.packages("remotes")
    remotes::install_github("TeddYenn/ShiNyP", force = TRUE)
-   library(ShiNyP)
    ```
-### Step 3: Start the ShiNyP Platform
+### Step 3: Start the _ShiNyP_ Platform
    ```R
+   library(ShiNyP)
    ShiNyP::run_ShiNyP()
    ```
+### Step 4: Run _ShiNyP_ Analysis
+Input your SNP data in VCF format, or feel free to use our Demo Data.
+
+
 
 ## Overview
 
-**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF) file format. [*Demo SNP datasets*](https://drive.google.com/drive/folders/18enzKdE1cb-JXxNFkKCVLWDRTCJ39C00?usp=drive_link)
+**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF).
 
 **Analysis:** Data QC, Population genetics analysis, Core collection…
 
-**Output:** Publication-ready figures, tables, analyzed data objects, and AI driven report.
+**Output:** Publication-ready figures, tables, analyzed data objects, and AI-driven reports.
 - Statistical and computational exploration
 - Customizable visualization options
-- Download publication-ready figures and tables
-- Download analyzed data objects
+- Publication-ready figures and tables
+- Analyzed R data objects
 - Auto-generate customized preliminary results
 - AI-driven report - powered by OpenAI
 
   
-## User Guide
-Visit the User Guide for detailed instructions on using each feature.
+## Instructions
+For detailed instructions on each feature, please visit the [User Guide](https://teddyenn.github.io/ShiNyP-guide/).
 
-[User Guide](https://teddy-tw.notion.site/ShiNyP-User-Guide-68b21f9bd4d94152b85feda55452d2a3?pvs=4)
-
-## Case Studies
-Explore how ShiNyP has been applied in WGS SNP datasets: wild rice & chicken. Check it out!
-
-[Case Studies](https://teddy-tw.notion.site/ShiNyP-Case-Studies-a8117cb6e8c44280a25686f9cdddca1c?pvs=4)
 
 ## Support
-If you encounter any issues or have suggestions for new features, please submit a report through our feedback form.
+If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7).
 
-[Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLScbMJILRWTJC_5AsbslVH59uPqHZJunur7wag8A2h7YYN4wVw/viewform?usp=send_form)
 
 ## Citation
 
 ```
-
+Huang et al. (upcoming 2024) ShiNyP: A Shiny-Based Interactive Platform for Genome-Wide SNP Analysis and Visualization
+Under Review…
 ```
+
+## URLs
+
+- Journal Article: Under Review…
+- User Manual: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
+- Demo Datasets: [https://reurl.cc/QEx5lZ](https://reurl.cc/QEx5lZ)
+- Demo Platform: [https://teddyhuang.shinyapps.io/ShiNyP/](https://teddyhuang.shinyapps.io/ShiNyP/)
+- Feedback Form: [https://forms.gle/GPCggSo5czyNLfoB7](https://forms.gle/GPCggSo5czyNLfoB7)
+- GitHub Repository: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
+
