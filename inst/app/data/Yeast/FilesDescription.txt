@@ -1,0 +1,5 @@
+(1) Yeast_10k_1011.vcf: A mini VCF dataset contains 1,011 samples and 10,000 SNPs, sampled randomly SNPs from the original dataset available at http://1002genomes.u-strasbg.fr/files/.
+
+(2) Group_Info.csv: Table including group info. and other info. from Peter et al. (2018) Supplementary Tables.
+
+(3) Chromosome_Info.csv: Table including chromosome information of reference genome.
