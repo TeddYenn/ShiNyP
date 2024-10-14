@@ -71,7 +71,7 @@ Under Review…
 ## URLs
 
 - Journal Article: Under Review…
-- User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)]
+- User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
 - Demo Datasets: [https://reurl.cc/QEx5lZ](https://reurl.cc/QEx5lZ)
 - Demo Platform: [https://teddyhuang.shinyapps.io/ShiNyP/](https://teddyhuang.shinyapps.io/ShiNyP/)
 - Feedback Form: [https://forms.gle/GPCggSo5czyNLfoB7](https://forms.gle/GPCggSo5czyNLfoB7)
