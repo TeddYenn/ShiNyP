@@ -5,7 +5,7 @@
 
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
 [![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
-![Version](https://img.shields.io/badge/version-1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 <!-- badges: end -->
 
 - [Quickstart](#Quickstart)
@@ -71,7 +71,7 @@ Under Review…
 ## URLs
 
 - Journal Article: Under Review…
-- User Manual: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
+- User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)]
 - Demo Datasets: [https://reurl.cc/QEx5lZ](https://reurl.cc/QEx5lZ)
 - Demo Platform: [https://teddyhuang.shinyapps.io/ShiNyP/](https://teddyhuang.shinyapps.io/ShiNyP/)
 - Feedback Form: [https://forms.gle/GPCggSo5czyNLfoB7](https://forms.gle/GPCggSo5czyNLfoB7)
