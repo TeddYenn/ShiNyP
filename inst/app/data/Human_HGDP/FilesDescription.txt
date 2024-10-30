@@ -1,0 +1,5 @@
+(1) Human_10k_929.vcf: A mini VCF dataset contains 929 samples and 10,000 SNPs, sampled randomly SNPs from the original dataset available at https://www.cog-genomics.org/plink/2.0/resources.
+
+(2) Group_Info.csv: Table including group info. and other info.
+
+(3) Chromosome_Info.csv: Table including chromosome information of reference genome.
