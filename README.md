@@ -1,5 +1,5 @@
 
-<img src="https://github.com/user-attachments/assets/9bbcb6f1-10fc-4617-8b09-be9b0e7a1ad6" alt="icon-removebg-preview" width="100"/>
+<img src="https://github.com/user-attachments/assets/91b10e7b-23f4-4730-8efb-2e570af01210" alt="icon-removebg-preview" width="100"/>
 
 # _ShiNyP_: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
 
