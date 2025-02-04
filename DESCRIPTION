@@ -1,0 +1,47 @@
+Package: ShiNyP
+Type: Package
+Title: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
+Version: 0.1.0
+Author: Yen-Hsiang Huang
+Maintainer: Yen-Hsiang Huang <teddyhuangyh@gmail.com>
+Description: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
+Depends: R (>= 4.4.0)
+License: GPL-3.0
+Encoding: UTF-8
+LazyData: true
+Depends:
+    shiny,
+    shinyjs,
+    ggplot2,
+    RColorBrewer,
+    ggthemes,
+    dplyr,
+    data.table,
+    adegenet,
+    DT,
+    dartRverse,
+    rms,
+    haplo.stats,
+    SNPassoc,
+    dartR.base,
+    dartR.popgen,
+    vctrs,
+    sass,
+    stringr,
+    poppr,
+    ape,
+    statgenGWAS,
+    popkin,
+    tidyr,
+    circlize,
+    hierfstat,
+    ggrepel,
+    pcadapt,
+    remotes,
+    fastmap,
+    plotly,
+    ggnewscale,
+    ggtree,
+    openai
+Remotes:
+    irudnyts/openai
