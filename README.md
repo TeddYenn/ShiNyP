@@ -81,7 +81,7 @@ Under Review…
 - Journal Article: 
 - User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
 - Demo Datasets: [https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets](https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets)
-- ShiNyP Outputs: [https://zenodo.org/records/14806044](https://zenodo.org/records/14806044)
+- ShiNyP Outputs: [https://zenodo.org/records/14813628](https://zenodo.org/records/14813628)
 - Online Platform (Demo): [https://teddyhuang.shinyapps.io/ShiNyP_Demo/](https://teddyhuang.shinyapps.io/ShiNyP_Demo/)
 - GitHub Repository: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
 
