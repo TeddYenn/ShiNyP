@@ -78,7 +78,7 @@ Under Review…
 
 ## URLs
 
-- Journal Article: Under Review…
+- Journal Article: 
 - User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
 - Demo Datasets: [https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets](https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets)
 - ShiNyP Outputs: [https://zenodo.org/records/14806044](https://zenodo.org/records/14806044)
