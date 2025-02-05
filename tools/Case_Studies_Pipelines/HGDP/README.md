@@ -1,19 +1,18 @@
 # HGDP Dataset
 
 This README file provides a step-by-step guide for reproducing the core collection and selection scan analyses described in our study. 
-The input data and output files can be download from [link].
 
----
+The input data and output files can be download from [Zenodo repository](https://zenodo.org/records/14806044) under **Case Studies Datasets (HGDP).zip** folder.
 
-## Table of Contents
-1. [Overview](#overview)  
-2. [Prerequisites](#prerequisites)
-3. [Analysis Workflow](#analysis-workflow)
-4. [Resource Guidelines](#resource-guidelines)
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Analysis Workflow](#analysis-workflow)
+- [Resource Guidelines](#resource-guidelines)
+  
 ---
 
 ## Overview
-This project uses the **ShiNyP** tool to analyze population diversity, detect selection signatures, and visualize results via phylogenetic trees and genomic plots. Key objectives:
+This project uses the _**ShiNyP**_ tool to analyze population diversity, detect selection signatures, and visualize results via phylogenetic trees and genomic plots. Key objectives:
 
 Using the full dataset (929 samples, 87K SNPs):
 
@@ -32,114 +31,120 @@ Using the core sample set (354 samples, 87K SNPs):
 
 1. **_ShiNyP_ Installation**: Refer to the [ShiNyP User Guide](https://teddyenn.github.io/ShiNyP-guide/sec-quickstart.html) for installation details.
 
-2. **Input Data**: SNP dataset (VCF format) and Metadata (CSV format) can be accessed at: [link].
+2. **Input Data**: SNP dataset (VCF format) and Metadata (CSV format) can be accessed at: [Zenodo repository](https://zenodo.org/records/14806044).
 
 3. **System Requirements**: Intel i5 with 8GB RAM or equivalent and above is recommended. Refer to [Resource Guidelines](#resource-guidelines) for detailed hardware recommendations.
 
 ---
 
-## Analysis Workflow
+## **Analysis Workflow**  
 
-1. **Data Upload**  
-   - Launch the _ShiNyP_ platform and navigate to **"Data Input"** → **"VCF"** page.
-   - Click "Browse" and upload the raw SNP dataset (e.g., `Human_929_85K.vcf`).
-   - Once the progress bar displays "Upload complete", click the "Input VCF File" button.
-   - Click the "Transform to data.frame" button to convert the VCF file into a data.frame format.
-   - Download the processed data for future reuse if needed.
+### **1. Data Upload**  
+1. Launch the _**ShiNyP**_ platform and navigate to **"Data Input" → "VCF"** page.  
+2. Click **"Browse"** and upload the raw SNP dataset (e.g., `Human_929_85K.vcf`).  
+3. Once the upload is complete, click the **"Input VCF File"** button.  
+4. Click **"Transform to data.frame"** to convert the VCF file into a DataFrame format.  
+5. Download the processed data for future reuse if needed.  
 
-2. **Core Collection**  
-   - Navigate to **"Core Collection"** → **"Core Sample Set"** page.
-   - If the dataset was previously transformed, _ShiNyP_ will automatically import data.frame file; otherwise,  manually upload the processed dataset on **"Data Input"** → **"data.frame/genind/genlight"** page.
-   - Set the minimum genetic coverage (%) to 99% and the coverage difference between iterations to 0.001.
-   - Click the "Run Core Sample" button to initiate the core collection process.
-   - Once the process is complete, download all results for further analysis.
+---
 
-3. **Data Transform**  
-   - Navigate to **"Data Transform"** page.
-   - If the dataset was previously transformed, _ShiNyP_ will automatically import data.frame file; otherwise,  manually upload the processed dataset on **"Data Input"** → **"data.frame/genind/genlight"** page.
-   - Click the "Transform to genind" button and "Transform to genlight" button to generate the respective files.
-   - Download the processed data for future reuse if needed.
+### **2. Core Collection**  
+1. Navigate to **"Core Collection" → "Core Sample Set"** page.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genind/genlight"** page.  
+3. Set the **minimum genetic coverage (%)** to **99%** and the **coverage difference between iterations** to **0.001**.  
+4. Click **"Run Core Sample"** to initiate the core collection process.  
+5. Download all results for further analysis.  
 
-4. **Phylogenetic Tree**
-   
-   **Step 1: Generate Neighbor-Joining (NJ) Tree**
-   
-   - Navigate to **"Population Structure"** → **"NJ Tree"** page.
-   - If the dataset was previously transformed, _ShiNyP_ will automatically import genlight file; otherwise, upload the processed dataset manually on **"Data Input"** → **"data.frame/genind/genlight"** page.
-   - Click the "Run NJ button" to generate tree plot.
-   - Once the process is complete, download all results for further analysis.
-     
-   **Step 2: Visualize NJ Tree with Tree Plot Plus**
-     
-   - Navigate to **"Population Structure"** → **"Tree Plot Plus"** page.
-   - Upload the NJ Object (`NJ_phylo_Object.rds`) and `Group Info.csv`.
-   - Click the "Run Tree Plot" button to generate the tree plot.
-   - Customize the tree plot using the settings below, then click "Run Tree Plot" again and download the final visualization.
-   - Customizable Tree Plot Settings: Layout: Circular; Line color variable: Core_sample;  Line colors: Neon; Line size: 0.5; Taxa label: Show; Text color variable: Core_sample; Text colors: Grey - single color; Text size: 1; Align label: TRUE; Symbol: Show; Symbol color variable: region; Symbol colors: Bright; Symbol shape variable:region; Symbol size: 3; Treescale: NULL; Bootstrap values: NULL; Legend: Right.
+---
 
-5. **Data Quality Control**
-   
-   **Step 1: Upload the Core Sample Set**
-   
-   - Navigate to **"Data Input"** → **"data.frame/genind/genlight"** page.
-   - Click "Browse" and upload the SNP dataset in data.frame format (`data.frame_354_85325SNPs_Core_Sample_Set.rds`) which was generated by **"Core Sample Set"** page.
-   - Click the Input button to upload your data.frame.
+### **3. Data Transformation**  
+1. Navigate to **"Data Transform"** page.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genind/genlight"** page.  
+3. Click **"Transform to genind"** and **"Transform to genlight"** to generate the respective files.  
+4. Download the processed data for future reuse.  
 
-   **Step 2: Perform Data QC**
-   
-   - Navigate to **"Data QC"** → **"SNP QC"** page.
-   - If the dataset was previously uploaded, _ShiNyP_ will automatically import the data.frame file.
-   - Click all "Summary" buttons to obtain the SNP summary statistics, including: missing rate, minor allele frequency (MAF), heterozygosity rate, and Hardy-Weinberg equilibrium (HWE).
-   - Adjust the QC thresholds and click the "SNP QC by Thresholds" button to generate the Post-QC data.frame file.
-   - QC Thresholds: Missing rate: 0.1; MAF: 0.05; HWE: 1×10⁻⁶
-   - Download the processed data for future reuse if needed.
+---
 
-6. **Diversity Metrics**
+### **4. Phylogenetic Tree Construction**  
 
-   **Step 1: Calculate Genetic Diversity**
-   
-   - Navigate to **"Genetic Diversity"** → **"Diversity Parameter"** page.
-   - If the dataset was previously uploaded, _ShiNyP_ will automatically import the data.frame file.
-   - Upload Site Info. and Group Info. files, which can be generated from the **"SNP QC"** and **"DAPC"** pages.
-   - Click the "Run Diversity Analysis" button to compute genetic diversity parameters.
+#### **Step 1: Generate Neighbor-Joining (NJ) Tree**  
+1. Navigate to **"Population Structure" → "NJ Tree"** page.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **genlight** file; otherwise, upload the processed dataset manually.  
+3. Click **"Run NJ"** to generate the tree plot.  
+4. Download all results for further analysis.  
 
-   **Step 2: Visualize Diversity Metrics with Circos Plot**
-   
-   - Navigate to **"Genetic Diversity"** → **"Circos Plot"** page.
-   - If diversity results were previously generated, _ShiNyP_ will automatically import them.
-   - Select the following genetic diversity parameters to be included in the analysis: Observed heterozygosity (Ho), Nucleotide diversity (π), and FST values
-   - Set the window size to 200 kb and the step size to 50 kb.
-   - Click the "Run Sliding Window" button to generate data for the Circos plot.
-   - Upload the Chromosome Info. (CSV) file, which is available at [link].
-   - Configure the following settings for each track in the Circos plot: Track 1 & 2: Chromosome Info.; Track 3: SNP density; Track 4: Observed heterozygosity (Ho); Track 5: Nucleotide diversity (π); Track 6: FST.
-   - Click the "Run Circos Plot" button to generate the visualization.
-   - Download the generated figure for future reference and reuse.
-  
-7. **Selection Sweep**
+#### **Step 2: Visualize NJ Tree with Tree Plot Plus**  
+1. Navigate to **"Population Structure" → "Tree Plot Plus"** page.  
+2. Upload the **NJ Object (NJ_phylo_Object.rds)** and **Group Info.csv**.  
+3. Click **"Run Tree Plot"** to generate the tree plot.  
+4. Customize the visualization as needed, then click **"Run Tree Plot"** again to apply changes.  
+5. Download the final visualization.  
 
-   **Step 1: Identify Genetic Variance**
-   
-   - Navigate to **"Population Structure"** → **"PCA"** page.
-   - If the dataset was previously uploaded, _ShiNyP_ will automatically import the data.frame file.
-   - Click the "Run PCA" button to generate PCA plots and related downloadable files.
-   - Examine the PCA eigenvalues plot (scree plot) to determine the principal component where the “elbow” appears, following Cattell’s rule for selecting significant PCs.
+---
 
-   **Step 2: Genomic Scan for Selection**
+### **5. Data Quality Control**  
 
-   - Navigate to **"Selection Sweep"** → **"pcadapt"** page.
-   - If the dataset was previously uploaded, _ShiNyP_ will automatically import the data.frame file.
-   - Upload Site Info., which was generated from the **"SNP QC"** page.
-   - Retain the first six principal components (PCs) for analysis and apply a false discovery rate (FDR) correction with α = 0.10 to adjust for multiple testing.
-   - Click the "Run pcadapt" button to perform a genome-wide selection scan.
-   - Download the processed data for future reuse if needed.
-  
-   **Step 3: Genomic Scan for Selection**
+#### **Step 1: Upload the Core Sample Set**  
+1. Navigate to **"Data Input" → "data.frame/genind/genlight"** page.  
+2. Click **"Browse"** and upload the SNP dataset (`data.frame_354_85325SNPs_Core_Sample_Set.rds`).  
+3. Click the **"Input"** button to upload the dataset.  
 
-   - Navigate to **"Selection Sweep"** → **"Manhattan Plot Plus"** page.
-   - Upload the pcadapt p-value per site file (RDS format) and Chromosome Info. file (CSV format).
-   - Click the "Run Manhattan Plot" button to generate the Manhattan plot.
-   - Customize the visualization as needed, then click the "Run Manhattan Plot" button again to apply changes.
-   - Review the interactive Manhattan plot, examine marker details, and conduct downstream analysis such as gene annotation.
+#### **Step 2: Perform Data QC**  
+1. Navigate to **"Data QC" → "SNP QC"** page.  
+2. Click all **"Summary"** buttons to obtain SNP summary statistics:  
+   - **Missing rate**  
+   - **Minor Allele Frequency (MAF)**  
+   - **Heterozygosity rate**  
+   - **Hardy-Weinberg Equilibrium (HWE)**  
+3. Adjust the QC thresholds:  
+   - **Missing rate**: 0.1  
+   - **MAF**: 0.05  
+   - **HWE**: 1×10⁻⁶  
+4. Click **"SNP QC by Thresholds"** to generate the **Post-QC data.frame** file.  
+5. Download the processed dataset for future reuse.  
+
+---
+
+### **6. Diversity Metrics Calculation**  
+
+#### **Step 1: Calculate Genetic Diversity**  
+1. Navigate to **"Genetic Diversity" → "Diversity Parameter"** page.  
+2. Upload **Site Info.** and **Group Info.** files.  
+3. Click **"Run Diversity Analysis"** to compute genetic diversity parameters.  
+
+#### **Step 2: Visualize Diversity Metrics with Circos Plot**  
+1. Navigate to **"Genetic Diversity" → "Circos Plot"** page.  
+2. Select the following parameters:  
+   - **Observed heterozygosity (Ho)**  
+   - **Nucleotide diversity (π)**  
+   - **FST values**  
+3. Set **window size** to **200 kb** and **step size** to **50 kb**.  
+4. Click **"Run Sliding Window"** to generate data for the Circos plot.  
+5. Upload the **Chromosome Info. (CSV)** file ([Zenodo repository](https://zenodo.org/records/14806044)).  
+6. Click **"Run Circos Plot"** to generate the visualization.  
+7. Download the final Circos plot.  
+
+---
+
+### **7. Selection Sweep Analysis**  
+
+#### **Step 1: Identify Genetic Variance**  
+1. Navigate to **"Population Structure" → "PCA"** page.  
+2. Click **"Run PCA"** to generate PCA plots.  
+3. Examine the **PCA eigenvalues plot (scree plot)** to determine the significant principal components (PCs).  
+
+#### **Step 2: Genomic Scan for Selection**  
+1. Navigate to **"Selection Sweep" → "pcadapt"** page.  
+2. Upload **Site Info.** file.  
+3. Retain the **first six principal components (PCs)** and apply a **false discovery rate (FDR) correction** with **α = 0.10**.  
+4. Click **"Run pcadapt"** to perform a **genome-wide selection scan**.  
+
+#### **Step 3: Visualize Selection Signatures**  
+1. Navigate to **"Selection Sweep" → "Manhattan Plot Plus"** page.  
+2. Upload **pcadapt p-value per site (RDS)** and **Chromosome Info. (CSV)**.  
+3. Click **"Run Manhattan Plot"** to generate the **Manhattan plot**.  
+4. Customize as needed, then re-run and download the final visualization.  
+
 ---
 
 ## Resource Guidelines
@@ -161,9 +166,9 @@ The following runtime estimates are based on a laptop computer with an Intel i7-
 **System Recommendations**  
 
 For optimal performance, we recommend using a system with:  
-- **CPU**: Multi-core processor (Intel i7 or equivalent and above)  
-- **Memory**: At least **16GB RAM** (8GB minimum for smaller datasets)  
+- **CPU**: Multi-core processor (Intel i5 or equivalent and above)  
+- **Memory**: At least **8GB RAM**
 - **Storage**: Sufficient disk space for intermediate and output files  
 
-For larger datasets, the high-performance computing (HPC) environment or Unix-based systems (Linux/macOS) with multi-threading support is advised.  
+For large dataset, the high-performance computing (HPC) environment or Unix-based systems (Linux/macOS) with multi-threading support is advised.  
 
