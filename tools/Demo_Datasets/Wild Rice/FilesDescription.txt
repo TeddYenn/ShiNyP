@@ -1,0 +1,5 @@
+(1) Wildrice_13k_446.vcf: A mini VCF dataset contains 446 samples and 13,077 SNPs, core SNPs from the original dataset available at http://viewer.shigen.info/oryzagenome21detail/downloads/index.xhtml.
+
+(2) Group_Info.csv: Table including group info. and other info. from Kajiya-Kanegae et al. (2021)
+
+(3) Chromosome_Info.csv: Table including chromosome information of reference genome.
