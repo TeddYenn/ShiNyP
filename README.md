@@ -8,12 +8,26 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 <!-- badges: end -->
 
-- [Quickstart](#Quickstart)
 - [Overview](#Overview)
 - [Instructions](#Instructions)
+- [Quickstart](#Quickstart)
 - [Support](#Support)
 - [Citation](#Citation)
 - [URLs](#URLs)
+
+## Overview
+
+_ShiNyP_ is a platform designed for real-time processing, analysis, and visualization of SNP datasets.
+
+**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF).
+
+**Analysis:** Data QC, population genetics analysis, core collection, and more.
+
+**Output:** Publication-ready figures, tables, analyzed data objects, and AI-driven reports.
+
+## Instructions
+For detailed instructions on each feature, please visit the [**User Guide**](https://teddyenn.github.io/ShiNyP-guide/).
+
 
 ## Quickstart
 
@@ -45,28 +59,8 @@
 Input your SNP data in VCF format, or feel free to use the built-in demo data.
 
 
-
-## Overview
-
-**Input data:** Genome-wide biallelic SNP in Variant Call Format (VCF).
-
-**Analysis:** Data QC, Population genetics analysis, Core collection…
-
-**Output:** Publication-ready figures, tables, analyzed data objects, and AI-driven reports.
-- Statistical and computational exploration
-- Customizable visualization options
-- Publication-ready figures and tables
-- Analyzed R data objects
-- Auto-generate customized preliminary results
-- AI-driven report - powered by OpenAI
-
-  
-## Instructions
-For detailed instructions on each feature, please visit the [User Guide](https://teddyenn.github.io/ShiNyP-guide/).
-
-
 ## Support
-If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7).
+If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7) or email us at: teddyhuangyh@gmail.com
 
 
 ## Citation
