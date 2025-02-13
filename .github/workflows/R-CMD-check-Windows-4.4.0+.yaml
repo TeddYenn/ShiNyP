@@ -1,6 +1,4 @@
-# .github/workflows/R-CMD-check.yaml
-
-name: R-CMD-check
+name: R-CMD-check (Windows: 4.4.0, 4.4.1, 4.4.2)
 
 on:
   push:
@@ -13,10 +11,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: windows-latest
     strategy:
       matrix:
-        r-version: [ "4.4.1", "4.4.2" ]
+        r-version: [ "4.4.0", "4.4.1", "4.4.2" ]
 
     steps:
       # 1. Check out the repository

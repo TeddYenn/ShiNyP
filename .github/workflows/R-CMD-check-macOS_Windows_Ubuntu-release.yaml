@@ -1,4 +1,4 @@
-name: R-CMD-check
+name: "R-CMD-check (macOS, Windows, Ubuntu: release)"
 
 on:
   push:
@@ -18,18 +18,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          # macOS
           - os: macos-latest
-            r: "4.4.1"
-          - os: macos-latest
-            r: "4.4.2"
+            r: "release"
+
+          # Windows
           - os: windows-latest
-            r: "4.4.1"
-          - os: windows-latest
-            r: "4.4.2"
+            r: "release"
+
+          # Ubuntu
           - os: ubuntu-latest
-            r: "4.4.1"
-          - os: ubuntu-latest
-            r: "4.4.2"
+            r: "release"
 
     steps:
       - name: "STEP 1: Check out source code"
