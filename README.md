@@ -17,16 +17,24 @@
 
 ## Quickstart
 
+### Prerequisites
+- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.19)
+- R Tools:
+  - Windows: Rtools
+  - macOS: Xcode Command Line Tools
+  - Linux: Development tools (e.g., r-base-dev)
+
+
 ### Step 1: Pre-install Required Package
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.19")
-   BiocManager::install("qvalue")
+   BiocManager::install(c("qvalue", "SNPRelate", "ggtree"), force = TRUE)
    ```
 ### Step 2: Install the _ShiNyP_ Package from GitHub
    ```R
    install.packages("remotes")
-   remotes::install_github("TeddYenn/ShiNyP-Test", force = TRUE)
+   remotes::install_github("TeddYenn/ShiNyP", force = TRUE)
    ```
 ### Step 3: Start the _ShiNyP_ Platform
    ```R
@@ -64,16 +72,16 @@ If you encounter any issues or have suggestions for new features, please submit 
 ## Citation
 
 ```
-Huang et al. (upcoming 2024) ShiNyP: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
+Huang et al. (upcoming 2025) ShiNyP: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
 Under Review…
 ```
 
 ## URLs
 
-- Journal Article: Under Review…
+- Journal Article: 
 - User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
-- Demo Datasets: [https://reurl.cc/QEx5lZ](https://reurl.cc/QEx5lZ)
-- Demo Platform: [https://teddyhuang.shinyapps.io/ShiNyP/](https://teddyhuang.shinyapps.io/ShiNyP/)
-- Feedback Form: [https://forms.gle/GPCggSo5czyNLfoB7](https://forms.gle/GPCggSo5czyNLfoB7)
+- Demo Datasets: [https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets](https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets)
+- ShiNyP Outputs: [https://zenodo.org/records/14813628](https://zenodo.org/records/14813628)
+- Online Platform (Demo): [https://teddyhuang.shinyapps.io/ShiNyP_Demo/](https://teddyhuang.shinyapps.io/ShiNyP_Demo/)
 - GitHub Repository: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
 
