@@ -18,35 +18,38 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: macOS-latest,   r: '4.4.1' }
-          - { os: macOS-latest,   r: '4.4.2' }
-          - { os: macOS-latest,    r: 'release' }
-          - { os: windows-latest, r: '4.4.1' }
-          - { os: windows-latest, r: '4.4.2' }
-          - { os: windows-latest,  r: 'release' }
-          - { os: ubuntu-latest,  r: '4.4.1' }
-          - { os: ubuntu-latest,  r: '4.4.2' }
-          - { os: ubuntu-latest,   r: 'release' }
+          - os: macos-latest
+            r: "4.4.1"
+          - os: macos-latest
+            r: "4.4.2"
+          - os: windows-latest
+            r: "4.4.1"
+          - os: windows-latest
+            r: "4.4.2"
+          - os: ubuntu-latest
+            r: "4.4.1"
+          - os: ubuntu-latest
+            r: "4.4.2"
 
     steps:
-      - name: STEP 1: Check out source code
+      - name: "STEP 1: Check out source code"
         uses: actions/checkout@v4
 
-      - name: STEP 2: Set up Pandoc
+      - name: "STEP 2: Set up Pandoc"
         uses: r-lib/actions/setup-pandoc@v2
 
-      - name: STEP 3: Set up R
+      - name: "STEP 3: Set up R"
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
-      - name: STEP 4: Install dependencies
+      - name: "STEP 4: Install dependencies"
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck
 
-      - name: STEP 5: Run R CMD check
+      - name: "STEP 5: Run R CMD check"
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
