@@ -4349,9 +4349,11 @@ server = function(input, output, session) {
         data$AdjPos[data$Chr == i] = as.numeric(data$AdjPos[data$Chr == i]) + end
       }
     }
-
-    Chr_axis = data %>% group_by(Chr) %>% summarize(center = (max(AdjPos) + min(AdjPos)) / 2, .groups = "drop")
-
+    
+    Chr_axis = data %>%
+      group_by(Chr) %>%
+      summarise(center = (max(AdjPos, na.rm = TRUE) + min(AdjPos, na.rm = TRUE)) / 2, .groups = "drop")
+    
     sele_columns = input$Manhattan_hover_text
     text_content = apply(data, 1, function(row) {
       paste0(sapply(sele_columns, function(col) paste0(col, ": ", row[col])), collapse = "\n")
