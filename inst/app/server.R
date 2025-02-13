@@ -136,7 +136,7 @@ server = function(input, output, session) {
         vcf = fread("data/Chicken/Chicken_10k_209.vcf", header = TRUE, sep = "\t")
         fileName("Chicken")
       } else if (input$demoFile == "Wild rice"){
-        vcf = fread("data/Wild Rice/Wildrice_13k_446.vcf", header = TRUE, sep = "\t")
+        vcf = fread("data/Wild_Rice/Wildrice_13k_446.vcf", header = TRUE, sep = "\t")
         fileName("Wildrice")
       } else if (input$demoFile == "Human #HGDP"){
         vcf = fread("data/Human_HGDP/Human_10k_929.vcf", header = TRUE, sep = "\t")
