@@ -31,21 +31,22 @@ jobs:
             r: "release"
 
     steps:
-      - name: "STEP 1: Check out repository"
+      - name: "STEP 1: Check out source code"
         uses: actions/checkout@v4
 
-      - name: "STEP 2: Set up R ${{ matrix.r-version }}"
+      - name: "STEP 2: Set up Pandoc"
+        uses: r-lib/actions/setup-pandoc@v2
+      - name: "STEP 3: Set up R"
         uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.r-version }}
+          r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
-      - name: "STEP 3: Install dependencies"
+      - name: "STEP 4: Install dependencies"
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck
 
-      - name: "STEP 4: Run R CMD check"
+      - name: "STEP 5: Run R CMD check"
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
         shell: Rscript {0}
-
