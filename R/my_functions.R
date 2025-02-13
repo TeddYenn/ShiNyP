@@ -1,5 +1,5 @@
-#' @noRd
-#' @keywords internal
+#' @title vcf2df
+#' @export
 vcf2df = function(VCF) {
   VCF_data = VCF[, 10:dim(VCF)[2]]
   total_steps = dim(VCF_data)[2]
@@ -16,15 +16,17 @@ vcf2df = function(VCF) {
   rownames(data) = colnames(VCF)[-c(1:9)]
   return(data)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title vcf2Site_Info
+#' @export
 vcf2Site_Info = function(VCF) {
   Site_Info = VCF[, c(1:3)]
   colnames(Site_Info) = c("Chr", "Pos", "Marker")
   return(Site_Info)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title hwe_test
+#' @export
 hwe_test = function(df) {
   N_AA = colSums(df == 0, na.rm = TRUE)
   N_Aa = colSums(df == 1, na.rm = TRUE)
@@ -42,8 +44,9 @@ hwe_test = function(df) {
 
   return(p_value)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title Sampleplot
+#' @export
 Sampleplot = function(rate){
   par(mar = c(3, 4, 1, 1) + 0.1)
   cut = table(cut(rate, breaks = seq(0, 1.0, by = 0.1), include.lowest = T, labels = F))
@@ -51,8 +54,9 @@ Sampleplot = function(rate){
               xlab = "", ylim = c(0, max(cut)*1.1), col = "#e89978", labels = T)
   return(hist)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title SNPplot
+#' @export
 SNPplot = function(rate){
   par(mar = c(3, 4, 1, 1) + 0.1)
   cut = table(cut(rate, breaks = seq(0, 1.0, by = 0.1), include.lowest = T, labels = F))
@@ -60,24 +64,27 @@ SNPplot = function(rate){
               xlab = "", ylim = c(0, max(cut)), col = "#e89978", labels = T)
   return(hist)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title SNPplot_HWE
+#' @export
 SNPplot_HWE = function(rate){
   par(mar = c(4, 4, 1, 1) + 0.1)
   hist = hist(rate, freq = T, main = NULL, ylab = "Number of SNPs",
               xlab = expression(-log[10](italic(p))), col = "#e89978", labels = T)
   return(hist)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title stat2summary
+#' @export
 stat2summary = function(stat){
   summary = data.frame("Min" = min(stat), "Max" = max(stat), "Mean" = mean(stat),
                        "Median" = median(stat), "SD" = sd(stat), "CV" = sd(stat)/mean(stat))
   summary[1:6] = format(round(summary[1:6], 4), nsmall = 4)
   return(summary)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title stat2summary_HWE
+#' @export
 stat2summary_HWE = function(stat){
   summary = data.frame("Min" = min(stat), "Max" = max(stat), "Mean" = mean(stat),
                        "Median" = median(stat), "SD" = sd(stat), "CV" = sd(stat)/mean(stat))
@@ -85,8 +92,9 @@ stat2summary_HWE = function(stat){
   summary[1] = format(summary[1], nsmall = 4)
   return(summary)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title size2size
+#' @export
 size2size = function(size_in_bytes) {
   if (size_in_bytes < 1024) {
     return(paste(size_in_bytes, "B"))
@@ -98,8 +106,9 @@ size2size = function(size_in_bytes) {
     return(paste(round(size_in_bytes / 1024^3, 2), "GB"))
   }
 }
-#' @noRd
-#' @keywords internal
+
+#' @title popgen2
+#' @export
 popgen2 = function(M, subgroups = NULL){
   withProgress(message = 'Processing data...', value = 0, {
     incProgress(0.05, message = "Checking missing data...")
@@ -181,8 +190,9 @@ popgen2 = function(M, subgroups = NULL){
     return(out)
   })
 }
-#' @noRd
-#' @keywords internal
+
+#' @title g.of.p
+#' @export
 g.of.p = function(M){
   m=ncol(M)
   g=nrow(M)
@@ -234,8 +244,9 @@ g.of.p = function(M){
   average = list("Markers" = markers, "Genotypes" = genotypes, "Population" = population, "Variability" = variance)
   return(average)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title F.stats
+#' @export
 F.stats = function(Hi, Hs, Ht, ngroups){
   n.harm = matrix(ngroups/sum(ngroups), nrow = 1)
 
@@ -253,8 +264,9 @@ F.stats = function(Hi, Hs, Ht, ngroups){
   rownames(FST.pop) = rownames(Ht)
   return(FST.pop)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title inbreeding.fun
+#' @export
 inbreeding.fun = function(mat, p){
   nOHom = rowSums(mat != 1, na.rm = T)
   nEHom = 1 - (2* p *(1-p))
@@ -262,8 +274,9 @@ inbreeding.fun = function(mat, p){
   Fi = round((nOHom - EH)/(rowSums(!is.na(mat)) - EH), 4)
   return(Fi)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title chiS
+#' @export
 chiS = function(counts){
   p = ((2 * counts[,"2"]) + counts[,"1"])/(2*rowSums(counts))
 
@@ -279,8 +292,9 @@ chiS = function(counts){
   resSQ[is.na(resSQ)] = 0
   return(resSQ)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title GDsiteplot
+#' @export
 GDsiteplot = function(data, y_axis, y_label){
   for (i in seq_along(unique(data$Chr))) {
     if (i > 1) {
@@ -315,8 +329,9 @@ GDsiteplot = function(data, y_axis, y_label){
     )
   return(plot)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title GDgroupplot
+#' @export
 GDgroupplot = function(data, y_axis, y_label){
   data = data[-1,]
   data2 = data.frame(
@@ -343,8 +358,9 @@ GDgroupplot = function(data, y_axis, y_label){
     )
   return(plot)
 }
-#' @noRd
-#' @keywords internal
+
+#' @title chromosome
+#' @export
 chromosome = function(chr) {
   num = as.numeric(gsub("\\D", "", chr))
   if (num < 10) {
@@ -353,8 +369,9 @@ chromosome = function(chr) {
     return(paste0("Chr", num))
   }
 }
-#' @noRd
-#' @keywords internal
+
+#' @title generateCircosPlot
+#' @export
 generateCircosPlot = function(Chr_Info, SW_data, pdf_path, Track3, Track4, Track5, Track6) {
   pdf(pdf_path, width = 10, height = 10)
   circos.clear()
@@ -423,8 +440,9 @@ generateCircosPlot = function(Chr_Info, SW_data, pdf_path, Track3, Track4, Track
   })
   dev.off()
 }
-#' @noRd
-#' @keywords internal
+
+#' @title core.set
+#' @export
 core.set = function(data.set, coverage = coverage, difference = difference){
   counts = data.set
   nc = ncol(data.set)
@@ -545,8 +563,9 @@ core.set = function(data.set, coverage = coverage, difference = difference){
   coreset = as.data.frame(coreset)
   return(list(coverage.table = coverage.table, coreset = coreset))
 }
-#' @noRd
-#' @keywords internal
+
+#' @title IBS_analysis
+#' @export
 IBS_analysis = function(data, Site_Info, REF, OBJ, Sliding.window = TRUE, window.size, step.size, remove_RM = TRUE){
   withProgress(message = "Processing Data", value = 0, {
     REF_loc = which(row.names(data) %in% REF)
@@ -617,8 +636,9 @@ IBS_analysis = function(data, Site_Info, REF, OBJ, Sliding.window = TRUE, window
     }
   })
 }
-#' @noRd
-#' @keywords internal
+
+#' @title density_analysis
+#' @export
 density_analysis = function(Site_Info, Chr_Info, window.size){
   withProgress(message = "Processing Data", value = 0, {
     nchr = length(unique(Site_Info$Chr))
@@ -664,8 +684,9 @@ density_analysis = function(Site_Info, Chr_Info, window.size){
 }
 
 
-#' @noRd
-#' @keywords internal
+
+#' @title my_palette
+#' @export
 my_palette = function(scatter_color, n_groups) {
   custom_palette = switch(scatter_color,
                           "Default" = custom_palette,

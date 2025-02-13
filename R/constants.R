@@ -1,6 +1,6 @@
-
-#' @noRd
-#' @keywords internal
+#' @title Tree Layout Choices
+#' @description A named character vector for layout keywords
+#' @export
 Tree_layout_choice = c("Rectangular" = "rectangular",
                        "Round rectangular" = "roundrect",
                        "Dendrogram" = "dendrogram",
@@ -9,15 +9,17 @@ Tree_layout_choice = c("Rectangular" = "rectangular",
                        "Inward circular" = "inward_circular",
                        "Radial" = "radial",
                        "Equal angle" = "equal_angle")
-#' @noRd
-#' @keywords internal
+#' @title Tree Legend Choices
+#' @description A named character vector for legend keywords
+#' @export
 Legend_choice = c("Top" = "top",
                   "Bottom" = "bottom",
                   "Right" = "right",
                   "Left" = "left",
                   "None" = "none")
-#' @noRd
-#' @keywords internal
+#' @title Genetic Distance Choices
+#' @description A named character vector for genetic distance keywords
+#' @export
 GT_method_choice = c("Cavalli-Sforza's chord distance" = "Dch",
                      "Nei's genetic distance" = "Da",
                      "Nei's standard genetic distance" = "Ds",
@@ -26,22 +28,27 @@ GT_method_choice = c("Cavalli-Sforza's chord distance" = "Dch",
                      "Rogers's distance" = "Dr",
                      "Prevosti's distance" = "Cp",
                      "Sanghvi's distance" = "X2")
-#' @noRd
-#' @keywords internal
+#' @title P value Adjustment Method Choices
+#' @description A named character vector for p value adjustment keywords
+#' @export
 pval_adj_method_choice = c("Bonferroni" = "bonferroni",
                            "Benjamini & Hochberg (FDR)" = "BH")
-#' @noRd
-#' @keywords internal
+#' @title AI Model Choices
+#' @description A named character vector for AI Model keywords
+#' @export
 AI_model_choice = c("GPT-4o" = "gpt-4o",
                     "GPT-4o mini" = "gpt-4o-mini",
                     "GPT-4 Turbo" = "gpt-4-turbo-2024-04-09",
                     "GPT-4" = "gpt-4",
                     "GPT-3.5 Turbo" = "gpt-3.5-turbo")
-#' @noRd
-#' @keywords internal
+#' @title Color Choices
+#' @description A named character vector for color
+#' @export
 custom_palette = c("#4482a8", "#91bb67", "#e3b800", "#E85C0D", "#e9788e", "#c493ff")
-#' @noRd
-#' @keywords internal
+
+#' @title Summary Request Prompt
+#' @description Prompt for Summary Request
+#' @export
 Summary_Request_Prompt = "Summarize key findings from a report analyzing genome-wide SNP data using various statistical and computational methods, excluding any GWAS results. 
 Focus on specific areas if their results are provided below, such as SNP data description, PCA, DAPC clustering, genetic diversity, genetic distance, selection sweep analysis, and core collection construction.
 # Steps
@@ -67,8 +74,10 @@ Provide a detailed summary in paragraph form for each section if their results a
 - Exclude any GWAS results from the summary.
 - Pay special attention to methodological details and their impact on the findings.
 - Clearly indicate analytical techniques and any assumptions or limitations associated with the findings."
-#' @noRd
-#' @keywords internal
+
+#' @title Data Interpretation Prompt
+#' @description Prompt for Data Interpretation
+#' @export
 Data_Interpretation_Prompt = "Interpret a report of genome-wide SNP data generated from various statistical and computational methods, excluding GWAS results.
 Focus on specific areas if their results are provided, such as SNP data description, PCA, DAPC clustering, genetic diversity, genetic distance, selection sweep analysis, and core collection construction.
 # Steps
@@ -102,8 +111,10 @@ Provide your interpretation as a structured report with sections corresponding t
 - Consider potential confounding factors that might affect the interpretation.
 - Maintain clarity when discussing statistical significance and biological relevance.
 - Recognize any assumptions made in the analysis and potential limitations of the data."
-#' @noRd
-#' @keywords internal
+
+#' @title Report Structuring Prompt
+#' @description Prompt for Report Structuring
+#' @export
 Report_Structuring_Prompt = "Create an academic report template for SNP data analysis, using the structure and guidelines provided below.
 # Template Sections
 ### Title
@@ -139,8 +150,10 @@ Ensure the report is structured with clearly marked sections and subsections as 
 - Pay attention to the clarity and coherence of each section.
 - Maintain a consistent and professional tone suitable for an academic report.
 - Tailor detailed content in each section according to the specific data and analyses conducted in your study."
-#' @noRd
-#' @keywords internal
+
+#' @title Idea Expansion Prompt
+#' @description Prompt for Idea Expansion
+#' @export
 Idea_Expansion_Prompt = "Create a template for expanding ideas based on your SNP data report.
 # Steps
 - **Review the SNP Data Report**: Begin by thoroughly examining the SNP data report to understand the key findings, terminology, and data points.
