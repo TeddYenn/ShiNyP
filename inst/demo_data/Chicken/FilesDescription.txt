@@ -1,0 +1,5 @@
+(1) Chicken_10k_209.vcf: A mini VCF dataset contains 209 samples and 10,000 SNPs, sampled randomly SNPs from the original dataset available at https://identifiers.org/ena.embl:PRJEB71347.
+
+(2) Group_Info.csv: Table including group info. and other info. from Tan et al. (2024) Supplementary Tables.
+
+(3) Chromosome_Info.csv: Table including chromosome information of reference genome.

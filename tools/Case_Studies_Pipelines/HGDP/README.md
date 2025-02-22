@@ -50,7 +50,7 @@ Using the core sample set (354 samples, 87K SNPs):
 
 ### **2. Core Collection**  
 1. Navigate to **"Core Collection" → "Core Sample Set"** page.  
-2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genind/genlight"** page.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genlight"** page.  
 3. Set the **minimum genetic coverage (%)** to **99%** and the **coverage difference between iterations** to **0.001**.  
 4. Click **"Run Core Sample"** to initiate the core collection process.  
 5. Download all results for further analysis.  
@@ -59,8 +59,8 @@ Using the core sample set (354 samples, 87K SNPs):
 
 ### **3. Data Transformation**  
 1. Navigate to **"Data Transform"** page.  
-2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genind/genlight"** page.  
-3. Click **"Transform to genind"** and **"Transform to genlight"** to generate the respective files.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genlight"** page.  
+3. Click **"Transform to genlight"** to generate the respective files.  
 4. Download the processed data for future reuse.  
 
 ---
@@ -85,7 +85,7 @@ Using the core sample set (354 samples, 87K SNPs):
 ### **5. Data Quality Control**  
 
 #### **Step 1: Upload the Core Sample Set**  
-1. Navigate to **"Data Input" → "data.frame/genind/genlight"** page.  
+1. Navigate to **"Data Input" → "data.frame/genlight"** page.  
 2. Click **"Browse"** and upload the SNP dataset (`data.frame_354_85325SNPs_Core_Sample_Set.rds`).  
 3. Click the **"Input"** button to upload the dataset.  
 

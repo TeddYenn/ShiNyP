@@ -8,6 +8,7 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 <!-- badges: end -->
 
+
 ## 🔸Overview
 
 **_ShiNyP_ is a platform designed for real-time processing, analysis, and visualization of SNP datasets.**
@@ -56,7 +57,7 @@ Input your SNP data in VCF format, or feel free to use the built-in demo data.
 
 ▪️ User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
 
-▪️ Demo Datasets: [https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets](https://github.com/TeddYenn/ShiNyP/tree/main/tools/Demo_Datasets)
+▪️ Demo Datasets: [https://github.com/TeddYenn/ShiNyP_Test/tree/main/inst/demo_data](https://github.com/TeddYenn/ShiNyP_Test/tree/main/inst/demo_data)
 
 ▪️ ShiNyP Outputs (Samples): [https://zenodo.org/records/14813628](https://zenodo.org/records/14813628)
 

@@ -42,8 +42,8 @@ This project utilizes the _**ShiNyP**_ platform to analyze **wild rice populatio
 
 ### **2. Data Transformation**  
 1. Navigate to **"Data Transform"** page.  
-2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genind/genlight"** page.  
-3. Click **"Transform to genind"** to generate the genind file.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **data.frame** file; otherwise, manually upload the processed dataset via **"Data Input" → "data.frame/genlight"** page.  
+3. Click **"Transform to genlight"** to generate the genlight file.  
 4. Download the processed data for future reuse.  
 
 ---
@@ -61,7 +61,7 @@ This project utilizes the _**ShiNyP**_ platform to analyze **wild rice populatio
 
 #### **Step 1: Perform DAPC**  
 1. Navigate to **"Population Structure" → "DAPC"** page.  
-2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **genind** file; otherwise, upload the processed dataset manually.  
+2. If the dataset was previously transformed, _ShiNyP_ will automatically import the **genlight** file; otherwise, upload the processed dataset manually.  
 3. Set the **number of PCs** to **356** and the **maximum number of clusters** to **15**.  
 4. Click **"Run DAPC I"** to determine the optimal number of clusters (lowest BIC value).  
 5. Set the **number of clusters (K)** to **7**.  
@@ -112,7 +112,7 @@ This project utilizes the _**ShiNyP**_ platform to analyze **wild rice populatio
 7. Download the processed data for future use.  
 
 #### **Step 2: Upload the Core SNP Set**  
-1. Navigate to **"Data Input" → "data.frame/genind/genlight"** page.  
+1. Navigate to **"Data Input" → "data.frame/genlight"** page.  
 2. Click **"Browse"** and upload the SNP dataset (`data.frame_446_13077SNPs_Core_SNP_Set.rds`).  
 3. Click the **"Input"** button to upload the dataset.  
 

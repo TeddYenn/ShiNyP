@@ -1,7 +1,7 @@
 Package: ShiNyP
 Type: Package
 Title: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
-Version: 0.1.0
+Version: 0.1.1
 Author: Yen-Hsiang Huang
 Maintainer: Yen-Hsiang Huang <teddyhuangyh@gmail.com>
 Description: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
