@@ -24,13 +24,13 @@ Page_3_Data_Transform_UI = function() {
                              "genind (RDS)" = "gl2genind",
                              "PLINK (PED & MAP)" = "gl2PLINK",
                              "GenAlEx (CSV)" = "gl2GenAlEx",
-                             "LEA (geno & lfmm)" = "gl2LEA",
-                             "gds (gds)" = "gl2gds",
-                             "STRUCTURE (str)" = "gl2STRUCTURE",
-                             "fastStructure (str)" = "gl2fastStructure",
-                             "PHYLIP (txt)" = "gl2PHYLIP",
-                             "Treemix (gz)" = "gl2Treemix",
-                             "BayeScan (txt)" = "gl2BayeScan"),
+                             "LEA (GENO & LFMM)" = "gl2LEA",
+                             "GDS (GDS)" = "gl2gds",
+                             "STRUCTURE (STR)" = "gl2STRUCTURE",
+                             "fastStructure (STR)" = "gl2fastStructure",
+                             "PHYLIP (TXT)" = "gl2PHYLIP",
+                             "Treemix (GZ)" = "gl2Treemix",
+                             "BayeScan (TXT)" = "gl2BayeScan"),
                  selected = "gl2genind"),
                conditionalPanel(
                  condition = "input.Transform_method == 'gl2genlight_group'",
@@ -286,25 +286,25 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       Cstatus3("GenAlEx (CSV) file has already been generated")
     } else if (transform == "gl2LEA"){
       gl2geno(gl(), outfile = "geno", outpath = input$T2_Path3, verbose = 0)
-      Cstatus3("LEA (geno & lfmm) file has already been generated")
+      Cstatus3("LEA (GENO & LFMM) file has already been generated")
     } else if (transform == "gl2gds"){
-      gl2gds(gl(), outfile = "gds.gds", outpath = input$T2_Path4, verbose = 0)
-      Cstatus3("gds (gds) file has already been generated")
+      gl2gds(gl(), outfile = "GDS.GDS", outpath = input$T2_Path4, verbose = 0)
+      Cstatus3("GDS (GDS) file has already been generated")
     } else if (transform == "gl2STRUCTURE"){
       gl2structure(gl(), outfile = "STRUCTURE.str", outpath = input$T2_Path5, verbose = 0)
-      Cstatus3("STRUCTURE (str) file has already been generated")
+      Cstatus3("STRUCTURE (STR) file has already been generated")
     } else if (transform == "gl2fastStructure"){
       gl2faststructure(gl(), outfile = "fastStructure.str", outpath = input$T2_Path6, verbose = 0)
-      Cstatus3("fastStructure (str) file has already been generated")
+      Cstatus3("fastStructure (STR) file has already been generated")
     } else if (transform == "gl2PHYLIP"){
       gl2phylip(gl(), outfile = "PHYLIP.txt", outpath = input$T2_Path7, verbose = 0)
-      Cstatus3("PHYLIP (txt) file has already been generated")
+      Cstatus3("PHYLIP (TXT) file has already been generated")
     } else if (transform == "gl2Treemix"){
       result = gl2treemix(gl(), outfile = "Treemix.gz", outpath = input$T2_Path8, verbose = 0)
-      Cstatus3("Treemix (gz) file has already been generated")
+      Cstatus3("Treemix (GZ) file has already been generated")
     } else if (transform == "gl2BayeScan"){
       gl2bayescan(gl(), outfile = "BayeScan.txt", outpath = input$T2_Path9, verbose = 0)
-      Cstatus3("BayeScan (txt) file has already been generated")
+      Cstatus3("BayeScan (TXT) file has already been generated")
     }
     output$Cstatus3 = renderText({ Cstatus3() })
     shinyjs::hide("gl2Status")
