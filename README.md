@@ -5,7 +5,7 @@
 
 ![CI](https://img.shields.io/badge/build-passing-brightgreen)
 [![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.1-blue)
 <!-- badges: end -->
 
 
