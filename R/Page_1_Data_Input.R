@@ -18,7 +18,7 @@ Page_1_Data_Input_UI = function(input, output, session) {
                           actionButton("demo_data", "Use Demo Data", class = "S-action-button"),
                           tags$hr(),
                           tags$h5("2. Transform to data.frame"),
-                          checkboxInput("FVCFdiploidize", "Applying diploidization processing", value = FALSE),
+                          checkboxInput("FVCFdiploidize", "Applying Diploidization Processing", value = FALSE),
                           actionButton("vcf2df", "Transform to data.frame", class = "run-action-button"),
                           actionButton("resetvcf2df", "Reset"),
                           width = 3),

@@ -1032,9 +1032,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   output$KinshipfileInfo = renderText({
     req(df())
-    paste0("Type: ", class(gl()), "\n",
-           "Number of samples: ", nInd(gl()), "\n",
-           "Number of SNPs: ", nLoc(gl()))
+    paste0("Type: ", class(df()), "\n",
+           "Number of samples: ", dim(df())[1], "\n",
+           "Number of SNPs: ", dim(df())[2])
   })
   
   output$groupfile2 = renderUI({
