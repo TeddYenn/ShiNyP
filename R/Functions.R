@@ -113,8 +113,8 @@ SNPplot_HWE = function(rate){
 #' @title stat2summary
 #' @export
 stat2summary = function(stat){
-  summary = data.frame("Min" = min(stat), "Max" = max(stat), "Mean" = mean(stat),
-                       "Median" = median(stat), "SD" = sd(stat), "CV" = sd(stat)/mean(stat))
+  summary = data.frame("Min" = min(stat, na.rm = T), "Max" = max(stat, na.rm = T), "Mean" = mean(stat, na.rm = T),
+                       "Median" = median(stat, na.rm = T), "SD" = sd(stat, na.rm = T), "CV" = sd(stat, na.rm = T)/mean(stat, na.rm = T))
   summary[1:6] = format(round(summary[1:6], 4), nsmall = 4)
   return(summary)
 }
@@ -122,8 +122,8 @@ stat2summary = function(stat){
 #' @title stat2summary_HWE
 #' @export
 stat2summary_HWE = function(stat){
-  summary = data.frame("Min" = min(stat), "Max" = max(stat), "Mean" = mean(stat),
-                       "Median" = median(stat), "SD" = sd(stat), "CV" = sd(stat)/mean(stat))
+  summary = data.frame("Min" = min(stat, na.rm = T), "Max" = max(stat, na.rm = T), "Mean" = mean(stat, na.rm = T),
+                       "Median" = median(stat, na.rm = T), "SD" = sd(stat, na.rm = T), "CV" = sd(stat, na.rm = T)/mean(stat, na.rm = T))
   summary[2:6] = format(round(summary[2:6], 4), nsmall = 4)
   summary[1] = format(summary[1], nsmall = 4)
   return(summary)

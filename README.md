@@ -24,7 +24,7 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
 ## 🔸Quickstart
 
 ### ✅ Prerequisites
-- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.19 or 3.20)
+- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.20)
 - R Tools:
   - Windows: Rtools
   - macOS: Xcode Command Line Tools
