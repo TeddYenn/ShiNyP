@@ -24,7 +24,7 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
 ## 🔸Quickstart
 
 ### ✅ Prerequisites
-- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.19)
+- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.19 or 3.20)
 - R Tools:
   - Windows: Rtools
   - macOS: Xcode Command Line Tools
@@ -34,7 +34,7 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
 ### 1️⃣ Pre-install Required Package
    ```R
    install.packages("BiocManager")
-   BiocManager::install(version = "3.19")
+   BiocManager::install(version = "3.20")
    BiocManager::install(c("qvalue", "SNPRelate", "ggtree"), force = TRUE)
    ```
 ### 2️⃣ Install the _ShiNyP_ Package from GitHub

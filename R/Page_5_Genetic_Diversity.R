@@ -787,7 +787,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   ##### AMOVA #####
   output$fileSelection_AMOVA = renderUI({
     if (!is.null(gl())){ choices = c("genlight file" = "gl") } else { choices = "" }
-    selectInput("FileforAMOVA", "Dataset for genetic distance:", choices)
+    selectInput("FileforAMOVA", "Dataset for AMOVA:", choices)
   })
   
   output$AMOVAfileInfo = renderText({

@@ -370,7 +370,6 @@ Page_2_Data_QC_Server = function(input, output, session) {
       shinyjs::show("hStatus")
       rate = colSums(QCData() == 1, na.rm = TRUE)/(dim(QCData())[1]-colSums(is.na(QCData())))
     }
-    rate = pmin(rate, 1 - rate)
     h(rate)
     h1("Summary of SNP Heterozygosity Rate")
     h2(stat2summary(h()))
@@ -631,7 +630,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     "Average SNP spacing: ", data[last_row, 2], " bp", "\n",
                     "Average number of SNPs per 1000bp: ", data[last_row, 3], " SNPs", "\n")
       pre_results = pre_results()
-      pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)
+      pre_results[[15]] = paste0("### Summary of SNP Density", text)
       pre_results(pre_results)
       paste0(text)
     }

@@ -16,7 +16,7 @@ Page_3_Data_Transform_UI = function() {
                verbatimTextOutput("glfileInfo"),
                tags$style("#glfileInfo { font-size: 14px;}"),
                tags$hr(),
-               tags$h5("2. genlight to ..."),
+               tags$h5("2. From genlight to"),
                selectInput(
                  inputId = "Transform_method", 
                  label = "Export the genlight object to:",
