@@ -29,13 +29,13 @@ Page_7_Core_Collection_UI = function() {
                                    div(class = "title-text-style", textOutput("CoreSampletitle1")),
                                    verbatimTextOutput("CoreSampleres"),
                                    uiOutput("download_core_sample_dataset"),
-                                   uiOutput("download_core_sample_info")
+                                   uiOutput("download_core_sample_info"),
+                                   uiOutput("download_core_sample_coverage")
                             ),
                             column(8,
                                    div(class = "title-text-style", textOutput("CoreSampletitle2")),
                                    plotOutput("CoreSampleplot", width = "690px", height = "500px"),
-                                   uiOutput("download_CoreSample_plot"),
-                                   uiOutput("download_core_sample_coverage")
+                                   uiOutput("download_core_sample_plot"),
                             )
                           ),
                           width = 9)
@@ -86,12 +86,12 @@ Page_7_Core_Collection_UI = function() {
                           div(class = "title-text-style", textOutput("CoreSNPtitle1")),
                           verbatimTextOutput("CoreSNPres"),
                           uiOutput("download_core_SNP_dataset"),
+                          uiOutput("download_core_SNP_site_info"),
                           uiOutput("download_core_SNP_info"),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("CoreSNPtitle2")),
                           plotOutput("CoreSNPplot", width = "950px", height = "350px"),
-                          uiOutput("download_CoreSNP_plot"),
-                          uiOutput("download_CoreSNP_site_info"),
+                          uiOutput("download_core_SNP_plot"),
                           width = 9)
                       ))
            ))
@@ -113,17 +113,16 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   observeEvent(input$runCoreSample, {
     req(input$FileforCoreSample)
     shinyjs::show("CoreSampleStatus")
-    data = switch(input$FileforCoreSample, "df" = df())
-    data = as.data.frame(t(data))
-    core_sample = core.set(data, coverage = as.numeric(input$coverage), difference = as.numeric(input$diff))
+    # data = switch(input$FileforCoreSample, "df" = df())
+    core_sample = core.set(as.data.frame(t(df())), coverage = as.numeric(input$coverage), difference = as.numeric(input$diff))
     core_sample_coverage(core_sample$coverage.table)
     dataset = as.data.frame(t(core_sample$coreset))
-    colnames(dataset) = row.names(data)
+    colnames(dataset) = colnames(df())
     row.names(dataset) = core_sample$coverage.table[,2]
     core_sample_dataset(dataset)
     
-    core_sample_info = data.frame("ID" = colnames(data),
-                                  "Core_sample" = ifelse(colnames(data) %in% core_sample_coverage()[,2], "TRUE", "FALSE"))
+    core_sample_info = data.frame("ID" = colnames(df()),
+                                  "Core_sample" = ifelse(colnames(df()) %in% core_sample_coverage()[,2], "TRUE", "FALSE"))
     core_sample_info(core_sample_info)
     
     shinyjs::hide("CoreSampleStatus")
@@ -165,7 +164,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSampletitle2("")
     showNotification("Data have been reset.")
     guide_CoreSample("To run core sample set, the input data must be in ✅ data.frame format. \nPlease click the 'Run Core Sample' button.")
-    })
+  })
   
   output$CoreSamplefileInfo = renderText({
     req(df())
@@ -220,7 +219,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     }
   })
   
-  output$download_CoreSample_plot = renderUI({
+  output$download_core_sample_plot = renderUI({
     if (CoreSampletitle2() == "Coverage Plot of Core Sample Set") {
       downloadButton("DCoreSample_plot", "Download Plot")
     }
@@ -241,18 +240,18 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   
   output$download_core_sample_dataset = renderUI({
     if (CoreSampletitle1() == "Core Sample Set") {
-      downloadButton("Dcore_sample_dataset", "Download Core Samples Set in data.frame")
+      downloadButton("Dcore_sample_dataset", "Download data.frame of Core Samples Set")
     }
   })
   
   output$download_core_sample_info = renderUI({
     if (CoreSampletitle1() == "Core Sample Set") {
-      downloadButton("D_core_sample_info", "Download Core Sample Info.")
+      downloadButton("D_core_sample_info", "Download Core Sample List")
     }
   })
   
   output$D_core_sample_info = downloadHandler(
-    filename = "Core_Sample_Info.csv",
+    filename = "Core_Sample_List.csv",
     content = function(file) {
       write.csv(core_sample_info(), file, row.names = FALSE)
     }
@@ -300,7 +299,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     req(input$FileforCoreSNP, Site_Info())
     shinyjs::show("CoreSNPStatus")
     guide_CoreSNP("Running...")
-    data = switch(input$FileforCoreSNP, "df" = df())
+    # data = switch(input$FileforCoreSNP, "df" = df())
     
     selected_SNPs = character(0)
     
@@ -322,16 +321,16 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       select = list()
       for (i in seq_len(ncol(loading))) {
         select[[i]] = names(sort(abs(loading[,i]), 
-                                  decreasing = TRUE)[1:sel[i]])
+                                 decreasing = TRUE)[1:sel[i]])
       }
       selected_SNPs = unique(unlist(select))
       
     } else if (method_chosen == "random_percentage") {
       pct = input$random_percentage / 100
       
-      total_snps  = ncol(data)
+      total_snps  = ncol(df())
       sample_size = round(total_snps * pct)
-      selected_SNPs = sample(colnames(data), sample_size)
+      selected_SNPs = sample(colnames(df()), sample_size)
       
     } else if (method_chosen == "random_density") {
       bp_per_snp = input$random_density
@@ -353,15 +352,17 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       })
       selected_SNPs = unique(unlist(selected_chr_list))
     }
-    subset_data = data[, selected_SNPs, drop = FALSE]
+    subset_data = df()[, selected_SNPs, drop = FALSE]
     subset_data = lapply(subset_data, function(x) as.numeric(as.character(x)))
     subset_data = as.data.frame(subset_data)
     colnames(subset_data) = selected_SNPs
+    row.names(subset_data) = row.names(df())
+    subset_data = subset_data[, order(as.numeric(gsub(":.*", "", colnames(subset_data))), as.numeric(gsub(".*:", "", colnames(subset_data))))]
     core_SNP_dataset(subset_data)
     
     core_SNP_info = data.frame(
-      "ID"       = colnames(data),
-      "Core_SNP" = ifelse(colnames(data) %in% selected_SNPs, "TRUE", "FALSE")
+      "ID"       = colnames(df()),
+      "Core_SNP" = ifelse(colnames(df()) %in% selected_SNPs, "TRUE", "FALSE")
     )
     core_SNP_info(core_SNP_info)
     
@@ -378,8 +379,8 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     pre_results[[51]] = "## Core Collection"
     pre_results[[55]] = "### Core SNPs set"
     pre_results[[56]] = paste0("Number of core SNPs: ", 
-                                length(selected_SNPs), " (", 
-                                round(length(selected_SNPs)/ncol(data), 4)*100, "%)")
+                               length(selected_SNPs), " (", 
+                               round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
     pre_results(pre_results)
     
     output$Dcore_SNP_dataset = downloadHandler(
@@ -414,7 +415,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     selected_Site_Info(NULL)
     showNotification("Data have been reset.")
     guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run Core SNP' button.")
-    })
+  })
   
   output$CoreSNPfileInfo = renderText({
     req(df())
@@ -482,7 +483,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   
-  output$download_CoreSNP_plot = renderUI({
+  output$download_core_SNP_plot = renderUI({
     if (CoreSNPtitle2() == "Distribution of Core SNPs") {
       downloadButton("DCoreSNP_plot", "Download Plot")
     }
@@ -501,26 +502,26 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   
   output$download_core_SNP_dataset = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
-      downloadButton("Dcore_SNP_dataset", "Download Core SNPs Set in data.frame")
+      downloadButton("Dcore_SNP_dataset", "Download data.frame")
     }
   })
   
   output$download_core_SNP_info = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
-      downloadButton("D_core_SNP_info", "Download Core SNPs Info.")
+      downloadButton("D_core_SNP_info", "Download Core SNPs List")
     }
   })
   
   output$D_core_SNP_info = downloadHandler(
-    filename = "Core_SNP_Info.rds",
+    filename = "Core_SNP_List.rds",
     content = function(file) {
       saveRDS(core_SNP_info(), file)
     }
   )
   
-  output$download_CoreSNP_site_info = renderUI({
+  output$download_core_SNP_site_info = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
-      downloadButton("D_CoreSNP_site_info", "Download Site Info. of Core SNPs")
+      downloadButton("D_CoreSNP_site_info", "Download Site Info.")
     }
   })
   

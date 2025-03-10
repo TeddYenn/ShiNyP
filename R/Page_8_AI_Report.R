@@ -139,25 +139,44 @@ Page_8_AI_Report_Server = function(input, output, session) {
     
     result = tryCatch({
       key = readLines(input$AI_api_key$datapath, warn = FALSE)
-      Sys.setenv(OPENAI_API_KEY = key)
-      client = OpenAI()
+      # Sys.setenv(OPENAI_API_KEY = key)
       model = AI_model_choice[input$AI_model]
       
-      message = paste(Role, Start, preliminary_results())
+      if (model %in% c("o1-mini", "o3-mini")){
+        chat = chat_openai(
+          system_prompt = NULL,
+          turns = NULL,
+          base_url = "https://api.openai.com/v1",
+          api_key = key,
+          model = model,
+          seed = NULL,
+          echo = "text"
+        )
+        message = paste(Role, "\n", preliminary_results())
+        content = chat$chat(message)
+      } else{
+        chat = chat_openai(
+          system_prompt = Start,
+          turns = NULL,
+          base_url = "https://api.openai.com/v1",
+          api_key = key,
+          model = model,
+          seed = NULL,
+          echo = "text"
+        )
+        message = paste(Role, "\n", preliminary_results())
+        content = chat$chat(message)
+      }
       
-      completion = client$chat$completions$create(
-        model = model,
-        messages = list(list("role" = "user", "content" = message))
-      )
       AI_report = paste0("---------- ShiNyP ----------", "\n", "\n",
                          "----- Successful Request -----", "\n",
                          "OpenAI Model: ", input$AI_model, "\n",
                          "OpenAI Task: ", input$AI_prompt, "\n",
-                         "Total Tokens Used: ", completion$usage$total_tokens, "\n",
-                         "Prompt Tokens: ", completion$usage$prompt_tokens, "\n",
-                         "Completion Tokens: ", completion$usage$completion_tokens, "\n", "\n",
+                         "Total Tokens Used: ", sum(token_usage()[,2:3]), "\n",
+                         "Prompt Tokens: ", token_usage()[,2], "\n",
+                         "Completion Tokens: ", token_usage()[,3], "\n", "\n",
                          "----- AI-driven report -----", "\n",
-                         completion$choices[[1]]$message$content, "\n", "\n",
+                         content, "\n", "\n",
                          "#### WARNING: ", "\n",
                          "### This report was generated with the assistance of OpenAI model and is for informational purposes only.", "\n",
                          "### It should not be considered as professional advice or a basis for decision-making.", "\n",

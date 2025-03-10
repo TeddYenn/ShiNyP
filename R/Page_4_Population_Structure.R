@@ -298,7 +298,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     shinyjs::show("PCAStatus")
     pca_data = switch(input$FileforPCA, "df" = df())
     pca_data[] = lapply(pca_data, function(x) replace(x, is.na(x), 0))
-    pca_result = prcomp(pca_data)
+    pca_data = pca_data[, apply(pca_data, 2, var) > 0]
+    pca_result = prcomp(pca_data, scale = T)
     pca_result(pca_result)
     sd = pca_result$sdev
     total_variance = sum(sd)
@@ -352,7 +353,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     PCAtitle2("")
     showNotification("Data have been reset.")
     guide_PCA("To run PCA, the input data must be in ✅ data.frame format. \nPlease click the 'Run PCA' button")
-    })
+  })
   
   output$pc1 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
@@ -370,7 +371,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   output$groupfile4 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
-      fileInput("groupfile4", "Group or Core Sample Info.", multiple = F, accept = c(".csv"))
+      fileInput("groupfile4", "Group Info. or Core Sample List", multiple = F, accept = c(".csv"))
     }
   })
   
@@ -619,7 +620,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     BICplot(NULL)
     showNotification("Data have been reset.")
     guide_DAPC("To run DAPC, the input data must be in ✅ genlight or ✅ genind format. \nPlease click the 'Run DAPC I' button first.")
-    })
+  })
   
   observeEvent(input$resetDAPC2, {
     DAPC1(NULL)
@@ -898,7 +899,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     tree(NULL)
     showNotification("Data have been reset.")
     guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. \nPlease click the 'Run UPGMA' button.")
-    })
+  })
   
   output$Layout = renderUI({
     if (UPGMAtitle1() == "UPGMA Phylogenetic Tree"){
@@ -982,7 +983,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     NJtitle1("")
     showNotification("Data have been reset.")
     guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.\nPlease click the 'Run NJ' button.")
-    })
+  })
   
   output$NJLayout = renderUI({
     if (NJtitle1() == "NJ Phylogenetic Tree"){
@@ -1090,7 +1091,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     })
     showNotification("Data have been reset.")
     guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Run Kinship' button.")
-    })
+  })
   
   
   output$Kinship = renderPlot({

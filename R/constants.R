@@ -36,9 +36,13 @@ pval_adj_method_choice = c("Bonferroni" = "bonferroni",
 #' @title AI Model Choices
 #' @description A named character vector for AI Model keywords
 #' @export
-AI_model_choice = c("GPT-4o" = "gpt-4o",
+AI_model_choice = c("o3-mini" = "o3-mini",
+                    # "o1" = "o1",
+                    "o1-mini" = "o1-mini",
+                    "GPT-4.5 Preview" = "gpt-4.5-preview",
+                    "GPT-4o" = "gpt-4o",
                     "GPT-4o mini" = "gpt-4o-mini",
-                    "GPT-4 Turbo" = "gpt-4-turbo-2024-04-09",
+                    "GPT-4 Turbo" = "gpt-4-turbo",
                     "GPT-4" = "gpt-4",
                     "GPT-3.5 Turbo" = "gpt-3.5-turbo")
 #' @title Color Choices

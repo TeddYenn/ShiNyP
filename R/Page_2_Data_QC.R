@@ -630,7 +630,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     "Average SNP spacing: ", data[last_row, 2], " bp", "\n",
                     "Average number of SNPs per 1000bp: ", data[last_row, 3], " SNPs", "\n")
       pre_results = pre_results()
-      pre_results[[15]] = paste0("### Summary of SNP Density", text)
+      pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)
       pre_results(pre_results)
       paste0(text)
     }
