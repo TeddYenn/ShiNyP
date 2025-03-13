@@ -199,12 +199,13 @@ Page_3_Data_Transform_Server = function(input, output, session) {
     req(gl())
     shinyjs::show("gl2Status")
     guide_C("Running...")
-    gl(gl.compliance.check(gl()))
-    class(gl()) = "genlight"
+    gl = gl()
+    gl = gl.compliance.check(gl)
+    class(gl) = "genlight"
+    gl(gl)
     
     if (transform == "gl2genlight_group"){
       req(T2_Group1Info())
-      gl = gl()
       pop(gl) = as.vector(T2_Group1Info())
       gl(gl)
       Cstatus3("genlight with Group Info.")
@@ -243,7 +244,6 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       
     } else if (transform == "gl2genind"){
       if (!is.null(T2_Group2Info())){
-        gl = gl()
         pop(gl) = as.vector(T2_Group2Info())
         gl(gl)
       }
