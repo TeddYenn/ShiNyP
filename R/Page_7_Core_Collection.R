@@ -142,16 +142,20 @@ Page_7_Core_Collection_Server = function(input, output, session) {
         paste0("Core_Sample_Plot-", "coverage", input$coverage, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("CoreSampleStatus")
         pdf(file, width = 10, height = 8)
         print(CoreSampleplot())
         dev.off()
+        shinyjs::hide("CoreSampleStatus")
       }
     )
     
     output$Dcore_sample_dataset = downloadHandler(
       filename = paste0("data.frame_", dim(core_sample_dataset())[1], "_", dim(core_sample_dataset())[2], "SNPs_", "Core_Sample_Set.rds"),
       content = function(file) {
+        shinyjs::show("CoreSampleStatus")
         saveRDS(core_sample_dataset(), file)
+        shinyjs::hide("CoreSampleStatus")
       }
     )
     
@@ -164,7 +168,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSampletitle2("")
     showNotification("Data have been reset.")
     guide_CoreSample("To run core sample set, the input data must be in ✅ data.frame format. \nPlease click the 'Run Core Sample' button.")
-  })
+    })
   
   output$CoreSamplefileInfo = renderText({
     req(df())
@@ -234,7 +238,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$Dcore_sample_coverage = downloadHandler(
     filename = "Core_Sample_Coverage_Data.csv",
     content = function(file) {
+      shinyjs::show("CoreSampleStatus")
       write.csv(core_sample_coverage(), file, row.names = FALSE)
+      shinyjs::hide("CoreSampleStatus")
     }
   )
   
@@ -253,7 +259,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$D_core_sample_info = downloadHandler(
     filename = "Core_Sample_List.csv",
     content = function(file) {
+      shinyjs::show("CoreSampleStatus")
       write.csv(core_sample_info(), file, row.names = FALSE)
+      shinyjs::hide("CoreSampleStatus")
     }
   )
   
@@ -321,7 +329,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       select = list()
       for (i in seq_len(ncol(loading))) {
         select[[i]] = names(sort(abs(loading[,i]), 
-                                 decreasing = TRUE)[1:sel[i]])
+                                  decreasing = TRUE)[1:sel[i]])
       }
       selected_SNPs = unique(unlist(select))
       
@@ -379,8 +387,8 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     pre_results[[51]] = "## Core Collection"
     pre_results[[55]] = "### Core SNPs set"
     pre_results[[56]] = paste0("Number of core SNPs: ", 
-                               length(selected_SNPs), " (", 
-                               round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
+                                length(selected_SNPs), " (", 
+                                round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
     pre_results(pre_results)
     
     output$Dcore_SNP_dataset = downloadHandler(
@@ -390,7 +398,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
                         "SNPs_", 
                         "Core_SNP_Set.rds"),
       content = function(file) {
+        shinyjs::show("CoreSNPStatus")
         saveRDS(core_SNP_dataset(), file)
+        shinyjs::hide("CoreSNPStatus")
       }
     )
     
@@ -401,7 +411,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
                         "SNPs_", 
                         "Core_SNP_Set.rds"),
       content = function(file) {
+        shinyjs::show("CoreSNPStatus")
         saveRDS(selected_Site_Info(), file)
+        shinyjs::hide("CoreSNPStatus")
       }
     )
   })
@@ -415,7 +427,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     selected_Site_Info(NULL)
     showNotification("Data have been reset.")
     guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run Core SNP' button.")
-  })
+    })
   
   output$CoreSNPfileInfo = renderText({
     req(df())
@@ -494,9 +506,11 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       paste0("Core_SNP_Plot.pdf")
     },
     content = function(file) {
+      shinyjs::show("CoreSNPStatus")
       pdf(file, width = 12, height = 5)
       print(CoreSNPplot())
       dev.off()
+      shinyjs::hide("CoreSNPStatus")
     }
   )
   
@@ -515,7 +529,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$D_core_SNP_info = downloadHandler(
     filename = "Core_SNP_List.rds",
     content = function(file) {
+      shinyjs::show("CoreSNPStatus")
       saveRDS(core_SNP_info(), file)
+      shinyjs::hide("CoreSNPStatus")
     }
   )
   

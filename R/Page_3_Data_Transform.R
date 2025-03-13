@@ -165,7 +165,9 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       }
     },
     content = function(file) {
+      shinyjs::show("glStatus")
       saveRDS(gl(), file)
+      shinyjs::hide("glStatus")
     })
   
   observeEvent(input$T2_Group1, {
@@ -198,6 +200,7 @@ Page_3_Data_Transform_Server = function(input, output, session) {
     shinyjs::show("gl2Status")
     guide_C("Running...")
     gl(gl.compliance.check(gl()))
+    class(gl()) = "genlight"
     
     if (transform == "gl2genlight_group"){
       req(T2_Group1Info())
@@ -233,7 +236,9 @@ Page_3_Data_Transform_Server = function(input, output, session) {
         filename = function() {
           paste("genlight_", nInd(gl()) , "_", nLoc(gl()), "SNPs.rds", sep = "")},
         content = function(file) {
+          shinyjs::show("glStatus")
           saveRDS(gl(), file)
+          shinyjs::hide("glStatus")
         })
       
     } else if (transform == "gl2genind"){
@@ -272,7 +277,9 @@ Page_3_Data_Transform_Server = function(input, output, session) {
         filename = function() {
           paste("genind_", length(gi@ploidy), "_", length(gi@loc.n.all), "SNPs.rds", sep = "")},
         content = function(file) {
+          shinyjs::show("glStatus")
           saveRDS(gi, file)
+          shinyjs::hide("glStatus")
         })
     } else if (transform == "gl2PLINK") {
       if (is.null(input$T2_Path1) || input$T2_Path1 == "") {

@@ -155,7 +155,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
         fileName("Wildrice")
       } else if (input$demoFile == "Human #HGDP"){
         #vcf = fread("data/Human_HGDP/Human_10k_929.vcf", header = TRUE, sep = "\t")
-        path = system.file("demo_data/Human_HGDP", "Human_10k_929.vcf", package = "ShiNyP")
+        system.file("demo_data/Human_HGDP", "Human_10k_929.vcf", package = "ShiNyP")
         vcf = fread(path, header = TRUE, sep = "\t")
         fileName("Human")
       } else if (input$demoFile == "Yeast"){
@@ -225,7 +225,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
   
   output$presample = renderUI({
     if (input1() == "VCF Data"){
-      sliderInput("presample", "Preview number of samples", min = 1, max = 100, value = 5, step = 1)
+      sliderInput("presample", "Preview number of samples", min = 1, max = ncol(vcfData())-9, value = 5, step = 1)
     }
   })
   
@@ -288,21 +288,27 @@ Page_1_Data_Input_Server = function(input, output, session) {
       filename = function() {
         paste("vcf_", fileName(), ".rds", sep = "")},
       content = function(file) {
+        shinyjs::show("inputStatus")
         saveRDS(vcfData(), file)
+        shinyjs::hide("inputStatus")
       })
     
     output$Ddf = downloadHandler(
       filename = function() {
         paste("data.frame_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("inputStatus")
         saveRDS(VCFdf(), file)
+        shinyjs::hide("inputStatus")
       })
     
     output$DsnpInfo = downloadHandler(
       filename = function() {
         paste("Site_Info_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("inputStatus")
         saveRDS(Site_Info(), file)
+        shinyjs::hide("inputStatus")
       })
   })
   

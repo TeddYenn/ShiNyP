@@ -231,14 +231,18 @@ Page_2_Data_QC_Server = function(input, output, session) {
       filename = function() {
         paste("data.frame_", SampleQC_sample(), "_", SampleQC_SNP(), "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("samplemissingStatus")
         saveRDS(QCData(), file)
+        shinyjs::hide("samplemissingStatus")
       })
     
     output$DsampleQCSite = downloadHandler(
       filename = function() {
         paste("Site_Info_", SampleQC_sample(), "_", SampleQC_SNP(), "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("samplemissingStatus")
         saveRDS(Site_Info(), file)
+        shinyjs::hide("samplemissingStatus")
       })
   })
   
@@ -447,14 +451,18 @@ Page_2_Data_QC_Server = function(input, output, session) {
       filename = function() {
         paste("data.frame_", SNPQC_sample(), "_", SNPQC_SNP(), "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("missingStatus")
         saveRDS(QCData(), file)
+        shinyjs::hide("missingStatus")
       })
     
     output$DSNPQCSite = downloadHandler(
       filename = function() {
         paste("Site_Info_", SNPQC_sample(), "_", SNPQC_SNP(), "SNPs.rds", sep = "")},
       content = function(file) {
+        shinyjs::show("missingStatus")
         saveRDS(Site_Info(), file)
+        shinyjs::hide("missingStatus")
       })
   })
   
@@ -588,9 +596,11 @@ Page_2_Data_QC_Server = function(input, output, session) {
         paste0("SNP_Density_Plot", "-", input$WindowSize0, "kb.pdf")
       },
       content = function(file) {
+        shinyjs::show("SNPdensityStatus")
         pdf(file, width = 12, height = 7)
         print(densityplot())
         dev.off()
+        shinyjs::hide("SNPdensityStatus")
       }
     )
   })
@@ -709,7 +719,9 @@ Page_2_Data_QC_Server = function(input, output, session) {
       paste0("SNP_Density.csv")
     },
     content = function(file) {
+      shinyjs::show("SNPdensityStatus")
       write.csv(SNPdensityresults2(), file, row.names = FALSE)
+      shinyjs::hide("SNPdensityStatus")
     }
   )
   

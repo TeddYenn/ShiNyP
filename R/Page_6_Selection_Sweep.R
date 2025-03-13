@@ -463,9 +463,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt_plot1 = downloadHandler(
     filename = "pcadapt_Manhattan_Plot.pdf",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       pdf(file, width = 10, height = 4)
       print(pcadaptplot1())
       dev.off()
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -478,7 +480,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt = downloadHandler(
     filename = "pcadapt_p-value_per_site.rds",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       saveRDS(pcadapt_data3(), file)
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -498,9 +502,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt_plot2 = downloadHandler(
     filename = "pcadapt_QQ_Plot.pdf",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       pdf(file, width = 4, height = 4)
       print(pcadaptplot2())
       dev.off()
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -520,9 +526,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt_plot3 = downloadHandler(
     filename = "pcadapt_Histogram_of_pvalue.pdf",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       pdf(file, width = 4, height = 4)
       print(pcadaptplot3())
       dev.off()
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -542,9 +550,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt_plot4 = downloadHandler(
     filename = "pcadapt_Histogram_of_Test_Statistics.pdf",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       pdf(file, width = 4, height = 4)
       print(pcadaptplot4())
       dev.off()
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -562,7 +572,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$Dpcadapt_results = downloadHandler(
     filename = "pcadapt_Significant_SNPs.csv",
     content = function(file) {
+      shinyjs::show("pcadaptStatus")
       write.csv(pcadapt_data2(), file, row.names = FALSE)
+      shinyjs::hide("pcadaptStatus")
     }
   )
   
@@ -841,9 +853,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_plot1 = downloadHandler(
     filename = "OutFLANK_Manhattan_Plot_pvalue.pdf",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       pdf(file, width = 10, height = 4)
       print(OutFLANKplot1())
       dev.off()
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -856,7 +870,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK = downloadHandler(
     filename = "OutFLANK_p-value_per_site.rds",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       saveRDS(outflank_data4(), file)
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -869,9 +885,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_plot2 = downloadHandler(
     filename = "OutFLANK_Manhattan_Plot_FST.pdf",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       pdf(file, width = 10, height = 4)
       print(OutFLANKplot2())
       dev.off()
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -905,9 +923,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_plot3 = downloadHandler(
     filename = "OutFLANK_QQ_Plot.pdf",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       pdf(file, width = 4, height = 4)
       print(OutFLANKplot3())
       dev.off()
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -920,9 +940,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_plot4 = downloadHandler(
     filename = "OutFLANK_Histogram_of_pvalue.pdf",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       pdf(file, width = 4, height = 4)
       print(OutFLANKplot4())
       dev.off()
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -935,9 +957,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_plot5 = downloadHandler(
     filename = "OutFLANK_Histogram_of_FST.pdf",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       pdf(file, width = 4, height = 4)
       print(OutFLANKplot5())
       dev.off()
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -955,7 +979,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DOutFLANK_Sign_SNP = downloadHandler(
     filename = "OutFLANK_Significant_SNPs.csv",
     content = function(file) {
+      shinyjs::show("OutFLANKStatus")
       write.csv(outflank_data2(), file, row.names = FALSE)
+      shinyjs::hide("OutFLANKStatus")
     }
   )
   
@@ -1023,9 +1049,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         paste0("IBS_Chromosome_Ideogram-", input$REF, "_vs_", input$COMPAR, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("IBSStatus")
         pdf(file, width = 12, height = 5)
         print(IBSplot())
         dev.off()
+        shinyjs::hide("IBSStatus")
       }
     )
     
@@ -1034,7 +1062,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         paste0("IBS_Sliding_Window-", input$REF, " vs ", input$COMPAR, ".csv")
       },
       content = function(file) {
+        shinyjs::show("IBSStatus")
         write.csv(IBS_result()$window_data, file, row.names = FALSE)
+        shinyjs::hide("IBSStatus")
       }
     )
   })
@@ -1294,7 +1324,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$DManhattanPlot_HTML = downloadHandler(
     filename = "Manhattan_Plot.html",
     content = function(file) {
+      shinyjs::show("ManhattanStatus")
       htmlwidgets::saveWidget(ManhattanPlot(), file)
+      shinyjs::hide("ManhattanStatus")
     })
   
   output$ManhattanPlot1 = renderText({ ManhattanPlot1() })

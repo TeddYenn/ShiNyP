@@ -394,10 +394,12 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       paste0("Genetic_Diversity_", input$Type, "-", input$Parameter, ".pdf")
     },
     content = function(file) {
+      shinyjs::show("GDStatus")
       width = if (input$Type == "Statistics per site") 8 else 6
       pdf(file, width = width, height = 5.8)
       print(GDplot())
       dev.off()
+      shinyjs::hide("GDStatus")
     }
   )
   
@@ -410,7 +412,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$DGD_site = downloadHandler(
     filename = "Genetic_Diversity_per_Site.rds",
     content = function(file) {
+      shinyjs::show("GDStatus")
       saveRDS(site_stat(), file)
+      shinyjs::hide("GDStatus")
     }
   )
   
@@ -423,7 +427,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$DGD_group = downloadHandler(
     filename = "Genetic_Diversity_by_Group.csv",
     content = function(file) {
+      shinyjs::show("GDStatus")
       write.csv(group_stat(), file, row.names = TRUE)
+      shinyjs::hide("GDStatus")
     }
   )
   
@@ -436,7 +442,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$D_Fst = downloadHandler(
     filename = "Genetic_Diversity_Fst_Matrix.csv",
     content = function(file) {
+      shinyjs::show("GDStatus")
       write.csv(fst_matrix(), file, row.names = TRUE)
+      shinyjs::hide("GDStatus")
     }
   )
   
@@ -449,7 +457,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$D_GD = downloadHandler(
     filename = "Genetic_Diversity_Object.rds",
     content = function(file) {
+      shinyjs::show("GDStatus")
       saveRDS(popgen(), file)
+      shinyjs::hide("GDStatus")
     }
   )
   
@@ -539,7 +549,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$D_SW = downloadHandler(
       filename = paste0("Diversity_Sliding_Window-Window_Size", input$WindowSize, "-Step_Size",input$StepSize,".csv"),
       content = function(file) {
+        shinyjs::show("CircosStatus")
         write.csv(SW_data(), file, row.names = FALSE)
+        shinyjs::hide("CircosStatus")
       }
     )
   })
@@ -608,7 +620,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$Circosplot = downloadHandler(
       filename = "Circos_Plot.pdf",
       content = function(file) {
+        shinyjs::show("CircosStatus")
         file.copy(pdf_path, file)
+        shinyjs::hide("CircosStatus")
       }
     )
     
@@ -715,16 +729,20 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
         paste0("Genetic_Distance_Plot-", input$GT_method, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("GTStatus")
         pdf(file, width = 7, height = 7)
         print(GTplot())
         dev.off()
+        shinyjs::hide("GTStatus")
       }
     )
     
     output$DGTresult = downloadHandler(
       filename = paste0("Genetic_Distance_Matrix-", input$GT_method, ".csv"),
       content = function(file) {
+        shinyjs::show("GTStatus")
         write.csv(GTmatrix(), file, row.names = TRUE)
+        shinyjs::hide("GTStatus")
       }
     )
   })
@@ -904,9 +922,11 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$varplot = downloadHandler(
     filename = "AMOVA_Variance_Plot.pdf",
     content = function(file) {
+      shinyjs::show("AMOVAStatus")
       pdf(file, width = 6, height = 8)
       print(AMOVAvarplot())
       dev.off()
+      shinyjs::hide("AMOVAStatus")
     }
   )
   
@@ -919,9 +939,11 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$testplot = downloadHandler(
     filename = "AMOVA_Test_Plot.pdf",
     content = function(file) {
+      shinyjs::show("AMOVAStatus")
       pdf(file, width = 6, height = 8)
       plot(amova.test())
       dev.off()
+      shinyjs::hide("AMOVAStatus")
     }
   )
   
@@ -934,7 +956,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$AMOVAResults = downloadHandler(
     filename = "AMOVA_Table.csv",
     content = function(file) {
+      shinyjs::show("AMOVAStatus")
       write.csv(AMOVA_res(), file, row.names = FALSE)
+      shinyjs::hide("AMOVAStatus")
     }
   )
   

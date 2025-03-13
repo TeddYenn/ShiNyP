@@ -327,9 +327,11 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         paste0("PCA_Scatter_Plot-", input$pc1, "_vs_",input$pc2, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("PCAStatus")
         pdf(file, width = 8, height = 5.8)
         print(PCA2Dplot())
         dev.off()
+        shinyjs::hide("PCAStatus")
       }
     )
     
@@ -338,9 +340,11 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         paste0("PCA_Explained_Variance_Plot-", "First_", input$PC, "_PCs", ".pdf")
       },
       content = function(file) {
+        shinyjs::show("PCAStatus")
         pdf(file, width = 8, height = 5.8)
         print(PCAexpplot())
         dev.off()
+        shinyjs::hide("PCAStatus")
       }
     )
   })
@@ -353,7 +357,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     PCAtitle2("")
     showNotification("Data have been reset.")
     guide_PCA("To run PCA, the input data must be in ✅ data.frame format. \nPlease click the 'Run PCA' button")
-  })
+    })
   
   output$pc1 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
@@ -488,7 +492,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$Dvar = downloadHandler(
     filename = "PCA_Explained_Variance.csv",
     content = function(file) {
+      shinyjs::show("PCAStatus")
       write.csv(PCA_SD(), file, row.names = FALSE)
+      shinyjs::hide("PCAStatus")
     }
   )
   
@@ -501,7 +507,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DPCAtrans = downloadHandler(
     filename = "PCA_Transformed_Data.csv",
     content = function(file) {
+      shinyjs::show("PCAStatus")
       write.csv(PCA_Trans(), file, row.names = FALSE)
+      shinyjs::hide("PCAStatus")
     }
   )
   
@@ -514,7 +522,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DPCAres = downloadHandler(
     filename = "PCA_prcomp_Object.rds",
     content = function(file) {
+      shinyjs::show("PCAStatus")
       saveRDS(pca_result(), file)
+      shinyjs::hide("PCAStatus")
     }
   )
   
@@ -620,7 +630,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     BICplot(NULL)
     showNotification("Data have been reset.")
     guide_DAPC("To run DAPC, the input data must be in ✅ genlight or ✅ genind format. \nPlease click the 'Run DAPC I' button first.")
-  })
+    })
   
   observeEvent(input$resetDAPC2, {
     DAPC1(NULL)
@@ -717,9 +727,11 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DBICplot = downloadHandler(
     filename = "DAPC_BIC_Plot.pdf",
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       pdf(file, width = 6, height = 4)
       plot(BICplot())
       dev.off()
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -732,12 +744,14 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DDF1plot = downloadHandler(
     filename = "DAPC_First_Discriminant_Function_Plot.pdf",
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       pdf(file, width = 8, height = 4)
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
       scatter(DAPC2(), grp = DAPC2()$assign, 1, 1, bg = "white", col = colors,
               scree.da = FALSE, legend = F, solid = .6)
       dev.off()
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -750,12 +764,14 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DDF2plot = downloadHandler(
     filename = "DAPC_Second_Discriminant_Function_Plot.pdf",
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       pdf(file, width = 8, height = 4)
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
       scatter(DAPC2(), grp = DAPC2()$assign, 2, 2, bg = "white", col = colors,
               scree.da = FALSE, legend = F, solid = .6)
       dev.off()
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -768,12 +784,14 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DDAPCplot = downloadHandler(
     filename = "DAPC_Scatter_Plot.pdf",
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       pdf(file, width = 12, height = 9)
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
       scatter(DAPC2(), grp = DAPC2()$assign, bg = "white", scree.da = F, pch = 19, col = colors,
               posi.leg = "topright", legend = T, cex = 2.2, cellipse = 1, axesell = F, txt.leg = paste("Group", 1:ngroup))
       dev.off()
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -786,6 +804,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$Dprobplot = downloadHandler(
     filename = "DAPC_Membership_Probability_Plot.pdf",
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       pdf(file, width = 8, height = 4)
       ngroup = length(unique(DAPC2()$assign))
       population = DAPC2()$assign
@@ -796,6 +815,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       colors = colorRampPalette(custom_palette)(ngroup)
       compoplot(DAPC2(), subset = subset, col = colors, legend = F)
       dev.off()
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -810,7 +830,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       "DAPC_Group_Info.csv"
     },
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       write.csv(DAPC_pop(), file, row.names = FALSE)
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -825,7 +847,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       "DAPC_Transformed_Data.csv"
     },
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       write.csv(DAPC_Trans(), file, row.names = TRUE)
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -840,7 +864,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       "DAPC_dapc_Object.rds"
     },
     content = function(file) {
+      shinyjs::show("DAPCStatus")
       saveRDS(DAPC2(), file)
+      shinyjs::hide("DAPCStatus")
     }
   )
   
@@ -888,8 +914,10 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         paste0("UPGMA_Plot-", input$sample, "bootstraps-Layout_", input$Layout, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("UPGMAStatus")
         Layout = Tree_layout_choice[input$Layout]
         ggsave(file, plot = ggtree(tree(), layout = Layout) + geom_tiplab(hjust = -0.1, align = TRUE, linesize = 0.5, size = 2), device = "pdf", width = 12, height = 12)
+        shinyjs::hide("UPGMAStatus")
       }
     )
   })
@@ -899,7 +927,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     tree(NULL)
     showNotification("Data have been reset.")
     guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. \nPlease click the 'Run UPGMA' button.")
-  })
+    })
   
   output$Layout = renderUI({
     if (UPGMAtitle1() == "UPGMA Phylogenetic Tree"){
@@ -930,7 +958,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DUPGMAres = downloadHandler(
     filename = "UPGMA_phylo_Object.rds",
     content = function(file) {
+      shinyjs::show("UPGMAStatus")
       saveRDS(tree(), file)
+      shinyjs::hide("UPGMAStatus")
     }
   )
   
@@ -972,8 +1002,10 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         paste0("NJ_Plot-Layout_", input$NJLayout, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("NJStatus")
         Layout = Tree_layout_choice[input$NJLayout]
         ggsave(file, plot = ggtree(NJtree(), layout = Layout) + geom_tiplab(hjust = -0.1, align = TRUE, linesize = 0.5, size = 2), device = "pdf", width = 12, height = 12)
+        shinyjs::hide("NJStatus")
       }
     )
   })
@@ -983,7 +1015,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     NJtitle1("")
     showNotification("Data have been reset.")
     guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.\nPlease click the 'Run NJ' button.")
-  })
+    })
   
   output$NJLayout = renderUI({
     if (NJtitle1() == "NJ Phylogenetic Tree"){
@@ -1014,7 +1046,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DNJres = downloadHandler(
     filename = "NJ_phylo_Object.rds",
     content = function(file) {
+      shinyjs::show("NJStatus")
       saveRDS(NJtree(), file)
+      shinyjs::hide("NJStatus")
     }
   )
   
@@ -1075,10 +1109,12 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         paste0("Kinship_Matrix_Plot-Method_", input$Kinship_method, ".pdf")
       },
       content = function(file) {
+        shinyjs::show("KinshipStatus")
         pdf(file, width = 10, height = 10)
         plot_popkin(KinshipMatrix(), titles = "Kinship Matrix", names = F, ylab = "",
                     col_n = 100, oma = 0.5, mar_pad = 0.1, leg_width = 0.1, leg_title = "")
         dev.off()
+        shinyjs::hide("KinshipStatus")
       }
     )
   })
@@ -1091,7 +1127,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     })
     showNotification("Data have been reset.")
     guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Run Kinship' button.")
-  })
+    })
   
   
   output$Kinship = renderPlot({
@@ -1117,7 +1153,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DKinshipres = downloadHandler(
     filename = paste0("Kinship_Matrix_Object-Method_", input$Kinship_method, ".rds"),
     content = function(file) {
+      shinyjs::show("KinshipStatus")
       saveRDS(KinshipMatrix(), file)
+      shinyjs::hide("KinshipStatus")
     }
   )
   
@@ -1180,7 +1218,10 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   
   output$scatter_fileInfo2 = renderText({
-    req(scatterInfo(), scatter_data())
+    req(scatter_data())
+    if (is.null(scatterInfo()) || ncol(scatterInfo()) == 0) {
+      return("Please upload data in CSV file with comma-delimited.")
+    }
     scatterInfo = scatterInfo()
     if (is.null(scatterInfo$ID)){
       paste0("**Warning**", "\n", "Data must contain a column named 'ID'!")
@@ -1312,7 +1353,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$Dscatter2DPlot_HTML = downloadHandler(
     filename = "2D_Scatter_Plot.html",
     content = function(file) {
+      shinyjs::show("ScatterStatus")
       htmlwidgets::saveWidget(Plot2D(), file)
+      shinyjs::hide("ScatterStatus")
     })
   
   output$download_scatter3DPlot_HTML = renderUI({
@@ -1324,7 +1367,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$Dscatter3DPlot_HTML = downloadHandler(
     filename = "3D_Scatter_Plot.html",
     content = function(file) {
+      shinyjs::show("ScatterStatus")
       htmlwidgets::saveWidget(Plot3D(), file)
+      shinyjs::hide("ScatterStatus")
     })
   
   output$guide_scatter = renderUI({ div(class = "guide-text-block", guide_scatter()) })
@@ -1485,7 +1530,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DTreePlot = downloadHandler(
     filename = paste0("Phylogenetic_Tree.pdf"),
     content = function(file) {
+      shinyjs::show("TreeStatus")
       ggsave(file, plot = TreePlot(), device = "pdf", width = 12, height = 12)
+      shinyjs::hide("TreeStatus")
     })
   
   output$TreePlot1 = renderText({ TreePlot1() })

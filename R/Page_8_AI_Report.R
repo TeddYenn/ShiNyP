@@ -30,10 +30,10 @@ Page_8_AI_Report_UI = function() {
                    column(4,
                           tags$h4("2. AI-Driven Report", class = "custom-h4"),
                           selectInput("AI_model", "Choose AI model:",
-                                      choices = names(AI_model_choice), selected = "GPT-4o mini"),
+                                      choices = names(AI_model_choice), selected = "o3-mini"),
                           selectInput("AI_prompt", "Specify AI task:",
                                       choices = c("Summary Request", "Data Interpretation", "Report Structuring", "Idea Expansion"), selected = "Data Interpretation"),
-                          fileInput("AI_api_key", "OpenAI API key file:", multiple = F, accept = c(".txt")),
+                          fileInput("AI_api_key", "API key file:", multiple = F, accept = c(".txt")),
                           actionButton("runAIreport", "Get Report", class = "AI1-action-button"),
                           actionButton("AIreport_Reset", "Reset", class = "AI2-action-button"),
                           div(id = "AIStatus", style = "color: #7A1CAC; font-weight: bold;", "Generating...")
@@ -152,8 +152,17 @@ Page_8_AI_Report_Server = function(input, output, session) {
           seed = NULL,
           echo = "text"
         )
-        message = paste(Role, "\n", preliminary_results())
-        content = chat$chat(message)
+      } else if (model %in% c("deepseek-chat")){
+        chat = chat_deepseek(
+          system_prompt = Start,
+          turns = NULL,
+          base_url = "https://api.deepseek.com",
+          api_key = key,
+          model = model,
+          seed = NULL,
+          api_args = list(timeout = 1200, max_tokens = 1000, stream = TRUE),
+          echo = "text"
+        )
       } else{
         chat = chat_openai(
           system_prompt = Start,
@@ -164,25 +173,25 @@ Page_8_AI_Report_Server = function(input, output, session) {
           seed = NULL,
           echo = "text"
         )
-        message = paste(Role, "\n", preliminary_results())
-        content = chat$chat(message)
       }
+      message = paste(Role, "\n", preliminary_results())
+      content = chat$chat(message)
       
-      AI_report = paste0("---------- ShiNyP ----------", "\n", "\n",
+      report = paste0("---------- ShiNyP ----------", "\n", "\n",
                          "----- Successful Request -----", "\n",
-                         "OpenAI Model: ", input$AI_model, "\n",
-                         "OpenAI Task: ", input$AI_prompt, "\n",
+                         "AI Model: ", input$AI_model, "\n",
+                         "AI Task: ", input$AI_prompt, "\n",
                          "Total Tokens Used: ", sum(token_usage()[,2:3]), "\n",
                          "Prompt Tokens: ", token_usage()[,2], "\n",
                          "Completion Tokens: ", token_usage()[,3], "\n", "\n",
                          "----- AI-driven report -----", "\n",
                          content, "\n", "\n",
-                         "#### WARNING: ", "\n",
-                         "### This report was generated with the assistance of OpenAI model and is for informational purposes only.", "\n",
+                         "## WARNING: ", "\n",
+                         "### This report was generated with the assistance of AI model and is for informational purposes only.", "\n",
                          "### It should not be considered as professional advice or a basis for decision-making.", "\n",
                          "### Please review and validate the content thoroughly before use.")
-      
-      AI_report(AI_report)
+      AI_report(NULL)
+      AI_report(report)
       AItitle2("Here's Your AI Report!")
       shinyjs::hide("AIStatus")
       NULL
@@ -191,14 +200,14 @@ Page_8_AI_Report_Server = function(input, output, session) {
       shinyjs::alert(paste("An error occurred:", e$message))
       NULL
     })
-    
-    output$DAI_report = downloadHandler(
+  })
+  
+  output$DAI_report = downloadHandler(
       filename = paste0("AI_Report-", input$AI_model, "-", input$AI_prompt,".txt"),
       content = function(file) {
         write.table(AI_report(), file, row.names = FALSE, col.names = FALSE, quote = FALSE)
-      }
-    )
-  })
+        }
+      )
   
   output$AI_response2 = renderText({
     req(AI_report())
