@@ -200,7 +200,7 @@ Page_3_Data_Transform_Server = function(input, output, session) {
     shinyjs::show("gl2Status")
     guide_C("Running...")
     gl = gl()
-    gl = gl.compliance.check(gl)
+    gl = gl.compliance.check(gl, verbose = 0)
     class(gl) = "genlight"
     gl(gl)
     
