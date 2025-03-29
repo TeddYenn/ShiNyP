@@ -155,7 +155,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
         fileName("Wildrice")
       } else if (input$demoFile == "Human #HGDP"){
         #vcf = fread("data/Human_HGDP/Human_10k_929.vcf", header = TRUE, sep = "\t")
-        system.file("demo_data/Human_HGDP", "Human_10k_929.vcf", package = "ShiNyP")
+        path = system.file("demo_data/Human_HGDP", "Human_10k_929.vcf", package = "ShiNyP")
         vcf = fread(path, header = TRUE, sep = "\t")
         fileName("Human")
       } else if (input$demoFile == "Yeast"){

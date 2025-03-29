@@ -9,6 +9,7 @@ Tree_layout_choice = c("Rectangular" = "rectangular",
                        "Inward circular" = "inward_circular",
                        "Radial" = "radial",
                        "Equal angle" = "equal_angle")
+
 #' @title Tree Legend Choices
 #' @description A named character vector for legend keywords
 #' @export
@@ -20,15 +21,16 @@ Legend_choice = c("Top" = "top",
 #' @title Genetic Distance Choices
 #' @description A named character vector for genetic distance keywords
 #' @export
-GT_method_choice = c("Cavalli-Sforza's chord distance" = "Dch",
-                     "Nei's genetic distance" = "Da",
-                     "Nei's standard genetic distance" = "Ds",
-                     "Reynolds's genetic distance" = "Fst",
-                     "Nei's minimum distance" = "Dm",
-                     "Rogers's distance" = "Dr",
-                     "Prevosti's distance" = "Cp",
-                     "Sanghvi's distance" = "X2")
-#' @title P value Adjustment Method Choices
+GT_method_choice = c("Nei's genetic distance  (1983)" = "Da", # Eq. 7
+                     "Nei's standard genetic distance (1972)" = "Ds", # Eq. 1
+                     "Nei's minimum distance  (1973)" = "Dm", # Eq. 2
+                     # "Reynolds's genetic distance  (1983)" = "Fst", # Eq. 3
+                     "Rogers's distance  (1972)" = "Dr", # Eq. 4
+                     "Prevosti's distance  (1975)" = "Cp", # Eq. 5
+                     "Cavalli-Sforza's chord distance  (1967)" = "Dch", # Eq. 6
+                     "Sanghvi's distance  (1953)" = "X2") # Eq. 8
+
+#' @title P value Adjustment Method Choices 
 #' @description A named character vector for p value adjustment keywords
 #' @export
 pval_adj_method_choice = c("Bonferroni" = "bonferroni",
@@ -47,6 +49,7 @@ AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
                     "GPT-4 Turbo" = "gpt-4-turbo",
                     "GPT-4" = "gpt-4",
                     "GPT-3.5 Turbo" = "gpt-3.5-turbo")
+
 #' @title Color Choices
 #' @description A named character vector for color
 #' @export
@@ -56,7 +59,7 @@ custom_palette = c("#4482a8", "#91bb67", "#e3b800", "#E85C0D", "#e9788e", "#c493
 #' @description Prompt for Summary Request
 #' @export
 Summary_Request_Prompt = 
-"Summarize key findings from a genome-wide SNP data analysis report (excluding GWAS) by addressing the following:
+  "Summarize key findings from a genome-wide SNP data analysis report (excluding GWAS) by addressing the following:
 
 - **SNP Data & QC:** Describe the dataset (sample size, variants, SNP density) and QC procedures (missing rate, MAF, HWE).
 - **PCA:** Explain variance distribution across principal components and the significance of major components.
@@ -72,7 +75,7 @@ Output each section as a concise paragraph only if data is available, clearly la
 #' @description Prompt for Data Interpretation
 #' @export
 Data_Interpretation_Prompt = 
-"Interpret a genome-wide SNP data report (excluding GWAS results) by focusing on the following sections:
+  "Interpret a genome-wide SNP data report (excluding GWAS results) by focusing on the following sections:
 
 1. **Data Description:**
     - Summarize SNP dataset characteristics (sample size, variant count, density) and QC procedures (integrity, reliability).
@@ -95,7 +98,7 @@ Structure your report in clear, concise sections with integrated conclusions, hi
 #' @description Prompt for Report Structuring
 #' @export
 Report_Structuring_Prompt = 
-"Generate an academic report template for SNP data analysis in markdown with these sections:
+  "Generate an academic report template for SNP data analysis in markdown with these sections:
 
 1. **Title:** A descriptive title summarizing the SNP analysis focus.
 2. **Abstract:** A concise summary of key findings, methods (e.g., QC, PCA, DAPC), dataset details, and conclusions.
@@ -120,7 +123,7 @@ Ensure each section is clearly marked, follows academic standards, and omits sec
 #' @description Prompt for Idea Expansion
 #' @export
 Idea_Expansion_Prompt = 
-"Draft a concise template to expand ideas from an SNP data report. The template should include:
+  "Draft a concise template to expand ideas from an SNP data report. The template should include:
 
 - **Introduction:** Briefly state the objective of expanding ideas based on the SNP report.
 - **Core Ideas:** List key findings from the report with succinct explanations.
