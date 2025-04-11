@@ -8,6 +8,6 @@ Description: An interactive Shiny-based platform for genome-wide SNP analysis an
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 4.4.0), shiny, shinyjs, ggplot2, RColorBrewer, ggthemes, dplyr, data.table, adegenet, DT, dartRverse, rms, haplo.stats, SNPassoc, dartR.base, dartR.popgen, vctrs, sass, stringr, poppr, ape, statgenGWAS, popkin, tidyr, circlize, hierfstat, ggrepel, pcadapt, remotes, fastmap, plotly, ggnewscale, ellmer, rmarkdown
+Depends: R (>= 4.4.0), shiny, shinyjs, ggplot2, RColorBrewer, ggthemes, dplyr, data.table, adegenet, DT, dartRverse, rms, haplo.stats, SNPassoc, dartR.base, dartR.popgen, vctrs, sass, stringr, poppr, ape, statgenGWAS, popkin, tidyr, circlize, hierfstat, ggrepel, pcadapt, remotes, fastmap, plotly, ggnewscale, ellmer, rmarkdown, ggtree, qvalue, SNPRelate, snpStats
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)

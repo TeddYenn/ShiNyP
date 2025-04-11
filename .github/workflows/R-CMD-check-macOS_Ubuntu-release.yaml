@@ -1,4 +1,4 @@
-name: "R-CMD-check (macOS, Windows, Ubuntu: release)"
+name: "R-CMD-check (macOS, Ubuntu: release)"
 
 on:
   push:
@@ -20,10 +20,6 @@ jobs:
         config:
           # macOS
           - os: macos-latest
-            r: "release"
-
-          # Windows
-          - os: windows-latest
             r: "release"
 
           # Ubuntu

@@ -4,7 +4,7 @@
 # _ShiNyP_: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
 
 ![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
-![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Windows_Ubuntu-release.yaml?label=R-CMD-check)
+![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Ubuntu-release.yaml?label=R-CMD-check)
 ![Version](https://img.shields.io/github/r-package/v/TeddYenn/ShiNyP?label=ShiNyP&color=blue)
 
 <!-- badges: end -->
@@ -37,7 +37,7 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.20")
-   BiocManager::install(c("qvalue", "SNPRelate", "ggtree"), force = TRUE)
+   BiocManager::install(c("qvalue", "SNPRelate", "ggtree", "snpStats"), force = TRUE)
    ```
 ### 2️⃣ Install the _ShiNyP_ Package
    ```R
