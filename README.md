@@ -3,7 +3,7 @@
 
 # _ShiNyP_: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
 
-![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest)
+![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
 ![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Windows_Ubuntu-release.yaml?label=R-CMD-check)
 ![Version](https://img.shields.io/github/r-package/v/TeddYenn/ShiNyP?label=ShiNyP&color=blue)
 
