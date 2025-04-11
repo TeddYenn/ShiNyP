@@ -1,4 +1,4 @@
-name: "R-CMD-check (Windows: 4.4.0, 4.4.1, 4.4.2)"
+name: "R-CMD-check (Windows: 4.4.0, 4.4.3, latest)"
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        r-version: [ "4.4.0", "4.4.1", "4.4.2" ]
+        r-version: [ "4.4.0", "4.4.3", "latest" ]
 
     steps:
       - name: "STEP 1: Check out repository"

@@ -253,7 +253,7 @@ selected_Site_Info = reactiveVal(NULL)
 core_SNP_info = reactiveVal(NULL)
 CoreSNPplot = reactiveVal(NULL)
 
-guide_AI = reactiveVal("This page allows you to 1️⃣ generate your preliminary results from prior analysis, 2️⃣ input your API key, 3️⃣ select an AI model, and 4️⃣ get an AI-driven report.")
+guide_AI = reactiveVal("This page allows you to 1️⃣ generate your preliminary results from prior analysis, 2️⃣ select an AI model, 3️⃣ input your API key, and 4️⃣ get an AI-driven report.")
 AItitle1 = reactiveVal("")
 AItitle2 = reactiveVal("")
 preliminary_results = reactiveVal(NULL)

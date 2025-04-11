@@ -130,11 +130,15 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSampletitle2("Coverage Plot of Core Sample Set")
     guide_CoreSample("The core sample set is completed.")
     
+    
     pre_results = pre_results()
     pre_results[[51]] = "## Core Collection"
     pre_results[[52]] = "### Core Sample Set"
-    pre_results[[53]] = paste0("Number of core samples: ", length(core_sample_coverage()[,2]), " (", round(length(core_sample_coverage()[,2])/dim(df())[1], 4)* 100, "%)")
-    pre_results[[54]] = paste0("Total coverage: ", max(as.numeric(core_sample_coverage()[,3])), "%")
+    text = paste0("Methodology: Establish a core collection that represents the genetic variation of the entire population. This approach is modified function from GenoCore (Jeong et al. 2017).", "\n",
+                  "Number of core samples: ", length(core_sample_coverage()[,2]), " (", round(length(core_sample_coverage()[,2])/dim(df())[1], 4)* 100, "%)", "\n",
+                  "Total coverage: ", max(as.numeric(core_sample_coverage()[,3])), "%", "\n",
+                  "The top representative core samples are: ", paste0(head(core_sample_coverage())[,2], collapse = ", "), ", with cumulative coverage values of ", paste(head(core_sample_coverage()[,3]), collapse = ", "), "%, respectively.")
+    pre_results[[53]] = paste0(text)
     pre_results(pre_results)
     
     output$DCoreSample_plot = downloadHandler(
@@ -168,7 +172,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSampletitle2("")
     showNotification("Data have been reset.")
     guide_CoreSample("To run core sample set, the input data must be in ✅ data.frame format. \nPlease click the 'Run Core Sample' button.")
-    })
+  })
   
   output$CoreSamplefileInfo = renderText({
     req(df())
@@ -313,6 +317,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     
     if (method_chosen == "dapc") {
       req(input$CoreSNPdata) 
+      text = "Methodology: DAPC-based selection method, ShiNyP first calculates the proportion of variance explained by each discriminant component. This proportion is then used to select the top SNPs for each component based on the absolute values of their loading scores. The final set of selected SNPs is obtained by taking the union of these individual marker sets."
       DAPC = readRDS(input$CoreSNPdata$datapath)
       loading = DAPC$var.contr
       ID      = row.names(loading)
@@ -329,11 +334,12 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       select = list()
       for (i in seq_len(ncol(loading))) {
         select[[i]] = names(sort(abs(loading[,i]), 
-                                  decreasing = TRUE)[1:sel[i]])
+                                 decreasing = TRUE)[1:sel[i]])
       }
       selected_SNPs = unique(unlist(select))
       
     } else if (method_chosen == "random_percentage") {
+      text = "Methodology: Random percentage-based selection, a specified percentage of SNPs is randomly selected."
       pct = input$random_percentage / 100
       
       total_snps  = ncol(df())
@@ -341,6 +347,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       selected_SNPs = sample(colnames(df()), sample_size)
       
     } else if (method_chosen == "random_density") {
+      text = "Methodology: Random density-based selection, SNPs are selected at regular intervals based on their density within each chromosome."
       bp_per_snp = input$random_density
       req(Chr_Info()) 
       Chr_Info  = Chr_Info()
@@ -386,9 +393,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     pre_results = pre_results()
     pre_results[[51]] = "## Core Collection"
     pre_results[[55]] = "### Core SNPs set"
-    pre_results[[56]] = paste0("Number of core SNPs: ", 
-                                length(selected_SNPs), " (", 
-                                round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
+    text = paste0(text, "\n",
+                  "Number of core SNPs: ", length(selected_SNPs), " (", round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
+    pre_results[[56]] = text
     pre_results(pre_results)
     
     output$Dcore_SNP_dataset = downloadHandler(
@@ -427,7 +434,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     selected_Site_Info(NULL)
     showNotification("Data have been reset.")
     guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run Core SNP' button.")
-    })
+  })
   
   output$CoreSNPfileInfo = renderText({
     req(df())

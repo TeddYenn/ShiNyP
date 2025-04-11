@@ -245,6 +245,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       })
       GDtitle3("Genetic Diversity Statistics by Group")
       pre_results = pre_results()
+      pre_results[[30]] = "## Genetic Diversity"
       pre_results[[31]] = paste0("The average observed heterozygosity (Ho) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,3], collapse = ", "))
       pre_results[[32]] = paste0("The average expected heterozygosity (He) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,2], collapse = ", "))
       pre_results[[33]] = paste0("The average Unbiased pi diversity (Pi) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,6], collapse = ", "))
@@ -299,7 +300,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$GDgroupresults = DT::renderDataTable({ DT::datatable(NULL) })
     showNotification("Data have been reset.")
     guide_GD("To analyze genetic diversity, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Site Info file (in RDS format).\nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Analysis' button.")
-    })
+  })
   
   observeEvent(input$Type, {
     req(site_stat())
@@ -721,7 +722,10 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     combined = apply(GTdf[, c("Pair1", "Pair2", "GeneticDistance")], 1, function(row) {
       paste0(row[1], "-", row[2], ": ", row[3])
     })
-    pre_results[[38]] = paste(combined, collapse = "; ")
+    text = paste0("Methodology: Group-Group Pairwise ", input$GT_method, "\n",
+                  paste(combined, collapse = "; ")
+    )
+    pre_results[[38]] = paste(text)
     pre_results(pre_results)
     
     output$DGTplot = downloadHandler(
@@ -759,7 +763,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     GTtitle1("")
     GTtitle2("")
     guide_GT("To run the genetic distance analysis, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Group Info. file.")
-    })
+  })
   
   output$GTplot = renderPlot({
     req(GTdf())
@@ -843,10 +847,11 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     pre_results = pre_results()
     pre_results[[30]] = "## Genetic Diversity"
     pre_results[[39]] = paste0("### Analysis of Molecular Variance (AMOVA)")
-    pre_results[[40]] = paste0("Estimated variance percentage (%): " ,
-                               "Among groups: ", AMOVA_res$Variance_percentage[1],
-                               "; Among individual within groups: ", AMOVA_res$Variance_percentage[2],
-                               "; Within individuals: ", AMOVA_res$Variance_percentage[3])
+    pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
+                               "Estimated variance percentage (%): " , "\n",
+                               "Among groups: ", AMOVA_res$Variance_percentage[1], "\n",
+                               "Among individual within groups: ", AMOVA_res$Variance_percentage[2], "\n",
+                               "Within individuals: ", AMOVA_res$Variance_percentage[3])
     pre_results(pre_results)
   })
   
@@ -858,7 +863,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     AMOVAtitle3("")
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
     guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page ")
-    })
+  })
   
   observeEvent(input$runTest, {
     req(amova.result())
@@ -872,10 +877,12 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     guide_AMOVA("AMOVA is complete.")
     output$AMOVAresults = renderTable({ AMOVA_res() }, rownames = FALSE)
     pre_results = pre_results()
-    pre_results[[40]] = paste0("Estimated variance percentage (%) and p-value of population strata: " ,
-                               "Among groups: ", AMOVA_res$Variance_percentage[1], ", p-value: ", AMOVA_res$p_value[1],
-                               "; Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2],
-                               "; Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])
+    pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
+                               "Estimated variance percentage (%) and p-value of population strata: " , "\n",
+                               "P-values were calculated using a randomization test with", input$nperm, "permutations", "\n",
+                               "Among groups: ", AMOVA_res$Variance_percentage[1], ", p-value: ", AMOVA_res$p_value[1], "\n",
+                               "Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2], "\n",
+                               "Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])
     pre_results(pre_results)
   })
   

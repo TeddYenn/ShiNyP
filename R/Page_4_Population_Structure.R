@@ -319,7 +319,19 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     pre_results = pre_results()
     pre_results[[19]] = "## Population Structure"
     pre_results[[20]] = "### Principal Component Analysis (PCA)"
-    pre_results[[21]] = paste0("Top 15 PCs explained variance (%), PC 1 to PC 15: ", paste(round(PCA_SD$Proportion_of_explained_variance[1:15], 2), collapse = ", "))
+    PCA_cum = cumsum(PCA_SD$Proportion_of_explained_variance)
+    thresholds = c(10, 25, 50, 75, 80, 90, 99)
+    pcs = sapply(thresholds, function(thresh) which(PCA_cum >= thresh)[1])
+    text = paste0("Top 15 PCs explained variance (%), PC 1 to PC 15: ", paste(round(PCA_SD$Proportion_of_explained_variance[1:15], 2), collapse = ", "), "\n",
+                  pcs[1], " PCs explain 10% total variance", "\n",
+                  pcs[2], " PCs explain 25% total variance", "\n",
+                  pcs[3], " PCs explain 50% total variance", "\n",
+                  pcs[4], " PCs explain 75% total variance", "\n",
+                  pcs[5], " PCs explain 80% total variance", "\n",
+                  pcs[6], " PCs explain 90% total variance", "\n",
+                  pcs[7], " PCs explain 99% total variance", "\n"
+    )
+    pre_results[[21]] = text
     pre_results(pre_results)
     
     output$DPCAplot = downloadHandler(
@@ -356,8 +368,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     PCAtitle1("")
     PCAtitle2("")
     showNotification("Data have been reset.")
-    guide_PCA("To run PCA, the input data must be in ✅ data.frame format. \nPlease click the 'Run PCA' button")
-    })
+    guide_PCA("To run PCA, the input data must be in ✅ data.frame format. ")
+  })
   
   output$pc1 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
@@ -600,12 +612,19 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     DAPCtitle4("DAPC Scatter Plot")
     DAPCtitle5("DAPC Membership Probability Plot")
     guide_DAPC("DAPC is complete. \nPlease review the results.")
+    DAPC1 = DAPC1()
+    
     pre_results = pre_results()
+    pre_results[[19]] = "## Population Structure"
     pre_results[[22]] = "### Discriminant Analysis of Principal Components (DAPC)"
-    pre_results[[23]] = paste0("The samples were divided into ", length(table(DAPC2$assign)), " groups based on the BIC value at K = ", length(table(DAPC2$assign)))
-    pre_results[[24]] = paste0("Group sizes, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(as.numeric(table(DAPC2$assign)), collapse = ", "))
-    pre_results[[25]] = paste0("The group centroid of each group at first discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,1], 2), collapse = ", "))
-    pre_results[[26]] = paste0("The group centroid of each group at second discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,2], 2), collapse = ", "))
+    text = paste0(
+      "BIC values, K = 1 to ", length(DAPC1$Kstat), ": ", paste(round(as.numeric(DAPC1$Kstat), 2), collapse = ", "), "\n",
+      "The samples were divided into ", length(table(DAPC2$assign)), " groups based on the lowest BIC value at K = ", length(table(DAPC2$assign)), "\n",
+      "Group sizes, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(as.numeric(table(DAPC2$assign)), collapse = ", "), "\n",
+      "The centroid of each group at first discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,1], 2), collapse = ", "), "\n",
+      "The centroid of each group at second discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,2], 2), collapse = ", "), "\n"
+    )
+    pre_results[[23]] = text
     pre_results(pre_results)
   })
   
@@ -630,7 +649,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     BICplot(NULL)
     showNotification("Data have been reset.")
     guide_DAPC("To run DAPC, the input data must be in ✅ genlight or ✅ genind format. \nPlease click the 'Run DAPC I' button first.")
-    })
+  })
   
   observeEvent(input$resetDAPC2, {
     DAPC1(NULL)
@@ -926,8 +945,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     UPGMAtitle1("")
     tree(NULL)
     showNotification("Data have been reset.")
-    guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. \nPlease click the 'Run UPGMA' button.")
-    })
+    guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. ")
+  })
   
   output$Layout = renderUI({
     if (UPGMAtitle1() == "UPGMA Phylogenetic Tree"){
@@ -1014,8 +1033,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     NJtree(NULL)
     NJtitle1("")
     showNotification("Data have been reset.")
-    guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.\nPlease click the 'Run NJ' button.")
-    })
+    guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.")
+  })
   
   output$NJLayout = renderUI({
     if (NJtitle1() == "NJ Phylogenetic Tree"){
@@ -1126,8 +1145,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       fileInput("groupfile2", "Group Info. (optional)", multiple = F, accept = c(".csv"))
     })
     showNotification("Data have been reset.")
-    guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Run Kinship' button.")
-    })
+    guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional.")
+  })
   
   
   output$Kinship = renderPlot({
@@ -1314,7 +1333,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     scatter2D("2D Scatter Plot")
     scatter3D("3D Scatter Plot")
     shinyjs::hide("ScatterStatus")
-    guide_scatter("You can customize the scatter plot and then click the 'Run Scatter Plot' button again.")
+    guide_scatter("You can customize the scatter plot and then click the ▶️ 'Run Scatter Plot' button again.")
   })
   
   observeEvent(input$resetScatter, {
@@ -1498,7 +1517,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     TreePlot(plot4)
     TreePlot1("Phylogenetic Tree Plot")
     shinyjs::hide("TreeStatus")
-    guide_Tree("You can customize the tree plot and then click the 'Run Tree Plot' button again.")
+    guide_Tree("You can customize the tree plot and then click the ▶️ 'Run Tree Plot' button again.")
   })
   
   observeEvent(input$resetTree, {

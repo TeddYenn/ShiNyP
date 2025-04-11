@@ -40,6 +40,8 @@ pval_adj_method_choice = c("Bonferroni" = "bonferroni",
 #' @export
 AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
                     # "DeepSeek-R1" = "deepseek-reasoner", -> Waiting time too long!
+                    "Gemini 2.0 Flash" = "gemini-2.0-flash",
+                    "Gemini 2.0 Flash-Lite" = "gemini-2.0-flash-lite",
                     "o3-mini" = "o3-mini",
                     # "o1" = "o1", -> Waiting time too long!
                     "o1-mini" = "o1-mini",
@@ -65,17 +67,17 @@ Summary_Request_Prompt =
 - **PCA:** Explain variance distribution across principal components and the significance of major components.
 - **DAPC Clustering:** Summarize clustering insights and population structure.
 - **Genetic Diversity:** Highlight within-group and overall diversity trends (e.g., bottlenecks, expansions).
-- **Genetic Distance:** Present differentiation metrics (e.g., Fst) and their implications.
-- **Selection Sweep:** Identify regions under selection and their biological significance.
+- **Genetic Distance:** Present differentiation metrics and their implications.
+- **Selection Sweep:** Detect regions under selective pressure and assess their biological relevance.
 - **Core Collection:** Explain construction, significance, and applications.
 
-Output each section as a concise paragraph only if data is available, clearly label each section, and address methods, assumptions, and limitations."
+Output each section as a concise paragraph only if data is available, clearly label each section."
 
 #' @title Data Interpretation Prompt
 #' @description Prompt for Data Interpretation
 #' @export
 Data_Interpretation_Prompt = 
-  "Interpret a genome-wide SNP data report (excluding GWAS results) by focusing on the following sections:
+  "Interpret a genome-wide SNP data analysis report (excluding GWAS results) by focusing on the following sections:
 
 1. **Data Description:**
     - Summarize SNP dataset characteristics (sample size, variant count, density) and QC procedures (integrity, reliability).
@@ -86,9 +88,9 @@ Data_Interpretation_Prompt =
 4. **Genetic Diversity:**
     - Summarize intra- and inter-group diversity, noting any bottlenecks or expansions.
 5. **Genetic Distance:**
-    - Assess differentiation (e.g., Fst) and discuss its impact on population structure.
+    - Assess differentiation and discuss its impact on population structure.
 6. **Selection Sweep Analysis:**
-    - Identify genomic regions under selection and discuss their evolutionary significance.
+    - Identify genomic regions under selection and discuss their evolutionary significance. Compare the two methods to evaluate the consistency or divergence of the identified signals.
 7. **Core Collection Construction:**
     - Explain the rationale, representativeness, and applications (e.g., conservation, breeding) of the core collection.
 
@@ -98,7 +100,7 @@ Structure your report in clear, concise sections with integrated conclusions, hi
 #' @description Prompt for Report Structuring
 #' @export
 Report_Structuring_Prompt = 
-  "Generate an academic report template for SNP data analysis in markdown with these sections:
+  "Generate an academic report template for SNP data analysis with these sections:
 
 1. **Title:** A descriptive title summarizing the SNP analysis focus.
 2. **Abstract:** A concise summary of key findings, methods (e.g., QC, PCA, DAPC), dataset details, and conclusions.
@@ -112,12 +114,10 @@ Report_Structuring_Prompt =
 5. **Results:**
     - **QC Metrics:** Sample size, variant count, MAF, missing rate.
     - **PCA & DAPC:** Patterns in population structure and clustering.
-    - **Genetic Diversity & Distance:** Metrics and implications (e.g., Fst).
-    - **Selection Sweep & Core Collection:** Significant regions and representativeness.
+    - **Genetic Diversity & Distance:** Metrics and implications.
+    - **Selection Sweep & Core Collection:** Overlapping significant regions and representativeness.
 6. **Discussion:** Summarize key findings, implications, limitations, and future research directions.
-7. **Conclusion:** Briefly restate study significance, results, and next steps.
-
-Ensure each section is clearly marked, follows academic standards, and omits sections without data."
+7. **Conclusion:** Briefly restate study significance, results, and next steps."
 
 #' @title Idea Expansion Prompt
 #' @description Prompt for Idea Expansion
@@ -128,6 +128,5 @@ Idea_Expansion_Prompt =
 - **Introduction:** Briefly state the objective of expanding ideas based on the SNP report.
 - **Core Ideas:** List key findings from the report with succinct explanations.
 - **Expansion Prompts:** Under each core idea, provide targeted questions or prompts to explore implications, interactions, and interdisciplinary perspectives.
-- **Additional Resources:** Recommend further readings or data sources.
 
 Ensuring that all scientific and technical terms are clearly defined."

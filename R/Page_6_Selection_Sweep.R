@@ -361,7 +361,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       fileInput("Site_Info2", "Site Info.* (required)", multiple = F, accept = c(".rds"))
     })
     guide_pcadapt("To run pcadapt, the input data must be in ✅ data.frame format. \nYou also need to upload a ▶️ Site Info file (in RDS format). \nPlease click the 'Run pcadapt' button.")
-    })
+  })
   
   output$pcadaptplot1 = renderPlot({
     req(pcadapt_data(), input$pcadapt_adj)
@@ -412,12 +412,18 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
           geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
       }
       pcadaptplot1(pcadaptplot1)
+      
+      top_pvalues = data2[order(data2$pvalue, na.last = NA), ]
+      result = head(top_pvalues, 10)
+      
       pre_results = pre_results()
       pre_results[[45]] = "## Selection Sweep"
       pre_results[[46]] = paste0("### pcadapt (PCA-based genome scan for selection)")
-      pre_results[[47]] = paste0(dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ",
-                                 length(table(data2[,1])), " chromosomes with the ",
-                                 input$pcadapt_adj, " P-value adjustment method at α = ", input$pcadapt_alpha)
+      text = paste0("Methodology: pcadapt: The PCA-based method utilizes the pcadapt package to identify outlier SNPs associated with selection pressures through principal component analysis (PCA), detecting loci that exhibit significant population structure deviations.", "\n",
+                    dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ", length(table(data2[,1])), " chromosomes with the ", input$pcadapt_adj, " P-value adjustment method at α = ", input$pcadapt_alpha, "\n",
+                    "Top 10 significant SNPs: ", "SNP positions [Chromosome: Position (base pair)]:", paste(result$Marker, collapse = ", "), ", with p-values ranging from: ", min(result$pvalue), " to ", max(result$pvalue)
+      )
+      pre_results[[47]] = paste0(text)
       pre_results(pre_results)
       pcadaptplot1()
     }
@@ -775,12 +781,20 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
           geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
       }
       OutFLANKplot1(OutFLANKplot1)
+      
+      top_pvalues = data2[order(data2$pvalue, na.last = NA), ]
+      result = head(top_pvalues, 10)
+      
       pre_results = pre_results()
       pre_results[[45]] = "## Selection Sweep"
       pre_results[[49]] = paste0("### OutFLANK (Fst-based genome scan for selection)")
-      pre_results[[50]] = paste0(dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ",
-                                 length(table(data2[,1])), " chromosomes with the ",
-                                 input$OutFLANK_adj, " P-value adjustment method at α = ", input$OutFLANK_alpha)
+      
+      text = paste0("Methodology: OutFLANK: The OutFLANK method to pinpoint SNPs under divergent selection by analyzing FST outliers, effectively distinguishing genomic regions subject to selection from neutral genetic variation.", "\n",
+                    dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ", length(table(data2[,1])), " chromosomes with the ", input$OutFLANK_adj, " P-value adjustment method at α = ", input$OutFLANK_alpha, "\n",
+                    "Top 10 significant SNPs: ", "SNP positions [Chromosome: Position (base pair)]:", paste(result$Marker, collapse = ", "), ", with p-values ranging from: ", min(result$pvalue), " to ", max(result$pvalue)
+      )
+      
+      pre_results[[50]] = text
       pre_results(pre_results)
       OutFLANKplot1()
     }
@@ -1138,7 +1152,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       fileInput("Chr_Info2", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
     guide_IBS = reactiveVal("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run IBS' button.")
-    })
+  })
   
   output$download_IBS_plot = renderUI({
     if (IBStitle1() == "Chromosome Ideogram") {
@@ -1293,7 +1307,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     
     ManhattanPlot1("Manhattan Plot")
     shinyjs::hide("ManhattanStatus")
-    guide_Manhattan("You can customize the Manhattan plot and then click the 'Run Manhattan Plot' button again.")
+    guide_Manhattan("You can customize the Manhattan plot and then click the ▶️ 'Run Manhattan Plot' button again.")
   })
   
   observeEvent(input$resetManhattan, {

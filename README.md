@@ -3,10 +3,15 @@
 
 # _ShiNyP_: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
 
-![CI](https://img.shields.io/badge/build-passing-brightgreen)
-[![R-CMD-check](https://github.com/irudnyts/openai/workflows/R-CMD-check/badge.svg)](https://github.com/irudnyts/openai/actions)
-![Version](https://img.shields.io/badge/version-0.1.1-blue)
+![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest)
+![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Windows_Ubuntu-release.yaml?label=R-CMD-check)
+![Version](https://img.shields.io/github/r-package/v/TeddYenn/ShiNyP?label=ShiNyP&color=blue)
+
 <!-- badges: end -->
+
+
+> [!NOTE] 
+> **🆕 Now available: _ShiNyP_ v0.1.2**
 
 
 ## 🔸Overview
@@ -17,27 +22,24 @@
 
 **📊Analysis:** Data QC, population genetics analysis, core collection, and more.
 
-**📋Output:** Publication-ready figures, tables, analyzed data objects, and AI-driven reports.
+**📋Output:** Publication-ready figures, tables, analyzed data objects, and free AI-driven reports.
 
 For detailed instructions on each feature, please visit ➡️ [**User Guide**](https://teddyenn.github.io/ShiNyP-guide/) ⬅️
 
 ## 🔸Quickstart
 
 ### ✅ Prerequisites
-- R Version: R ≥ 4.4 (compatible with Bioconductor version 3.20)
-- R Tools:
-  - Windows: Rtools
-  - macOS: Xcode Command Line Tools
-  - Linux: Development tools (e.g., r-base-dev)
+- R Version: R ≥ 4.4 (Compatible with Bioconductor version 3.20)
+- R Tools (Recommended, but not required).
 
 
-### 1️⃣ Pre-install Required Package
+### 1️⃣ Install Required Packages
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.20")
    BiocManager::install(c("qvalue", "SNPRelate", "ggtree"), force = TRUE)
    ```
-### 2️⃣ Install the _ShiNyP_ Package from GitHub
+### 2️⃣ Install the _ShiNyP_ Package
    ```R
    install.packages("remotes")
    remotes::install_github("TeddYenn/ShiNyP", force = TRUE)
@@ -47,13 +49,13 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
    library(ShiNyP)
    ShiNyP::run_ShiNyP()
    ```
-### 4️⃣ Run _ShiNyP_ Analysis
-Input your SNP data in VCF format, or feel free to use the built-in demo data.
+### 4️⃣ Run Analysis on _ShiNyP_
+Input your SNP data in VCF, or feel free to use the built-in demo data.
 
 
 ## 🔸URLs
 
-▪️ Journal Article: 
+▪️ Journal Article
 
 ▪️ User Manual: [https://teddyenn.github.io/ShiNyP-guide](https://teddyenn.github.io/ShiNyP-guide)
 
@@ -65,14 +67,21 @@ Input your SNP data in VCF format, or feel free to use the built-in demo data.
 
 ▪️ GitHub Repository: [https://github.com/TeddYenn/ShiNyP](https://github.com/TeddYenn/ShiNyP)
 
+## 🔸Updates
+
+- Aug 2024: Initial release alpha version.
+- Oct 2024: Release v0.1.0.
+- Feb 2025: Release v0.1.1.
+- Apr 2025: Release v0.1.2.
+
 
 ## 🔸Support
+
 If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7) or email us at: teddyhuangyh@gmail.com
 
 
 ## 🔸Citation
 
 ```
-Huang et al. (upcoming 2025) ShiNyP: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
-Under Review…
+Huang et al. (upcoming 2025) ShiNyP: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization.
 ```
