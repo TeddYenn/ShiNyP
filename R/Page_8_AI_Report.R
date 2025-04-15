@@ -216,7 +216,6 @@ Page_8_AI_Report_Server = function(input, output, session) {
           paste(sections[["Selection Sweep"]], collapse = "\n"),
           paste(sections[["Core Collection"]], collapse = "\n")
         )
-        
         content = c()
         topic = list(
           "Data Input, Data QC, amd SNP dataset for downstream analysis",

@@ -12,6 +12,9 @@
 
 > [!NOTE] 
 > **🆕 Now available: _ShiNyP_ v0.1.2**
+> - Enhanced AI report functionality with new configuration options and new AI models (*Free*: Gemini 2.0; GPT-4.1).
+> - Improved the layout of preliminary results for better readability.
+> - Added more methods for constructing core SNP set.
 
 
 ## 🔸Overview
