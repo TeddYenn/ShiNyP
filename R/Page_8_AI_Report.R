@@ -29,9 +29,9 @@ Page_8_AI_Report_UI = function() {
                  fluidRow(
                    column(3,
                           tags$h4("2. AI-Driven Report", class = "custom-h4"),
-                          selectInput("AI_model", "Choose AI model:",
+                          selectInput("AI_model", "AI model:",
                                       choices = names(AI_model_choice), selected = "Gemini 2.0 Flash"),
-                          selectInput("AI_prompt", "Specify AI task:",
+                          selectInput("AI_prompt", "AI task:",
                                       choices = c("Summary Request", "Data Interpretation", "Report Structuring", "Idea Expansion"), selected = "Data Interpretation"),
                           selectInput("AI_turn", "Conversation:",
                                       choices = c("Single-Turn", "Multi-Turn"), selected = "Single-Turn"),

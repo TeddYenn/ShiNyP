@@ -121,8 +121,8 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     row.names(dataset) = core_sample$coverage.table[,2]
     core_sample_dataset(dataset)
     
-    core_sample_info = data.frame("ID" = colnames(df()),
-                                  "Core_sample" = ifelse(colnames(df()) %in% core_sample_coverage()[,2], "TRUE", "FALSE"))
+    core_sample_info = data.frame("ID" = row.names(df()),
+                                  "Core_sample" = ifelse(row.names(df()) %in% core_sample_coverage()[,2], "TRUE", "FALSE"))
     core_sample_info(core_sample_info)
     
     shinyjs::hide("CoreSampleStatus")
