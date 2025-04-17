@@ -160,7 +160,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
       key = readLines(input$AI_api_key$datapath, warn = FALSE)
       model = AI_model_choice[input$AI_model]
       
-      if (model %in% c("o1-mini", "o3-mini")){
+      if (model %in% c("o1-mini", "o3-mini", "o4-mini")){
         chat = chat_openai(
           system_prompt = NULL,
           turns = NULL,
@@ -216,6 +216,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
           paste(sections[["Selection Sweep"]], collapse = "\n"),
           paste(sections[["Core Collection"]], collapse = "\n")
         )
+        
         content = c()
         topic = list(
           "Data Input, Data QC, amd SNP dataset for downstream analysis",
@@ -335,4 +336,3 @@ Page_8_AI_Report_Server = function(input, output, session) {
   
   output$AItitle1 = renderText({ AItitle1() })
   output$AItitle2 = renderText({ AItitle2() })
-}

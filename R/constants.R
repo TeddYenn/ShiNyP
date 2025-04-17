@@ -42,6 +42,7 @@ AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
                     # "DeepSeek-R1" = "deepseek-reasoner", -> Waiting time too long!
                     "Gemini 2.0 Flash" = "gemini-2.0-flash",
                     "Gemini 2.0 Flash-Lite" = "gemini-2.0-flash-lite",
+                    "o4-mini" = "o4-mini",
                     "o3-mini" = "o3-mini",
                     # "o1" = "o1", -> Waiting time too long!
                     "o1-mini" = "o1-mini",
