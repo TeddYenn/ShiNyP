@@ -336,3 +336,4 @@ Page_8_AI_Report_Server = function(input, output, session) {
   
   output$AItitle1 = renderText({ AItitle1() })
   output$AItitle2 = renderText({ AItitle2() })
+}
