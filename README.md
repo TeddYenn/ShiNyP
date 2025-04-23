@@ -21,9 +21,9 @@
 
 ##  🧬 Quickstart
 
-[🔸Run *ShiNyP* via R](#run-shinyp-via-r)
+[Run *ShiNyP* via R](#run-shinyp-via-r)
 
-[🔸Run *ShiNyP* via Docker](#run-shinyp-via-docker)
+[Run *ShiNyP* via Docker](#run-shinyp-via-docker)
 
 <br>
 
@@ -120,12 +120,12 @@ If you have 🐳 [Docker](https://www.docker.com/) installed, you can launch _Sh
 
 ## 🔸Updates and Support
 
+If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7) or email us at: teddyhuangyh@gmail.com
+
 - Aug 2024: Initial release alpha version.
 - Oct 2024: Release v0.1.0.
 - Feb 2025: Release v0.1.1.
 - Apr 2025: Release v0.1.2.
-
-If you encounter any issues or have suggestions for new features, please submit a report through our [Feedback Form](https://forms.gle/GPCggSo5czyNLfoB7) or email us at: teddyhuangyh@gmail.com
 
 <br>
 
