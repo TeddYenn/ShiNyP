@@ -26,9 +26,11 @@ jobs:
           r-version: ${{ matrix.r-version }}
 
       - name: "STEP 3: Install R package dependencies"
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: rcmdcheck
+        run: |
+          install.packages("pak", repos = "https://cloud.r-project.org")
+          pak::pak("rcmdcheck")
+          pak::pak("local::.")
+        shell: Rscript {0}
 
       - name: "STEP 4: Run R CMD check"
         run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
