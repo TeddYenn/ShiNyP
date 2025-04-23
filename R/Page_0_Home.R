@@ -43,7 +43,7 @@ Page_0_Home_UI = function() {
              h4("🔶 Support", style = "color: #34495e; margin-top: 5px; font-weight: bold;"),
              p("If you encounter any issues or have suggestions for new features, please submit a report through our Feedback Form:",
                style = "font-size: 16px;", tags$a(href = "https://forms.gle/GPCggSo5czyNLfoB7", "https://forms.gle/GPCggSo5czyNLfoB7  (Google Form)", target = "_blank"), 
-               "or email us at: teddyhuangyh@gmail.com")
+               "or email us at: ", tags$a(href = "mailto:teddyhuangyh@gmail.com", "teddyhuangyh@gmail.com"))
            )
   )
 }
