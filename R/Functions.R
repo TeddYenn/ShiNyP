@@ -789,7 +789,7 @@ parse_sections = function(text) {
 #' @export
 llama_retrieve_answer <- function(query_text) {
   api_key <- "llx-He8NGNKtO1ASA1ObE2yDOsWX2CB2J7x0ArJxEPVQCDFNUG1C"
-  endpoint_url <- "https://api.cloud.llamaindex.ai/api/v1/pipelines/10fe69d0-a808-4d77-9821-ef922be6b251/retrieve"
+  endpoint_url <- "https://api.cloud.llamaindex.ai/api/v1/pipelines/b9f96382-4d56-485e-9462-1f9088586fc1/retrieve"
   
   response <- POST(
     url = endpoint_url,

@@ -102,6 +102,11 @@ Data_Interpretation_Prompt =
 
 Structure your report in clear, concise sections with integrated conclusions, highlighting statistical significance, assumptions, limitations, and omitting any sections without data."
 
+#' @title KEY
+#' @description KEY
+#' @export
+KEY = "AIzaSyBCblK9s5AZo5WmT5UeQutpmg13mG0jblw"
+
 #' @title Report Structuring Prompt
 #' @description Prompt for Report Structuring
 #' @export
@@ -136,8 +141,3 @@ Idea_Expansion_Prompt =
 - **Expansion Prompts:** Under each core idea, provide targeted questions or prompts to explore implications, interactions, and interdisciplinary perspectives.
 
 Ensuring that all scientific and technical terms are clearly defined."
-
-#' @title API KEY GOOGLE Gemini
-#' @description API for GOOGLE Gemini
-#' @export
-API_KEY_GOOGLE_Gemini = "AIzaSyBCblK9s5AZo5WmT5UeQutpmg13mG0jblw"

@@ -1,7 +1,7 @@
 
 <img src="https://github.com/user-attachments/assets/b1e125b2-c97d-4a97-9169-5669cadc5bd4" alt="ShiNyP-icon_20250510" width="100"/>
 
-# _ShiNyP_: An Interactive Shiny-based Platform for Genome-Wide SNP Analysis and Visualization
+# _ShiNyP_: Platform for SNP Analysis and Visualization
 
 ![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
 ![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Ubuntu-release.yaml?label=R-CMD-check)
@@ -14,9 +14,9 @@
 > **🆕 _ShiNyP_ v1.0.0  is now available!**
 > - Introduced the new _ShiNyP_ AI chatbot.
 > - Enhanced AI report features and deprecated older AI models.
-> - Added publication details.
+> - Added publication details [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117).
 > - Made minor UI improvements.
-> - Fixed several bugs
+> - Fixed several bugs.
 <br>
 
 ##  🧬 Quickstart
@@ -147,7 +147,7 @@ If you encounter any issues or have suggestions for new features, please submit 
 - Aug 2024: Initial release alpha version.
 - Oct 2024: Release v0.1.0.
 - Feb 2025: Release v0.1.1.
-- Apr 2025: Release v0.1.2.
+- Apr 2025: Release v0.2.0.
 - May 2025: Release v1.0.0.
 
 <br>

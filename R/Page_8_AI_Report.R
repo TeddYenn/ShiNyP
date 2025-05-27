@@ -209,7 +209,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
     result = tryCatch({
       
       if (input$AI_model == "Gemini 2.0 Flash (API Free)") {
-        key = API_KEY_GOOGLE_Gemini
+        key = KEY
       } else{
         req(input$AI_api_key$datapath)
         key = readLines(input$AI_api_key$datapath, warn = FALSE)

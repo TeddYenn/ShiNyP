@@ -39,7 +39,7 @@ AI_Bot_Server <- function(input, output, session) {
       chat_instance <- chat_google_gemini(
         system_prompt = system_prompt,
         base_url = "https://generativelanguage.googleapis.com/v1beta/",
-        api_key = API_KEY_GOOGLE_Gemini,
+        api_key = KEY,
         model = "gemini-2.0-flash-lite",
         echo = "none"
       )
