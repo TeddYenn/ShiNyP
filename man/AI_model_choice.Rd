@@ -5,7 +5,7 @@
 \alias{AI_model_choice}
 \title{AI Model Choices}
 \format{
-An object of class \code{character} of length 10.
+An object of class \code{character} of length 11.
 }
 \usage{
 AI_model_choice

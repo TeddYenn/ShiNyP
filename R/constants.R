@@ -41,20 +41,22 @@ pval_adj_method_choice = c("Bonferroni" = "bonferroni",
 AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
                     # "DeepSeek-R1" = "deepseek-reasoner", -> Waiting time too long!
                     "Gemini 2.0 Flash" = "gemini-2.0-flash",
+                    "Gemini 2.0 Flash (API Free)" = "gemini-2.0-flash",
                     "Gemini 2.0 Flash-Lite" = "gemini-2.0-flash-lite",
                     "o4-mini" = "o4-mini",
                     "o3-mini" = "o3-mini",
                     # "o1" = "o1", -> Waiting time too long!
-                    "o1-mini" = "o1-mini",
+                    # "o1-mini" = "o1-mini", -> Discard 
                     # "GPT-4.5 Preview" = "gpt-4.5-preview",
                     "GPT-4.1" = "gpt-4.1",
                     "GPT-4.1 mini" = "gpt-4.1-mini",
                     "GPT-4.1 nano" = "gpt-4.1-nano",
                     "GPT-4o" = "gpt-4o",
-                    "GPT-4o mini" = "gpt-4o-mini",
-                    "GPT-4 Turbo" = "gpt-4-turbo",
-                    "GPT-4" = "gpt-4",
-                    "GPT-3.5 Turbo" = "gpt-3.5-turbo")
+                    "GPT-4o mini" = "gpt-4o-mini"
+                    # "GPT-4 Turbo" = "gpt-4-turbo", -> Discard 
+                    # "GPT-4" = "gpt-4", -> Discard 
+                    # "GPT-3.5 Turbo" = "gpt-3.5-turbo" -> Discard 
+                    )
 
 #' @title Color Choices
 #' @description A named character vector for color
@@ -134,3 +136,8 @@ Idea_Expansion_Prompt =
 - **Expansion Prompts:** Under each core idea, provide targeted questions or prompts to explore implications, interactions, and interdisciplinary perspectives.
 
 Ensuring that all scientific and technical terms are clearly defined."
+
+#' @title API KEY GOOGLE Gemini
+#' @description API for GOOGLE Gemini
+#' @export
+API_KEY_GOOGLE_Gemini = "AIzaSyBCblK9s5AZo5WmT5UeQutpmg13mG0jblw"

@@ -10,15 +10,24 @@ Page_1_Data_Input_UI = function(input, output, session) {
                       sidebarLayout(
                         sidebarPanel(
                           tags$h5("1. Input VCF File"),
-                          uiOutput("Uploaddata"),
+                          bslib::tooltip(
+                            uiOutput("Uploaddata"),
+                            "Upload: vcf; vcf.gz; VCF in RDS"
+                          ),
                           checkboxInput("FVCFtools", "VCF File from VCFtools", value = FALSE),
-                          actionButton("Inputdata", "Input VCF File", class = "run-action-button"),
+                          actionButton("Inputdata", "Input VCF file", class = "run-action-button"),
                           actionButton("resetInput", "Reset"),
                           tags$br(),
-                          actionButton("demo_data", "Use Demo Data", class = "S-action-button"),
+                          bslib::tooltip(
+                            actionButton("demo_data", "Use Demo Data", class = "S-action-button"),
+                            "Use built-in datasets"
+                          ),
                           tags$hr(),
                           tags$h5("2. Transform to data.frame"),
-                          checkboxInput("FVCFdiploidize", "Applying Diploidization Processing", value = FALSE),
+                          bslib::tooltip(
+                            checkboxInput("FVCFdiploidize", "Applying diploidization processing", value = FALSE),
+                            "If working with non-diploid", placement = "top"
+                          ),
                           actionButton("vcf2df", "Transform to data.frame", class = "run-action-button"),
                           actionButton("resetvcf2df", "Reset"),
                           width = 3),
@@ -46,14 +55,28 @@ Page_1_Data_Input_UI = function(input, output, session) {
                       sidebarLayout(
                         sidebarPanel(
                           tags$h5("Input data.frame File"),
-                          uiOutput("uploaddf"),
+                          bslib::tooltip(
+                            uiOutput("uploaddf"),
+                            "Upload: Transformed SNP data in data.frame"
+                          ),
                           actionButton("inputdf", "Input", class = "run-action-button"),
                           actionButton("resetdf", "Reset"),
                           tags$hr(),
                           tags$h5("Input genlight File"),
-                          uiOutput("uploadgl"),
+                          bslib::tooltip(
+                            uiOutput("uploadgl"),
+                            "Upload: Transformed SNP data in genlight"
+                          ),
                           actionButton("inputgl", "Input", class = "run-action-button"),
                           actionButton("resetgl", "Reset"),
+                          tags$hr(),
+                          tags$h5("Input genind File"),
+                          bslib::tooltip(
+                            uiOutput("uploadgi"),
+                            "Upload: Transformed SNP data in genind"
+                          ),
+                          actionButton("inputgi", "Input", class = "run-action-button"),
+                          actionButton("resetgi", "Reset"),
                           width = 3),
                         mainPanel(
                           uiOutput("guide_input2"),
@@ -64,6 +87,9 @@ Page_1_Data_Input_UI = function(input, output, session) {
                           tags$br(),
                           div(class = "title-text-style", textOutput("glstatus")),
                           verbatimTextOutput("glinfo"),
+                          tags$br(),
+                          div(class = "title-text-style", textOutput("gistatus")),
+                          verbatimTextOutput("giinfo"),
                           width = 9)
                       ))
            ))
@@ -99,19 +125,31 @@ Page_1_Data_Input_Server = function(input, output, session) {
     if (input$demoFile == "Chicken") {
       showModal(modalDialog(
         title = "Data Source",
-        p("Tan, X., Zhang, J., Dong, J., Huang, M., Li, Q., Wang, H., ... & Wang, D. (2024). Whole-genome variants dataset of 209 local chickens from China. Scientific Data, 11(1), 169.", br(),
-          tags$a(href = "https://doi.org/10.1038/s41597-024-02995-w", "https://doi.org/10.1038/s41597-024-02995-w")
-        ),
+        p("Tan, X., Zhang, J., Dong, J., Huang, M., Li, Q., Wang, H., ... & Wang, D. (2024). Whole-genome variants dataset of 209 local chickens from China. Scientific Data, 11(1), 169.", 
+          br(),
+          tags$a(href = "https://doi.org/10.1038/s41597-024-02995-w", target = "_blank",
+                 "https://doi.org/10.1038/s41597-024-02995-w")),
+        tags$b("Related files:"),
+        tags$br(),
+        tags$a(
+          href = "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Chicken", target = "_blank",
+          "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Chicken"),
         footer = tagList(
           modalButton("Close")
         )
       ))
+      
     } else if (input$demoFile == "Wild rice") {
       showModal(modalDialog(
         title = "Data Source",
         p("Kajiya-Kanegae, H., Ohyanagi, H., Ebata, T., Tanizawa, Y., Onogi, A., Sawada, Y., ... & Sato, Y. (2021). OryzaGenome2.1: Database of diverse genotypes in wild Oryza species. Rice, 14, 1-8.", br(),
-          tags$a(href = "https://doi.org/10.1186/s12284-021-00468-x", "https://doi.org/10.1186/s12284-021-00468-x")
-        ),
+          tags$a(href = "https://doi.org/10.1186/s12284-021-00468-x", target = "_blank",
+                 "https://doi.org/10.1186/s12284-021-00468-x")),
+        tags$b("Related files:"),
+        tags$br(),
+        tags$a(
+          href = "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Wild_Rice", target = "_blank",
+          "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Wild_Rice"),
         footer = tagList(
           modalButton("Close")
         )
@@ -120,8 +158,14 @@ Page_1_Data_Input_Server = function(input, output, session) {
       showModal(modalDialog(
         title = "Data Source",
         p("Bergström, A., McCarthy, S. A., Hui, R., Almarri, M. A., Ayub, Q., Danecek, P., ... & Tyler-Smith, C. (2020). Insights into human genetic variation and population history from 929 diverse genomes. Science, 367(6484), eaay5012.", br(),
-          tags$a(href = "https://doi.org/10.1126/science.aay5012", "https://doi.org/10.1126/science.aay5012")
-        ),
+          tags$a(href = "https://doi.org/10.1126/science.aay5012", target = "_blank", 
+                 "https://doi.org/10.1126/science.aay5012")),
+        tags$b("Related files:"),
+        tags$br(),
+        tags$a(
+          href = "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Human_HGDP", target = "_blank",
+          "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Human_HGDP"),
+        
         footer = tagList(
           modalButton("Close")
         )
@@ -130,8 +174,13 @@ Page_1_Data_Input_Server = function(input, output, session) {
       showModal(modalDialog(
         title = "Data Source",
         p("Peter, J., De Chiara, M., Friedrich, A., Yue, J. X., Pflieger, D., Bergström, A., ... & Schacherer, J. (2018). Genome evolution across 1,011 Saccharomyces cerevisiae isolates. Nature, 556(7701), 339-344.", br(),
-          tags$a(href = "https://doi.org/10.1038/s41586-018-0030-5", "https://doi.org/10.1038/s41586-018-0030-5")
-        ),
+          tags$a(href = "https://doi.org/10.1038/s41586-018-0030-5", target = "_blank",
+                 "https://doi.org/10.1038/s41586-018-0030-5")),
+        tags$b("Related files:"),
+        tags$br(),
+        tags$a(
+          href = "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Yeast", target = "_blank",
+          "https://github.com/TeddYenn/ShiNyP/tree/main/inst/demo_data/Yeast"),
         footer = tagList(
           modalButton("Close")
         )
@@ -183,45 +232,93 @@ Page_1_Data_Input_Server = function(input, output, session) {
   })
   
   observeEvent(input$Inputdata, {
-    if (guide_input() == "Now waiting for input VCF file... (Please click the 'Input VCF file' button)"){
+    if (guide_input() == "Now waiting for input VCF file... (Please click the 'Input VCF file' button)") {
       shinyjs::show("inputStatus")
       req(input$file1)
-      withProgress(message = 'Processing data...', value = 0.05, {
-        if (grepl("\\.vcf$", input$file1$name)) {
-          vcf = fread(input$file1$datapath, header = TRUE, sep = "\t")
-        } else if (grepl("\\.gz$", input$file1$name)) {
-          vcf = fread(input$file1$datapath, header = TRUE, sep = "\t")
-        } else if (grepl("\\.rds$", input$file1$name)) {
-          vcf = readRDS(input$file1$datapath)
-          vcf = as.data.table(vcf)
-        }
-        incProgress(0.1, message = "Processing data...")
-        names(vcf) = gsub("(.+?)_\\1", "\\1", names(vcf))
-        vcf[, `#CHROM` := gsub("[^0-9]", "", `#CHROM`)]
-        incProgress(0.15, message = "Processing data...")
-        vcf[ID == ".", ID := paste(`#CHROM`, POS, sep = ":")]
-        incProgress(0.2, message = "Processing data...")
-        if (input$FVCFtools == TRUE){
-          vcf_process = function(x) {
-            x = ifelse(is.na(x) | x %in% c("./.", ".|."), NA_character_, x)
-            genotype = sub(":.*", "", x)  
-            return(genotype)
+      tryCatch({
+        withProgress(message = 'Processing data...', value = 0.05, {
+          
+          vcf = NULL
+          if (grepl("\\.vcf$", input$file1$name, ignore.case = TRUE)) {
+            # Read VCF
+            vcf = tryCatch({
+              fread(input$file1$datapath, header = TRUE, sep = "\t")
+            }, error = function(e) stop("Failed to read VCF file. Please check the file content and format."))
+            
+          } else if (grepl("\\.gz$", input$file1$name, ignore.case = TRUE)) {
+            # Read compressed VCF
+            vcf = tryCatch({
+              fread(input$file1$datapath, header = TRUE, sep = "\t")
+            }, error = function(e) stop("Failed to read compressed VCF (.gz) file. Please check the file content and format."))
+            
+          } else if (grepl("\\.rds$", input$file1$name, ignore.case = TRUE)) {
+            # Read RDS
+            vcf = tryCatch({
+              readRDS(input$file1$datapath)
+            }, error = function(e) stop("Failed to read RDS file. Please ensure the file is a valid RDS and in the correct format."))
+            
+            if (!any(class(vcf) %in% c("data.frame", "data.table"))) {
+              stop("RDS file does not contain a data.frame or data.table object.")
+            }
+            vcf = as.data.table(vcf)
+          } else {
+            # Unsupported file type
+            stop("Unsupported file type. Please upload a .vcf, .vcf.gz, or .rds file.")
           }
-          vcf[, (names(vcf)[10:ncol(vcf)]) := 
-                lapply(.SD, vcf_process), 
-              .SDcols = names(vcf)[10:ncol(vcf)]]
-        }
-        incProgress(0.4, message = "Processing data...")
-        vcfData(as.data.frame(vcf))
+          
+          # --- Basic content check ---
+          if (ncol(vcf) < 10) stop("Input file does not contain sufficient columns for VCF format.")
+          if (!any(c("ID", "#CHROM", "POS") %in% names(vcf))) {
+            stop("Missing required columns (e.g., 'ID', '#CHROM', 'POS'). Please check your file format.")
+          }
+          
+          incProgress(0.1, message = "Processing data...")
+          
+          # --- Clean column names and chromosome column ---
+          names(vcf) = gsub("(.+?)_\\1", "\\1", names(vcf))
+          vcf[, `#CHROM` := gsub("[^0-9]", "", `#CHROM`)]
+          
+          incProgress(0.15, message = "Processing data...")
+          
+          # --- Fill missing IDs if needed ---
+          vcf[ID == ".", ID := paste(`#CHROM`, POS, sep = ":")]
+          
+          incProgress(0.2, message = "Processing data...")
+          
+          # --- Optional: VCFtools genotype data cleaning ---
+          if (isTRUE(input$FVCFtools)) {
+            vcf_process = function(x) {
+              x = ifelse(is.na(x) | x %in% c("./.", ".|."), NA_character_, x)
+              genotype = sub(":.*", "", x)
+              return(genotype)
+            }
+            vcf[, (names(vcf)[10:ncol(vcf)]) :=
+                  lapply(.SD, vcf_process),
+                .SDcols = names(vcf)[10:ncol(vcf)]]
+          }
+          
+          incProgress(0.4, message = "Processing data...")
+          
+          # --- Save result & Update status ---
+          vcfData(as.data.frame(vcf))
+          guide_input("VCF file has been input!\nNow waiting to transform to a data.frame... (Please click the 'Transform to data.frame' button)")
+          input1("VCF Data")
+          input3("Preview VCF Data")
+          fileName(tools::file_path_sans_ext(input$file1$name))
+          shinyjs::hide("inputStatus")
+          showNotification("Uploaded successfully", type = "message")
+        })
+      }, error = function(e) {
+        shinyjs::hide("inputStatus")
+        showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+        vcfData(NULL)
+        input1("")
+        input3("")
+        fileName("")
       })
-      guide_input("VCF file has been input!\nNow waiting to transform to a data.frame... (Please click the 'Transform to data.frame' button)")
-      input1("VCF Data")
-      input3("Preview VCF Data")
-      
-      fileName(tools::file_path_sans_ext(input$file1$name))
-      shinyjs::hide("inputStatus")
     }
   })
+  
   
   output$presample = renderUI({
     if (input1() == "VCF Data"){
@@ -243,7 +340,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
           selected_vcfData,
           options = list(
             scrollX = TRUE,
-            scrollY = '400px',
+            scrollY = '450px',
             paging = TRUE,
             searching = TRUE,
             lengthMenu = c(10, 25, 50, 100)
@@ -269,47 +366,80 @@ Page_1_Data_Input_Server = function(input, output, session) {
   })
   
   observeEvent(input$vcf2df, {
-    req(vcfData())
     shinyjs::show("inputStatus")
-    diploidize = as.logical(input$FVCFdiploidize)
-    VCFdf(vcf2df(vcfData(), diploidize))
-    df(VCFdf())
-    Site_Info(vcf2Site_Info(vcfData()))
-    input2("VCF Data in data.frame")
-    shinyjs::hide("inputStatus")
-    guide_input("VCF to data.frame is complete.")
-    pre_results = pre_results()
-    pre_results[[2]] = "## Data Input"
-    pre_results[[4]] = paste0("Number of samples: ", dim(VCFdf())[1])
-    pre_results[[5]] = paste0("Number of SNPs: ", dim(VCFdf())[2])
-    pre_results(pre_results)
-    
-    output$Dinput = downloadHandler(
-      filename = function() {
-        paste("vcf_", fileName(), ".rds", sep = "")},
-      content = function(file) {
-        shinyjs::show("inputStatus")
-        saveRDS(vcfData(), file)
-        shinyjs::hide("inputStatus")
-      })
-    
-    output$Ddf = downloadHandler(
-      filename = function() {
-        paste("data.frame_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")},
-      content = function(file) {
-        shinyjs::show("inputStatus")
-        saveRDS(VCFdf(), file)
-        shinyjs::hide("inputStatus")
-      })
-    
-    output$DsnpInfo = downloadHandler(
-      filename = function() {
-        paste("Site_Info_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")},
-      content = function(file) {
-        shinyjs::show("inputStatus")
-        saveRDS(Site_Info(), file)
-        shinyjs::hide("inputStatus")
-      })
+    tryCatch({
+      req(vcfData())
+      
+      # --- Get input options ---
+      diploidize = as.logical(input$FVCFdiploidize)
+      
+      # --- Main conversion process ---
+      VCFdf(vcf2df(vcfData(), diploidize))
+      df(VCFdf())
+      Site_Info(vcf2Site_Info(vcfData()))
+      input2("VCF Data in data.frame")
+      guide_input("VCF to data.frame is complete.")
+      
+      # --- Update summary info ---
+      pre_results = pre_results()
+      pre_results[[2]] = "## Data Input"
+      pre_results[[4]] = paste0("Number of samples: ", dim(VCFdf())[1])
+      pre_results[[5]] = paste0("Number of SNPs: ", dim(VCFdf())[2])
+      pre_results(pre_results)
+      
+      # --- Setup download handlers  ---
+      output$Dinput = downloadHandler(
+        filename = function() {
+          paste("VCF_", fileName(), ".rds", sep = "")
+        },
+        content = function(file) {
+          shinyjs::show("inputStatus")
+          tryCatch({
+            saveRDS(vcfData(), file)
+          }, error = function(e) {
+            showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+          })
+          shinyjs::hide("inputStatus")
+        })
+      
+      output$Ddf = downloadHandler(
+        filename = function() {
+          paste("data.frame_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")
+        },
+        content = function(file) {
+          shinyjs::show("inputStatus")
+          tryCatch({
+            saveRDS(VCFdf(), file)
+          }, error = function(e) {
+            showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+          })
+          shinyjs::hide("inputStatus")
+        })
+      
+      output$DsnpInfo = downloadHandler(
+        filename = function() {
+          paste("Site_Info_", dim(VCFdf())[1], "_", dim(VCFdf())[2], "SNPs.rds", sep = "")
+        },
+        content = function(file) {
+          shinyjs::show("inputStatus")
+          tryCatch({
+            saveRDS(Site_Info(), file)
+          }, error = function(e) {
+            showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+          })
+          shinyjs::hide("inputStatus")
+        })
+      
+      shinyjs::hide("inputStatus")
+      showNotification("Transformed successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("inputStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      VCFdf(NULL)
+      df(NULL)
+      Site_Info(NULL)
+      input2("")
+    })
   })
   
   observeEvent(input$resetvcf2df, {
@@ -370,6 +500,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
   output$input3 = renderText({ input3() })
   
   ##### Page 1-2: data.frame/genlight #####
+  # ---- data.frame ----
   output$uploaddf = renderUI({
     fileInput("input_df", "", multiple = F, accept = c(".rds"))
   })
@@ -386,13 +517,41 @@ Page_1_Data_Input_Server = function(input, output, session) {
   observeEvent(input$inputdf, {
     req(input$input_df)
     shinyjs::show("input2Status")
-    df = readRDS(input$input_df$datapath)
-    df(df)
-    VCFdf(df)
-    dfstatus("data.frame")
-    shinyjs::hide("input2Status")
+    tryCatch({
+      uploaded_obj = readRDS(input$input_df$datapath)
+      
+      if (!is.data.frame(uploaded_obj)) {
+        stop("Not a data.frame file.")
+      }
+      
+      df(uploaded_obj)
+      VCFdf(uploaded_obj)
+      dfstatus("data.frame")
+      shinyjs::hide("input2Status")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      
+      shinyjs::hide("input2Status")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      df(NULL)
+      VCFdf(NULL)
+      dfstatus("")
+    })
   })
   
+  output$dfinfo = renderText({
+    req(df())
+    if (dfstatus() == "data.frame") {
+      paste0("Type: ", class(df()), "\n",
+             "Number of samples: ", dim(df())[1], "\n",
+             "Number of SNPs: ", dim(df())[2], "\n",
+             "File name: ", tools::file_path_sans_ext(input$input_df$name), "\n",
+             "Size in RAM: ", size2size(as.numeric(object.size(df())))
+      )
+    }
+  })
+  
+  # ---- genlight ----
   output$uploadgl = renderUI({
     fileInput("input_gl", "", multiple = F, accept = c(".rds"))
   })
@@ -409,22 +568,23 @@ Page_1_Data_Input_Server = function(input, output, session) {
   observeEvent(input$inputgl, {
     req(input$input_gl)
     shinyjs::show("input2Status")
-    gl = readRDS(input$input_gl$datapath)
-    gl(gl)
-    glstatus("genlight")
-    shinyjs::hide("input2Status")
-  })
-  
-  output$dfinfo = renderText({
-    req(df())
-    if (dfstatus() == "data.frame") {
-      paste0("Type: ", class(df()), "\n",
-             "Number of samples: ", dim(df())[1], "\n",
-             "Number of SNPs: ", dim(df())[2], "\n",
-             "File name: ", tools::file_path_sans_ext(input$input_df$name), "\n",
-             "Size in RAM: ", size2size(as.numeric(object.size(df())))
-      )
-    }
+    tryCatch({
+      uploaded_obj = readRDS(input$input_gl$datapath)
+      
+      if (!"genlight" %in% class(uploaded_obj)) {
+        stop("Not a valid 'genlight' file.")
+      }
+      
+      gl(uploaded_obj)
+      glstatus("genlight")
+      shinyjs::hide("input2Status")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("input2Status")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      gl(NULL)
+      glstatus("")
+    })
   })
   
   output$glinfo = renderText({
@@ -440,7 +600,63 @@ Page_1_Data_Input_Server = function(input, output, session) {
     }
   })
   
+  # ---- genind ----
+  output$uploadgi = renderUI({
+    fileInput("input_gi", "", multiple = F, accept = c(".rds"))
+  })
+  
+  observeEvent(input$resetgi, {
+    output$uploadgi = renderUI({
+      fileInput("input_gi", "", multiple = F, accept = c(".rds"))
+    })
+    gistatus("")
+    gi(NULL)
+    showNotification("Data have been reset.")
+  })
+  
+  observeEvent(input$inputgi, {
+    req(input$input_gi)
+    shinyjs::show("input2Status")
+    tryCatch({
+      uploaded_obj = readRDS(input$input_gi$datapath)
+      
+      if (!"genind" %in% class(uploaded_obj)) {
+        stop("Not a valid 'genind' file.")
+      }
+      
+      gi(uploaded_obj)
+      gistatus("genind")
+      shinyjs::hide("input2Status")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("input2Status")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      gi(NULL)
+      gistatus("")
+    })
+  })
+  
+  output$giinfo = renderText({
+    req(gi())
+    if (!is.null(gi()@pop)){
+      group.info = "Added"
+    }else{
+      group.info = "NaN"
+    }
+    if (gistatus() == "genind") {
+      paste0("Type: ", class(gi()), "\n",
+             "Number of samples: ", length(gi()@ploidy), "\n",
+             "Number of SNPs: ", length(gi()@all.names), "\n",
+             "Group Info.: ", group.info, "\n",
+             "File name: ", tools::file_path_sans_ext(input$input_gi$name), "\n",
+             "Size in RAM: ", size2size(as.numeric(object.size(gi())))
+      )
+    }
+  })
+  
+  # ---- Text ----
   output$guide_input2 = renderUI({ div(class = "guide-text-block", guide_input2()) })
   output$dfstatus = renderText({ dfstatus() })
   output$glstatus = renderText({ glstatus() })
+  output$gistatus = renderText({ gistatus() })
 }

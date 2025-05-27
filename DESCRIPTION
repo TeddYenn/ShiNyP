@@ -1,13 +1,16 @@
 Package: ShiNyP
 Type: Package
-Title: An interactive Shiny-based platform for genome-wide SNP analysis and visualization
-Version: 0.1.2
+Title: An R/Shiny platform for genome-wide SNP analysis and visualization with AI-assisted features
+Version: 1.0.0
 Author: Yen-Hsiang Huang
 Maintainer: Yen-Hsiang Huang <teddyhuangyh@gmail.com>
-Description: An interactive Shiny-based platform for genome-wide SNP analysis and visualization
+Description: Publication: Huang, Y.-H., Chen, L.-Y., Septiningsih, E. M., Kao, P.-H., & Kao, C.-F. (2025). ShiNyP: Unlocking SNP-based population genetics—An AI-assisted platform for rapid and interactive visual exploration. Molecular Biology and Evolution, 43(6), msaf117. https://doi.org/10.1093/molbev/msaf117
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 4.4.0), shiny, shinyjs, ggplot2, RColorBrewer, ggthemes, dplyr, data.table, adegenet, DT, dartRverse, rms, haplo.stats, SNPassoc, dartR.base, dartR.popgen, vctrs, sass, stringr, poppr, ape, statgenGWAS, popkin, tidyr, circlize, hierfstat, ggrepel, pcadapt, remotes, fastmap, plotly, ggnewscale, ellmer, rmarkdown, ggtree, qvalue, SNPRelate, snpStats
+Depends: R (>= 4.4.0), shiny, shinyjs, ggplot2, RColorBrewer, ggthemes, dplyr, data.table, adegenet, DT, dartRverse, rms, haplo.stats, SNPassoc, dartR.base, dartR.popgen, vctrs, sass, stringr, poppr, ape, statgenGWAS, popkin, tidyr, circlize, hierfstat, ggrepel, pcadapt, remotes, fastmap, plotly, ggnewscale, ellmer, rmarkdown, ggtree, qvalue, SNPRelate, snpStats, bslib, httr, promises, future
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

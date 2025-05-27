@@ -23,7 +23,7 @@ Page_4_Population_Structure_UI = function() {
                           fluidRow(
                             column(6,
                                    div(class = "title-text-style", textOutput("PCAtitle1")),
-                                   plotOutput("PCAplot", width = "500px", height = "500px"),
+                                   plotOutput("PCAplot", width = "450px", height = "450px"),
                                    uiOutput("pc1"),
                                    uiOutput("pc2"),
                                    uiOutput("groupfile4"),
@@ -31,7 +31,7 @@ Page_4_Population_Structure_UI = function() {
                             ),
                             column(6,
                                    div(class = "title-text-style", textOutput("PCAtitle2")),
-                                   plotOutput("PCAexpplot", width = "500px", height = "500px"),
+                                   plotOutput("PCAexpplot", width = "450px", height = "450px"),
                                    uiOutput("PC"),
                                    uiOutput("download_Expplot")
                             )
@@ -69,13 +69,13 @@ Page_4_Population_Structure_UI = function() {
                           fluidRow(
                             column(5,
                                    div(class = "title-text-style", textOutput("DAPCtitle1")),
-                                   plotOutput("BICplot", width = "400px", height = "270px"),
+                                   plotOutput("BICplot", width = "360px", height = "270px"),
                                    uiOutput("download_BIC_plot"),
                                    div(class = "title-text-style", textOutput("DAPCtitle2")),
-                                   plotOutput("DF1plot", width = "400px", height = "270px"),
+                                   plotOutput("DF1plot", width = "360px", height = "270px"),
                                    uiOutput("download_DF1_plot"),
                                    div(class = "title-text-style", textOutput("DAPCtitle3")),
-                                   plotOutput("DF2plot", width = "400px", height = "270px"),
+                                   plotOutput("DF2plot", width = "360px", height = "270px"),
                                    uiOutput("download_DF2_plot")
                             ),
                             column(7,
@@ -194,7 +194,7 @@ Page_4_Population_Structure_UI = function() {
                             column(4,
                                    sliderInput("Scatter_size", "Point size:", min = 1, max = 20, value = 10, step = 1),
                                    sliderInput("Scatter_opacity", "Opacity:", min = 0, max = 1, value = 0.8, step = 0.1),
-                                   selectInput("Scatter_color", "Colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Cool Tone", "Warm Tone", "Earthy", "Vibrant", "Neon")),
+                                   selectInput("Scatter_color", "Colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
                                    selectInput("Scatter_show.legend", "Legend:", choices = c("Show", "NULL"))
                             ),
                             column(4,
@@ -245,27 +245,28 @@ Page_4_Population_Structure_UI = function() {
                             column(3,
                                    selectInput("Tree_str_layout", "Layout:", choices = names(Tree_layout_choice), selected = "Circular"),
                                    selectInput("Tree_str_color_var", "Line color variable:", choices = NULL),
-                                   selectInput("Tree_str_color", "Line colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Cool Tone", "Warm Tone", "Earthy", "Vibrant", "Neon")),
+                                   selectInput("Tree_str_color", "Line colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
                                    sliderInput("Tree_str_size", "Line size:", min = 0, max = 5, value = 0.5, step = 0.1)
                             ),
                             column(3,
                                    selectInput("Tree_taxa", "Taxa label:", choices = c("Show", "NULL")),
                                    selectInput("Tree_taxa_color_var", "Text color variable:", choices = NULL),
-                                   selectInput("Tree_taxa_color", "Text colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Cool Tone", "Warm Tone", "Earthy", "Vibrant", "Neon")),
-                                   sliderInput("Tree_taxa_size", "Text size:", min = 0, max = 5, value = 3, step = 0.1),
+                                   selectInput("Tree_taxa_color", "Text colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
+                                   sliderInput("Tree_taxa_size", "Text size:", min = 0, max = 8, value = 3, step = 0.1),
                                    selectInput("Tree_taxa_align", "Align label:", choices = c("TRUE", "FALSE"))
                             ),
                             column(3,
                                    selectInput("Tree_sym", "Symbol:", choices = c("Show", "NULL")),
                                    selectInput("Tree_sym_color_var", "Symbol color variable:", choices = NULL),
-                                   selectInput("Tree_sym_color", "Symbol colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Cool Tone", "Warm Tone", "Earthy", "Vibrant", "Neon")),
+                                   selectInput("Tree_sym_color", "Symbol colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
                                    selectInput("Tree_sym_shape_var", "Symbol shape variable:", choices = NULL),
-                                   sliderInput("Tree_sym_size", "Symbol size:", min = 0, max = 5, value = 3, step = 0.1)
+                                   sliderInput("Tree_sym_size", "Symbol size:", min = 0, max = 8, value = 3, step = 0.1)
                             ),
                             column(3,
                                    selectInput("Tree_treescale", "Treescale:", choices = c("Show", "NULL"), selected = "NULL"),
                                    selectInput("Tree_Bt", "Bootstrap values:", choices = c("Show", "NULL"), selected = "NULL"),
-                                   selectInput("Tree_legend", "Legend:", choices = names(Legend_choice), selected = "bottom")
+                                   selectInput("Tree_legend", "Legend:", choices = names(Legend_choice), selected = "bottom"),
+                                   sliderInput("Tree_legend_size", "Legend size", min  = 0.5, max = 2, value = 1, step = 0.1)
                             )
                           ),
                           tags$hr(),
@@ -284,6 +285,7 @@ Page_4_Population_Structure_UI = function() {
 Page_4_Population_Structure_Server = function(input, output, session) {
   ##### Page 4: Population Structure #####
   ##### PCA #####
+  # ---- Select File ----
   output$fileSelection_PCA = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -293,6 +295,14 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     selectInput("FileforPCA", "Dataset for PCA:", choices)
   })
   
+  output$PCAfileInfo = renderText({
+    req(df())
+    paste0("Type: ", class(df()), "\n",
+           "Number of samples: ", dim(df())[1], "\n",
+           "Number of SNPs: ", dim(df())[2])
+  })
+  
+  # ---- Core Functions ----
   observeEvent(input$runPCA, {
     req(input$FileforPCA)
     shinyjs::show("PCAStatus")
@@ -330,35 +340,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
                   pcs[5], " PCs explain 80% total variance", "\n",
                   pcs[6], " PCs explain 90% total variance", "\n",
                   pcs[7], " PCs explain 99% total variance", "\n"
-    )
+                  )
     pre_results[[21]] = text
     pre_results(pre_results)
-    
-    output$DPCAplot = downloadHandler(
-      filename = function() {
-        paste0("PCA_Scatter_Plot-", input$pc1, "_vs_",input$pc2, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("PCAStatus")
-        pdf(file, width = 8, height = 5.8)
-        print(PCA2Dplot())
-        dev.off()
-        shinyjs::hide("PCAStatus")
-      }
-    )
-    
-    output$DExpplot = downloadHandler(
-      filename = function() {
-        paste0("PCA_Explained_Variance_Plot-", "First_", input$PC, "_PCs", ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("PCAStatus")
-        pdf(file, width = 8, height = 5.8)
-        print(PCAexpplot())
-        dev.off()
-        shinyjs::hide("PCAStatus")
-      }
-    )
   })
   
   observeEvent(input$resetPCA, {
@@ -369,8 +353,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     PCAtitle2("")
     showNotification("Data have been reset.")
     guide_PCA("To run PCA, the input data must be in ✅ data.frame format. ")
-  })
+    })
   
+  # ---- Plot Setting ----
   output$pc1 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
       pca_result = pca_result()
@@ -405,13 +390,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     groupfile4(groupfile4)
   })
   
-  output$PCAfileInfo = renderText({
-    req(df())
-    paste0("Type: ", class(df()), "\n",
-           "Number of samples: ", dim(df())[1], "\n",
-           "Number of SNPs: ", dim(df())[2])
-  })
-  
+  # ---- Show Plot  ----
   output$PCAplot = renderPlot({
     req(input$pc1, input$pc2, pca_result(), PCA_SD())
     if (PCAtitle1() == "PCA Scatter Plot") {
@@ -483,18 +462,134 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     }
   })
   
+  # ---- Download Plot  ----
   output$download_PCA_plot = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot") {
-      downloadButton("DPCAplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_PCA_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
   })
+  
+  observeEvent(input$show_download_PCA_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_pca_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_pca_height", "Height", value = 5.8, min = 4, max = 30, step = 1),
+                 selectInput("dl_pca_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_pca_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_pca_format == 'png' || input.dl_pca_format == 'jpeg'",
+                   numericInput("dl_pca_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DPCAplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DPCAplot = downloadHandler(
+    filename = function() {
+      ext = input$dl_pca_format
+      paste0("PCA_Scatter_Plot-", input$pc1, "_vs_", input$pc2, ".", ext)
+    },
+    content = function(file) {
+      shinyjs::show("PCAStatus")
+      req(PCA2Dplot())
+      
+      width = input$dl_pca_width
+      height = input$dl_pca_height
+      units = input$dl_pca_unit
+      device = input$dl_pca_format
+      dpi = input$dl_pca_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = PCA2Dplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = PCA2Dplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = PCA2Dplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("PCAStatus")
+      removeModal()
+    }
+  )
   
   output$download_Expplot = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot") {
-      downloadButton("DExpplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_Expplot",
+        label = tagList(shiny::icon("download"), "Download Explained Variance Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_Expplot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_exp_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_exp_height", "Height", value = 5.8, min = 4, max = 30, step = 1),
+                 selectInput("dl_exp_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_exp_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_exp_format == 'png' || input.dl_exp_format == 'jpeg'",
+                   numericInput("dl_exp_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DExpplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DExpplot = downloadHandler(
+    filename = function() {
+      ext = input$dl_exp_format
+      paste0("PCA_Explained_Variance_Plot-First_", input$PC, "_PCs.", ext)
+    },
+    content = function(file) {
+      shinyjs::show("PCAStatus")
+      req(PCAexpplot())
+      
+      width = input$dl_exp_width
+      height = input$dl_exp_height
+      units = input$dl_exp_unit
+      device = input$dl_exp_format
+      dpi = input$dl_exp_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = PCAexpplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = PCAexpplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = PCAexpplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("PCAStatus")
+      removeModal()
+    }
+  )
+  
+  # ---- Download Table  ----
   output$download_var = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot") {
       downloadButton("Dvar", "Download Explained Variance")
@@ -540,11 +635,14 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     }
   )
   
+  # ---- Text  ----
   output$guide_PCA = renderUI({ div(class = "guide-text-block", guide_PCA()) })
   output$PCAtitle1 = renderText({ PCAtitle1() })
   output$PCAtitle2 = renderText({ PCAtitle2() })
   
   ##### DAPC #####
+  
+  # ---- Select File ----
   output$fileSelection_DAPC = renderUI({
     choices = list()
     if (!is.null(gi()) && !is.null(gl())) {
@@ -570,7 +668,22 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     selectInput("FileforDAPC", "Dataset for DAPC:", choices)
   })
   
+  output$DAPCfileInfo = renderText({
+    req(input$FileforDAPC)
+    if (input$FileforDAPC == "gi"){
+      req(gi())
+      paste0("Type: ", class(gi()), "\n",
+             "Number of samples: ", nInd(gi()), "\n",
+             "Number of SNPs: ", nLoc(gi()))
+    }else if (input$FileforDAPC == "gl"){
+      req(gl())
+      paste0("Type: ", class(gl()), "\n",
+             "Number of samples: ", nInd(gl()), "\n",
+             "Number of SNPs: ", nLoc(gl()))
+    }
+  })
   
+  # ---- Core Functions ----
   observeEvent(input$runDAPC1, {
     req(input$FileforDAPC, input$npca, input$Maxgrp)
     shinyjs::show("DAPCStatus")
@@ -628,28 +741,13 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     pre_results(pre_results)
   })
   
-  output$DAPCfileInfo = renderText({
-    req(input$FileforDAPC)
-    if (input$FileforDAPC == "gi"){
-      req(gi())
-      paste0("Type: ", class(gi()), "\n",
-             "Number of samples: ", nInd(gi()), "\n",
-             "Number of SNPs: ", nLoc(gi()))
-    }else if (input$FileforDAPC == "gl"){
-      req(gl())
-      paste0("Type: ", class(gl()), "\n",
-             "Number of samples: ", nInd(gl()), "\n",
-             "Number of SNPs: ", nLoc(gl()))
-    }
-  })
-  
   observeEvent(input$resetDAPC1, {
     DAPCtitle1("")
     DAPC1(NULL)
     BICplot(NULL)
     showNotification("Data have been reset.")
     guide_DAPC("To run DAPC, the input data must be in ✅ genlight or ✅ genind format. \nPlease click the 'Run DAPC I' button first.")
-  })
+    })
   
   observeEvent(input$resetDAPC2, {
     DAPC1(NULL)
@@ -663,6 +761,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     guide_DAPC("To run DAPC, input data must be genlight or genind file.\nPlease click 'Run DAPC I' button first.")
   })
   
+  # ---- Show Plot ----
   output$BICplot = renderPlot({
     req(DAPC1())
     if (DAPCtitle1() == "Bayesian Information Criterion (BIC) Plot"){
@@ -737,94 +836,327 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     }
   })
   
+  # ---- Download Plot ----
   output$download_BIC_plot = renderUI({
     if (DAPCtitle1() == "Bayesian Information Criterion (BIC) Plot") {
-      downloadButton("DBICplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_modal_bic",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_modal_bic, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_bic_width", "Width", value = 6, min = 4, max = 30, step = 1),
+                 numericInput("dl_bic_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_bic_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_bic_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_bic_format == 'png' || input.dl_bic_format == 'jpeg'",
+                   numericInput("dl_bic_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DBICplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DBICplot = downloadHandler(
-    filename = "DAPC_BIC_Plot.pdf",
+    filename = function() {
+      ext = input$dl_bic_format
+      paste0("DAPC_BIC_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("DAPCStatus")
-      pdf(file, width = 6, height = 4)
-      plot(BICplot())
-      dev.off()
+      req(BICplot())
+      width = input$dl_bic_width
+      height = input$dl_bic_height
+      units = input$dl_bic_unit
+      device = input$dl_bic_format
+      dpi = input$dl_bic_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = BICplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = BICplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = BICplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
       shinyjs::hide("DAPCStatus")
+      removeModal()
     }
   )
   
   output$download_DF1_plot = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
-      downloadButton("DDF1plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_modal_DF1",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_modal_DF1, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_df1_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_df1_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_df1_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_df1_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_df1_format == 'png' || input.dl_df1_format == 'jpeg'",
+                   numericInput("dl_df1_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DDF1plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DDF1plot = downloadHandler(
-    filename = "DAPC_First_Discriminant_Function_Plot.pdf",
+    filename = function() {
+      ext = input$dl_df1_format
+      paste0("DAPC_First_Discriminant_Function_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("DAPCStatus")
-      pdf(file, width = 8, height = 4)
+      req(DAPC2())
+      
+      width = input$dl_df1_width
+      height = input$dl_df1_height
+      units = input$dl_df1_unit
+      device = input$dl_df1_format
+      dpi = input$dl_df1_dpi
+      
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
+      
+      if (device == "pdf") {
+        pdf(file, width = ifelse(units == "in", width, width/2.54), height = ifelse(units == "in", height, height/2.54))
+      } else if (device == "jpeg") {
+        jpeg(file, width = width, height = height, units = units, res = dpi)
+      } else {
+        png(file, width = width, height = height, units = units, res = dpi)
+      }
       scatter(DAPC2(), grp = DAPC2()$assign, 1, 1, bg = "white", col = colors,
               scree.da = FALSE, legend = F, solid = .6)
       dev.off()
       shinyjs::hide("DAPCStatus")
+      removeModal()
     }
   )
   
   output$download_DF2_plot = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
-      downloadButton("DDF2plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_modal_DF2",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_modal_DF2, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_df2_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_df2_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_df2_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_df2_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_df2_format == 'png' || input.dl_df2_format == 'jpeg'",
+                   numericInput("dl_df2_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DDF2plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DDF2plot = downloadHandler(
-    filename = "DAPC_Second_Discriminant_Function_Plot.pdf",
+    filename = function() {
+      ext = input$dl_df2_format
+      paste0("DAPC_Second_Discriminant_Function_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("DAPCStatus")
-      pdf(file, width = 8, height = 4)
+      req(DAPC2())
+      
+      width = input$dl_df2_width
+      height = input$dl_df2_height
+      units = input$dl_df2_unit
+      device = input$dl_df2_format
+      dpi = input$dl_df2_dpi
+      
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
+      
+      if (device == "pdf") {
+        pdf(file, width = ifelse(units == "in", width, width/2.54), height = ifelse(units == "in", height, height/2.54))
+      } else if (device == "jpeg") {
+        jpeg(file, width = width, height = height, units = units, res = dpi)
+      } else {
+        png(file, width = width, height = height, units = units, res = dpi)
+      }
       scatter(DAPC2(), grp = DAPC2()$assign, 2, 2, bg = "white", col = colors,
               scree.da = FALSE, legend = F, solid = .6)
       dev.off()
       shinyjs::hide("DAPCStatus")
+      removeModal()
     }
   )
   
   output$download_DAPC_plot = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
-      downloadButton("DDAPCplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_modal_DAPC",
+        label = tagList(shiny::icon("download"), "Download DAPC Scatter Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_modal_DAPC, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_dapc_width", "Width", value = 12, min = 4, max = 30, step = 1),
+                 numericInput("dl_dapc_height", "Height", value = 9, min = 4, max = 30, step = 1),
+                 selectInput("dl_dapc_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_dapc_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_dapc_format == 'png' || input.dl_dapc_format == 'jpeg'",
+                   numericInput("dl_dapc_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DDAPCplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DDAPCplot = downloadHandler(
-    filename = "DAPC_Scatter_Plot.pdf",
+    filename = function() {
+      ext = input$dl_dapc_format
+      paste0("DAPC_Scatter_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("DAPCStatus")
-      pdf(file, width = 12, height = 9)
+      req(DAPC2())
+      
+      width = input$dl_dapc_width
+      height = input$dl_dapc_height
+      units = input$dl_dapc_unit
+      device = input$dl_dapc_format
+      dpi = input$dl_dapc_dpi
+      
       ngroup = length(unique(DAPC2()$assign))
       colors = colorRampPalette(custom_palette)(ngroup)
+      
+      if (device == "pdf") {
+        pdf(file, width = ifelse(units == "in", width, width/2.54), height = ifelse(units == "in", height, height/2.54))
+      } else if (device == "jpeg") {
+        jpeg(file, width = width, height = height, units = units, res = dpi)
+      } else {
+        png(file, width = width, height = height, units = units, res = dpi)
+      }
       scatter(DAPC2(), grp = DAPC2()$assign, bg = "white", scree.da = F, pch = 19, col = colors,
               posi.leg = "topright", legend = T, cex = 2.2, cellipse = 1, axesell = F, txt.leg = paste("Group", 1:ngroup))
       dev.off()
       shinyjs::hide("DAPCStatus")
+      removeModal()
     }
   )
   
   output$download_prob_plot = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
-      downloadButton("Dprobplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_modal_prob",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_modal_prob, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_prob_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_prob_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_prob_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_prob_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_prob_format == 'png' || input.dl_prob_format == 'jpeg'",
+                   numericInput("dl_prob_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("Dprobplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$Dprobplot = downloadHandler(
-    filename = "DAPC_Membership_Probability_Plot.pdf",
+    filename = function() {
+      ext = input$dl_prob_format
+      paste0("DAPC_Membership_Probability_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("DAPCStatus")
-      pdf(file, width = 8, height = 4)
+      req(DAPC2())
+      
+      width = input$dl_prob_width
+      height = input$dl_prob_height
+      units = input$dl_prob_unit
+      device = input$dl_prob_format
+      dpi = input$dl_prob_dpi
+      
       ngroup = length(unique(DAPC2()$assign))
       population = DAPC2()$assign
       subset = c()
@@ -832,12 +1164,22 @@ Page_4_Population_Structure_Server = function(input, output, session) {
         subset = c(subset, which(population %in% i))
       }
       colors = colorRampPalette(custom_palette)(ngroup)
+      
+      if (device == "pdf") {
+        pdf(file, width = ifelse(units == "in", width, width/2.54), height = ifelse(units == "in", height, height/2.54))
+      } else if (device == "jpeg") {
+        jpeg(file, width = width, height = height, units = units, res = dpi)
+      } else {
+        png(file, width = width, height = height, units = units, res = dpi)
+      }
       compoplot(DAPC2(), subset = subset, col = colors, legend = F)
       dev.off()
       shinyjs::hide("DAPCStatus")
+      removeModal()
     }
   )
   
+  # ---- Download Table ----
   output$download_DAPC_pop = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
       downloadButton("DDAPCpop", "Download DAPC Group Info.")
@@ -889,6 +1231,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     }
   )
   
+  # ---- Text ----
   output$guide_DAPC = renderUI({ div(class = "guide-text-block", guide_DAPC()) })
   output$DAPCtitle1 = renderText({ DAPCtitle1() })
   output$DAPCtitle2 = renderText({ DAPCtitle2() })
@@ -946,7 +1289,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     tree(NULL)
     showNotification("Data have been reset.")
     guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. ")
-  })
+    })
   
   output$Layout = renderUI({
     if (UPGMAtitle1() == "UPGMA Phylogenetic Tree"){
@@ -1034,7 +1377,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     NJtitle1("")
     showNotification("Data have been reset.")
     guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.")
-  })
+    })
   
   output$NJLayout = renderUI({
     if (NJtitle1() == "NJ Phylogenetic Tree"){
@@ -1146,7 +1489,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     })
     showNotification("Data have been reset.")
     guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional.")
-  })
+    })
   
   
   output$Kinship = renderPlot({
@@ -1187,153 +1530,146 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   observeEvent(input$scatterdata1, {
+    req(input$scatterdata1)
     data = readRDS(input$scatterdata1$datapath)
     scatter_object(data)
-    req(input$Scatter_xvar, input$Scatter_yvar, input$Scatter_zvar)
-    if (length(data) < 7){
+    
+    if (length(data) < 7) {
       scatter_file("PCA")
-      updateSelectInput(session, "Scatter_xvar", choices = paste0("PC", seq_along(data$sdev)), selected = "PC1")
-      updateSelectInput(session, "Scatter_yvar", choices = paste0("PC", seq_along(data$sdev)), selected = "PC2")
-      updateSelectInput(session, "Scatter_zvar", choices = paste0("PC", seq_along(data$sdev)), selected = "PC3")
-      xvar = as.numeric(str_extract(input$Scatter_xvar, "\\d+"))
-      yvar = as.numeric(str_extract(input$Scatter_yvar, "\\d+"))
-      zvar = as.numeric(str_extract(input$Scatter_zvar, "\\d+"))
-      scatter_data = data$x[, c(xvar, yvar, zvar)]
-    }
-    if (length(data) > 7){
+      pcs = paste0("PC", seq_along(data$sdev))
+      scatter_data(data$x[, 1:3, drop = FALSE])
+    } else {
       scatter_file("DAPC")
-      updateSelectInput(session, "Scatter_xvar", choices = paste0("LD", seq_along(data$eig)), selected = "LD1")
-      updateSelectInput(session, "Scatter_yvar", choices = paste0("LD", seq_along(data$eig)), selected = "LD2")
-      updateSelectInput(session, "Scatter_zvar", choices = paste0("LD", seq_along(data$eig)), selected = "LD3")
-      xvar = as.numeric(str_extract(input$Scatter_xvar, "\\d+"))
-      yvar = as.numeric(str_extract(input$Scatter_yvar, "\\d+"))
-      zvar = as.numeric(str_extract(input$Scatter_zvar, "\\d+"))
-      if (is.na(xvar)) xvar = 1
-      if (is.na(yvar)) yvar = 2
-      if (is.na(zvar)) zvar = 3
-      scatter_data = data$ind.coord[, c(xvar, yvar, zvar)]
+      pcs = paste0("LD", seq_along(data$eig))
+      scatter_data(data$ind.coord[, 1:3, drop = FALSE])
     }
-    scatter_data(scatter_data)
+    
+    updateSelectInput(session, "Scatter_xvar", choices = pcs, selected = pcs[1])
+    updateSelectInput(session, "Scatter_yvar", choices = pcs, selected = pcs[2])
+    updateSelectInput(session, "Scatter_zvar", choices = pcs, selected = pcs[3])
   })
   
   output$scatter_fileInfo = renderText({
+    req(scatter_object(), scatter_file())
     if (scatter_file() == "PCA") {
-      paste0("-- PCA Object --", "\n",
-             dim(scatter_object()$x)[1], " samples x ", dim(scatter_object()$x)[2], " PC axis")
-    } else if (scatter_file() == "DAPC"){
-      paste0("-- DAPC Object --", "\n",
-             dim(scatter_object()$ind.coord)[1], " samples x ", dim(scatter_object()$ind.coord)[2], " LD axis")
+      paste0("-- PCA Object --\n",
+             nrow(scatter_object()$x), " samples x ", ncol(scatter_object()$x), " PC axes")
+    } else {
+      paste0("-- DAPC Object --\n",
+             nrow(scatter_object()$ind.coord), " samples x ", ncol(scatter_object()$ind.coord), " LD axes")
     }
   })
   
   output$scatter_Upload2 = renderUI({
-    fileInput("scatterdata2", "", multiple = F, accept = c(".csv"))
+    fileInput("scatterdata2", label = "", multiple = FALSE, accept = ".csv")
   })
   
   observeEvent(input$scatterdata2, {
-    scatterInfo = read.csv(input$scatterdata2$datapath)
-    scatterInfo(scatterInfo)
+    req(input$scatterdata2)
+    df = read.csv(input$scatterdata2$datapath)
+    scatterInfo(df)
   })
   
-  
   output$scatter_fileInfo2 = renderText({
-    req(scatter_data())
-    if (is.null(scatterInfo()) || ncol(scatterInfo()) == 0) {
-      return("Please upload data in CSV file with comma-delimited.")
-    }
-    scatterInfo = scatterInfo()
-    if (is.null(scatterInfo$ID)){
-      paste0("**Warning**", "\n", "Data must contain a column named 'ID'!")
-    } else if (dim(scatterInfo)[1] != dim(scatter_data())[1]){
-      paste0("**Warning**", "\n", "Data must contain the same number of rows as the transformed data!")
-    } else{
-      updateSelectInput(session, "Scatter_colvar", choices = colnames(scatterInfo), selected = colnames(scatterInfo)[2])
-      paste0("-- Group Info. & etc. --", "\n",
-             "Names: ", paste(colnames(scatterInfo), collapse = ", "))
-    }
+    req(scatterInfo())
+    df = scatterInfo()
+    
+    if (ncol(df) == 0) return("Empty file or not comma-delimited.")
+    if (is.null(df$ID)) return("**Warning**\nData must contain a column named 'ID'.")
+    if (is.null(scatter_data())) return("Please upload PCA or DAPC object first.")
+    if (nrow(df) != nrow(scatter_data())) return("**Warning**\nRow number does not match PCA/DAPC object.")
+    
+    updateSelectInput(session, "Scatter_colvar", choices = colnames(df), selected = colnames(df)[2])
+    paste0("-- Group Info --\nColumns: ", paste(colnames(df), collapse = ", "))
   })
   
   observeEvent(input$runScatter, {
-    req(scatter_object(), scatter_data(), scatterInfo())
-    shinyjs::show("ScatterStatus")
-    loc = which(colnames(scatterInfo()) == input$Scatter_colvar)
-    
-    xvar = as.numeric(str_extract(input$Scatter_xvar, "\\d+"))
-    yvar = as.numeric(str_extract(input$Scatter_yvar, "\\d+"))
-    zvar = as.numeric(str_extract(input$Scatter_zvar, "\\d+"))
-    if (scatter_file() == "PCA") {
-      scatter_data = scatter_object()$x[, c(xvar, yvar, zvar)]
-      scatter_var = round(scatter_object()$sdev[c(xvar, yvar, zvar)]/sum(scatter_object()$sdev)*100, 2)
-    } else if(scatter_file() == "DAPC") {
-      scatter_data = scatter_object()$ind.coord[, c(xvar, yvar, zvar)]
-      scatter_var = round(scatter_object()$pca.eig[c(xvar, yvar, zvar)]/sum(scatter_object()$pca.eig)*100, 2)
-    }
-    
-    data = data.frame(
-      xx = scatter_data[, 1],
-      yy = scatter_data[, 2],
-      zz = scatter_data[, 3],
-      Group = as.character(scatterInfo()[, loc])
-    )
-    
-    n_groups = n_distinct(scatterInfo()[, loc])
-    colors = my_palette(input$Scatter_color, n_groups)
-    
-    text_content = paste0('"</br> ◉ ', colnames(scatterInfo()), ': ", scatterInfo()$', colnames(scatterInfo()), collapse = ', ')
-    text = as.formula(paste("~paste(", text_content, ")"))
-    
-    if (scatter_file() == "PCA") {
-      var1 = paste0(input$Scatter_xvar, " (", scatter_var[1], "%)")
-      var2 = paste0(input$Scatter_yvar, " (", scatter_var[2], "%)")
-      var3 = paste0(input$Scatter_zvar, " (", scatter_var[3], "%)")
-    } else if(scatter_file() == "DAPC") {
-      var1 = paste0(input$Scatter_xvar, " (", scatter_var[1], "%)")
-      var2 = paste0(input$Scatter_yvar, " (", scatter_var[2], "%)")
-      var3 = paste0(input$Scatter_zvar, " (", scatter_var[3], "%)")
-    }
-    
-    if (input$Scatter_axis.title == "NULL"){
-      var1 = ""
-      var2 = ""
-      var3 = ""
-    }
-    showline = TRUE
-    zeroline = TRUE
-    showticklabels = TRUE
-    showlegend = TRUE
-    if (input$Scatter_axis.line == "NULL"){ showline = FALSE }
-    if (input$Scatter_zero.line == "NULL"){ zeroline = FALSE }
-    if (input$Scatter_axis.tick.labels == "NULL"){ showticklabels = FALSE }
-    if (input$Scatter_show.legend == "NULL"){ showlegend = FALSE }
-    
-    Plot2D = plot_ly(data, x = ~xx, y = ~yy,
-                     type = "scatter", mode = "markers",
+    tryCatch({
+      req(scatter_object(), scatter_data(), scatterInfo(), input$Scatter_colvar)
+      
+      shinyjs::show("ScatterStatus")
+      
+      df_info = scatterInfo()
+      col_idx = which(colnames(df_info) == input$Scatter_colvar)
+      if (length(col_idx) == 0) {
+        shinyjs::alert("Selected grouping variable not found in the uploaded CSV.")
+        return()
+      }
+      
+      extract_axis_number = function(x) as.numeric(stringr::str_extract(x, "\\d+"))
+      xvar = extract_axis_number(input$Scatter_xvar) %||% 1
+      yvar = extract_axis_number(input$Scatter_yvar) %||% 2
+      zvar = extract_axis_number(input$Scatter_zvar) %||% 3
+      
+      if (scatter_file() == "PCA") {
+        mat = scatter_object()$x[, c(xvar, yvar, zvar)]
+        var_exp = round(scatter_object()$sdev[c(xvar, yvar, zvar)] / sum(scatter_object()$sdev) * 100, 2)
+      } else {
+        mat = scatter_object()$ind.coord[, c(xvar, yvar, zvar)]
+        var_exp = round(scatter_object()$pca.eig[c(xvar, yvar, zvar)] / sum(scatter_object()$pca.eig) * 100, 2)
+      }
+      
+      group_labels = as.character(df_info[, col_idx])
+      data_plot = data.frame(xx = mat[, 1], yy = mat[, 2], zz = mat[, 3], Group = group_labels)
+      colors = my_palette(input$Scatter_color, dplyr::n_distinct(group_labels))
+      
+      text_content = paste0('"</br> ◉ ', colnames(df_info), ': ", df_info$', colnames(df_info), collapse = ", ")
+      tooltip_text = as.formula(paste("~paste(", text_content, ")"))
+      
+      axis_label = function(axis, var) {
+        if (input$Scatter_axis.title == "NULL") return("")
+        paste0(axis, " (", var, "%)")
+      }
+      
+      var1 = axis_label(input$Scatter_xvar, var_exp[1])
+      var2 = axis_label(input$Scatter_yvar, var_exp[2])
+      var3 = axis_label(input$Scatter_zvar, var_exp[3])
+      
+      ax_opt = function(title) {
+        list(
+          title = title,
+          showline = input$Scatter_axis.line != "NULL",
+          showgrid = FALSE,
+          zeroline = input$Scatter_zero.line != "NULL",
+          zerolinecolor = "grey",
+          showticklabels = input$Scatter_axis.tick.labels != "NULL"
+        )
+      }
+      
+      # 2D plot
+      p2d = plot_ly(data_plot, x = ~xx, y = ~yy, type = "scatter", mode = "markers",
                      color = ~Group, colors = colors,
                      marker = list(size = input$Scatter_size, opacity = input$Scatter_opacity),
-                     text = text) %>%
-      layout(title = NA,
-             xaxis = list(title = var1, showline = showline, showgrid = FALSE, zeroline = zeroline, zerolinecolor = "grey", showticklabels = showticklabels),
-             yaxis = list(title = var2, showline = showline, showgrid = FALSE, zeroline = zeroline, zerolinecolor = "grey", showticklabels = showticklabels),
-             legend = list(title = list(text = input$Scatter_colvar)), showlegend = showlegend)
-    Plot2D(Plot2D)
-    
-    Plot3D = plot_ly(data, x = ~xx, y = ~yy, z = ~zz,
-                     type = "scatter3d", mode = "markers",
+                     text = tooltip_text) %>%
+        layout(title = NULL,
+               xaxis = ax_opt(var1),
+               yaxis = ax_opt(var2),
+               legend = list(title = list(text = input$Scatter_colvar)),
+               showlegend = input$Scatter_show.legend != "NULL")
+      
+      # 3D plot
+      p3d = plot_ly(data_plot, x = ~xx, y = ~yy, z = ~zz, type = "scatter3d", mode = "markers",
                      color = ~Group, colors = colors,
                      marker = list(size = input$Scatter_size, opacity = input$Scatter_opacity),
-                     text = text) %>%
-      layout(title = NA,
-             scene = list(
-               xaxis = list(title = var1, showline = showline, showgrid = FALSE, zeroline = zeroline, zerolinecolor = "grey", showticklabels = showticklabels),
-               yaxis = list(title = var2, showline = showline, showgrid = FALSE, zeroline = zeroline, zerolinecolor = "grey", showticklabels = showticklabels),
-               zaxis = list(title = var3, showline = showline, showgrid = FALSE, zeroline = zeroline, zerolinecolor = "grey", showticklabels = showticklabels)),
-             showlegend = showlegend,
-             legend = list(title = list(text = input$Scatter_colvar)))
-    Plot3D(Plot3D)
-    scatter2D("2D Scatter Plot")
-    scatter3D("3D Scatter Plot")
-    shinyjs::hide("ScatterStatus")
-    guide_scatter("You can customize the scatter plot and then click the ▶️ 'Run Scatter Plot' button again.")
+                     text = tooltip_text) %>%
+        layout(title = NULL,
+               scene = list(xaxis = ax_opt(var1),
+                            yaxis = ax_opt(var2),
+                            zaxis = ax_opt(var3)),
+               legend = list(title = list(text = input$Scatter_colvar)),
+               showlegend = input$Scatter_show.legend != "NULL")
+      
+      Plot2D(p2d)
+      Plot3D(p3d)
+      scatter2D("2D Scatter Plot")
+      scatter3D("3D Scatter Plot")
+      guide_scatter("You can customize the scatter plot and then click the ▶️ 'Run Scatter Plot' button again.")
+      
+    }, error = function(e) {
+      shinyjs::alert(paste("An error occurred:", e$message))
+    }, finally = {
+      shinyjs::hide("ScatterStatus")
+    })
   })
   
   observeEvent(input$resetScatter, {
@@ -1406,15 +1742,37 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     tree_object(data)
   })
   
+  observeEvent(input$treedata1, {
+    req(input$treedata1)
+    tryCatch({
+      data = readRDS(input$treedata1$datapath)
+      
+      if (!"phylo" %in% class(data)) {
+        showNotification("Error: Please upload a 'phylo' object (.rds file).", type = "error", duration = 10)
+        tree_object(NULL)
+        return(NULL)
+      }
+      
+      if (is.null(data$tip.label)) {
+        showNotification("Error: Uploaded phylo object is missing 'tip.label'.", type = "error", duration = 10)
+        tree_object(NULL)
+        return(NULL)
+      }
+      tree_object(data)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Error:", e$message), type = "error", duration = 10)
+      tree_object(NULL)
+    })
+  })
+  
   output$Tree_fileInfo = renderText({
     req(tree_object())
     data = tree_object()
     if (is.null(data$node.label)){
-      paste0("-- NJ Tree Object --", "\n",
-             length(data$tip.label), " samples")
-    } else if (!is.null(data$node.label)){
-      paste0("-- UPGMA Tree Object --", "\n",
-             length(data$tip.label), " samples")
+      paste0("-- NJ Tree Object --\n", length(data$tip.label), " samples")
+    } else {
+      paste0("-- UPGMA Tree Object --\n", length(data$tip.label), " samples")
     }
   })
   
@@ -1423,102 +1781,185 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   observeEvent(input$treedata2, {
-    treeInfo = read.csv(input$treedata2$datapath)
-    treeInfo(treeInfo)
+    req(input$treedata2)
+    tryCatch({
+      data = read.csv(input$treedata2$datapath)
+      
+      if (!"ID" %in% colnames(data)) {
+        showNotification("Error: Uploaded CSV must contain a column named 'ID'.", type = "error", duration = 10)
+        treeInfo(NULL)
+        return(NULL)
+      }
+      
+      if (!is.null(tree_object())) {
+        if (nrow(data) != length(tree_object()$tip.label)) {
+          showNotification("Error: The number of samples in the CSV does not match the tree object.", type = "error", duration = 10)
+          treeInfo(NULL)
+          return(NULL)
+        }
+      }
+      treeInfo(data)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Error:", e$message), type = "error", duration = 10)
+      treeInfo(NULL)
+    })
   })
   
   output$Tree_fileInfo2 = renderText({
     req(treeInfo(), tree_object())
-    treeInfo = treeInfo()
-    if (is.null(treeInfo$ID)){
+    data = treeInfo()
+    if (is.null(data$ID)){
       paste0("**Warning**", "\n", "Data must contain a column named 'ID'!")
-    } else if (dim(treeInfo)[1] != length(tree_object()$tip.label)){
+    } else if (dim(data)[1] != length(tree_object()$tip.label)){
       paste0("**Warning**", "\n", "Data must contain the same number of samples as the object data!")
     } else{
-      updateSelectInput(session, "Tree_str_color_var", choices = colnames(treeInfo), selected = colnames(treeInfo)[2])
-      updateSelectInput(session, "Tree_taxa_color_var", choices = colnames(treeInfo), selected = colnames(treeInfo)[2])
-      updateSelectInput(session, "Tree_sym_color_var", choices = colnames(treeInfo), selected = colnames(treeInfo)[2])
-      updateSelectInput(session, "Tree_sym_shape_var", choices = colnames(treeInfo), selected = colnames(treeInfo)[2])
+      choices = setdiff(colnames(data), "ID")
+      updateSelectInput(session, "Tree_str_color_var", choices = choices, selected = colnames(data)[2])
+      updateSelectInput(session, "Tree_taxa_color_var", choices = choices, selected = colnames(data)[2])
+      updateSelectInput(session, "Tree_sym_color_var", choices = choices, selected = colnames(data)[2])
+      updateSelectInput(session, "Tree_sym_shape_var", choices = c(choices, "#All Circle", "#All Triangle", "#All Square"), selected = colnames(data)[2])
       paste0("-- Group Info. & etc. --", "\n",
-             "Names: ", paste(colnames(treeInfo), collapse = ", "))
+             "Names: ", paste(colnames(data), collapse = ", "))
     }
   })
   
   observeEvent(input$runTree, {
     req(tree_object(), treeInfo())
     shinyjs::show("TreeStatus")
-    tree = tree_object()
-    data = treeInfo()
-    Layout = Tree_layout_choice[input$Tree_str_layout]
     
-    plot1 = ggtree(tree, layout = Layout)
-    
-    var0 = input$Tree_str_color_var
-    var1 = input$Tree_taxa_color_var
-    var2 = input$Tree_sym_color_var
-    var3 = input$Tree_sym_shape_var
-    
-    str_color_var = split(data$ID, data[var0])
-    taxa_color_var = split(data$ID, data[var1])
-    sym_color_var = split(data$ID, data[var2])
-    sym_shape_var = split(data$ID, data[var3])
-    
-    plot1 = groupOTU(plot1, str_color_var, "str_color")
-    plot1 = groupOTU(plot1, taxa_color_var, "taxa_color")
-    plot1 = groupOTU(plot1, sym_color_var, "sym_color")
-    plot1 = groupOTU(plot1, sym_shape_var, "sym_shape")
-    
-    n_var0 = n_distinct(data[var0])
-    n_var1 = n_distinct(data[var1])
-    n_var2 = n_distinct(data[var2])
-    colors0 = my_palette(input$Tree_str_color, n_var0)
-    colors1 = my_palette(input$Tree_taxa_color, n_var1)
-    colors2 = my_palette(input$Tree_sym_color, n_var2)
-    
-    if (n_distinct(data[var3]) < 5){
-      shapes = sample(c(15, 16, 17, 18), n_distinct(data[var3]))
-    } else {
-      shapes = sample(c(1:18), n_distinct(data[var3]), prob = c(rep(0.05, 14), rep(0.9, 4)))
-    }
-    legend = Legend_choice[input$Tree_legend]
-    
-    plot2 = plot1 +
-      geom_tree(aes(color = str_color), layout = Layout, size = input$Tree_str_size) +
-      scale_color_manual(values = colors0) +
-      guides(color = guide_legend(title = input$Tree_str_color_var)) +
-      theme(legend.title = element_text(size = 14, face = "bold"),
-            legend.text = element_text(size = 12),
-            legend.position = legend)
-    taxa_align = TRUE
-    if (input$Tree_taxa_align == "FALSE"){ taxa_align = FALSE }
-    if (input$Tree_taxa == "Show"){
-      plot3 = plot2 +
-        new_scale_color() +
-        geom_tiplab(aes(color = taxa_color), hjust = -0.1, align = taxa_align, linesize = 0.5, size = input$Tree_taxa_size) +
-        scale_color_manual(name = "taxa_color", values = colors1) +
-        guides(color = guide_legend(title = input$Tree_taxa_color_var))
-    } else {
-      plot3 = plot2
-    }
-    if (input$Tree_sym == "Show"){
-      plot4 = plot3 +
-        new_scale_color() +
-        geom_tippoint(aes(color = sym_color, shape = sym_shape), size = input$Tree_sym_size) +
-        scale_color_manual(name = "sym_color", values = colors2) +
-        scale_shape_manual(name = "sym_color", values = shapes) +
-        guides(color = guide_legend(title = input$Tree_sym_color_var),
-               shape = guide_legend(title = input$Tree_sym_shape_var))
-    } else {
-      plot4 = plot3
-    }
-    
-    if (input$Tree_treescale == "Show"){ plot4 = plot4 + theme_tree2() }
-    if (input$Tree_Bt == "Show"){ plot4 = plot4 + geom_label2(size = 2, aes(label = label, subset = !is.na(as.numeric(label)))) }
-    TreePlot(plot4)
-    TreePlot1("Phylogenetic Tree Plot")
+    tryCatch({
+      tree = tree_object()
+      data = treeInfo()
+      Layout = Tree_layout_choice[input$Tree_str_layout]
+      
+      if (length(tree$tip.label) != nrow(data)) {
+        stop("The number of samples in the tree does not match group info.")
+      }
+      
+      plot1 = ggtree(tree, layout = Layout)
+      str_color_var = split(data$ID, data[[input$Tree_str_color_var]])
+      taxa_color_var = split(data$ID, data[[input$Tree_taxa_color_var]])
+      sym_color_var = split(data$ID, data[[input$Tree_sym_color_var]])
+      
+      if (!(input$Tree_sym_shape_var %in% c("#All Circle", "#All Triangle", "#All Square"))) {
+        sym_shape_var = split(data$ID, data[[input$Tree_sym_shape_var]])
+        plot1 = groupOTU(plot1, sym_shape_var, "sym_shape")
+      }
+      plot1 = groupOTU(plot1, str_color_var, "str_color")
+      plot1 = groupOTU(plot1, taxa_color_var, "taxa_color")
+      plot1 = groupOTU(plot1, sym_color_var, "sym_color")
+      
+      data[[input$Tree_str_color_var]] = factor(data[[input$Tree_str_color_var]])
+      data[[input$Tree_taxa_color_var]] = factor(data[[input$Tree_taxa_color_var]])
+      data[[input$Tree_sym_color_var]] = factor(data[[input$Tree_sym_color_var]])
+      
+      n_var0 = length(levels(data[[input$Tree_str_color_var]]))
+      n_var1 = length(levels(data[[input$Tree_taxa_color_var]]))
+      n_var2 = length(levels(data[[input$Tree_sym_color_var]]))
+      
+      colors0 = my_palette(input$Tree_str_color, n_var0)
+      colors1 = my_palette(input$Tree_taxa_color, n_var1)
+      colors2 = my_palette(input$Tree_sym_color, n_var2)
+      
+      if (!(input$Tree_sym_shape_var %in% c("#All Circle", "#All Triangle", "#All Square"))) {
+        n_shape = n_distinct(data[[input$Tree_sym_shape_var]])
+        if (n_shape < 5) {
+          shapes = sample(c(15, 16, 17, 18), n_shape)
+        } else {
+          shapes = sample(1:18, n_shape, prob = c(rep(0.05, 14), rep(0.9, 4)))
+        }
+      }
+      legend = Legend_choice[input$Tree_legend]
+      
+      plot2 = plot1 +
+        geom_tree(aes(color = str_color), layout = Layout, size = input$Tree_str_size) +
+        scale_color_manual(values = colors0, limits = levels(data[[input$Tree_str_color_var]])) +
+        guides(color = guide_legend(title = input$Tree_str_color_var,
+                                    override.aes = list(size = 2 + input$Tree_legend_size))) +
+        theme(
+          legend.position = legend,
+          legend.key.size = unit(input$Tree_legend_size, "cm"),
+          legend.title = element_text(size = 14 * input$Tree_legend_size, face = "bold"),
+          legend.text = element_text(size = 12 * input$Tree_legend_size)
+        )
+      
+      taxa_align = input$Tree_taxa_align != "FALSE"
+      
+      if (input$Tree_taxa == "Show") {
+        plot3 = plot2 +
+          new_scale_color() +
+          geom_tiplab(aes(color = taxa_color), hjust = -0.2, align = taxa_align, linesize = 0.5, size = input$Tree_taxa_size) +
+          scale_color_manual(name = "taxa_color", values = colors1, limits = levels(data[[input$Tree_taxa_color_var]])) +
+          guides(color = guide_legend(title = input$Tree_taxa_color_var,
+                                      override.aes = list(size = 2 + input$Tree_legend_size)))
+      } else {
+        plot3 = plot2
+      }
+      
+      if (input$Tree_sym == "Show") {
+        if (input$Tree_sym_shape_var == "#All Circle") {
+          plot4 = plot3 +
+            new_scale_color() +
+            geom_tippoint(aes(color = sym_color), shape = 16, size = input$Tree_sym_size) +
+            scale_color_manual(name = "sym_color", values = colors2, limits = levels(data[[input$Tree_sym_color_var]])) +
+            guides(color = guide_legend(title = input$Tree_sym_color_var,
+                                        override.aes = list(size = 14 + input$legend_symbol_size*1.5)),
+                   shape = guide_legend(title = input$Tree_sym_shape_var,
+                                        override.aes = list(size = 14 + input$legend_symbol_size*1.5))
+            )
+        } else if (input$Tree_sym_shape_var == "#All Triangle") {
+          plot4 = plot3 +
+            new_scale_color() +
+            geom_tippoint(aes(color = sym_color), shape = 17, size = input$Tree_sym_size) +
+            scale_color_manual(name = "sym_color", values = colors2, limits = levels(data[[input$Tree_sym_color_var]])) +
+            guides(color = guide_legend(title = input$Tree_sym_color_var,
+                                        override.aes = list(size = 14 + input$legend_symbol_size*1.5)),
+                   shape = guide_legend(title = input$Tree_sym_shape_var,
+                                        override.aes = list(size = 14 + input$legend_symbol_size*1.5))
+            )
+        } else if (input$Tree_sym_shape_var == "#All Square") {
+          plot4 = plot3 +
+            new_scale_color() +
+            geom_tippoint(aes(color = sym_color), shape = 15, size = input$Tree_sym_size) +
+            scale_color_manual(name = "sym_color", values = colors2, limits = levels(data[[input$Tree_sym_color_var]])) +
+            guides(color = guide_legend(title = input$Tree_sym_color_var,
+                                        override.aes = list(size = input$Tree_sym_size)),
+                   shape = guide_legend(title = input$Tree_sym_shape_var,
+                                        override.aes = list(size = input$Tree_sym_size))
+                   )
+        } else {
+          plot4 = plot3 +
+            new_scale_color() +
+            geom_tippoint(aes(color = sym_color, shape = sym_shape), size = input$Tree_sym_size, show.legend = TRUE) +
+            scale_color_manual(name = "sym_color", values = colors2, limits = levels(data[[input$Tree_sym_color_var]])) +
+            scale_shape_manual(name = "Shape", values = shapes, limits = levels(data[[input$Tree_sym_shape_var]])) +
+            guides(color = guide_legend(title = input$Tree_sym_color_var,
+                                        override.aes = list(size = input$Tree_sym_size)),
+                   shape = guide_legend(title = input$Tree_sym_shape_var,
+                                        override.aes = list(size = input$Tree_sym_size))
+                   )
+        }
+      } else {
+        plot4 = plot3
+      }
+      
+      if (input$Tree_treescale == "Show") plot4 = plot4 + theme_tree2()
+      if (input$Tree_Bt == "Show") plot4 = plot4 + geom_label2(size = 2, aes(label = label, subset = !is.na(as.numeric(label))))
+      
+      TreePlot(plot4)
+      TreePlot1("Phylogenetic Tree Plot")
+      guide_Tree("You can customize the tree plot and then click the ▶️ 'Run Tree Plot' button again.")
+      
+    }, error = function(e) {
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      TreePlot(NULL)
+      TreePlot1("Error")
+      guide_Tree("Plotting failed. Please check your input data and parameters.")
+    })
     shinyjs::hide("TreeStatus")
-    guide_Tree("You can customize the tree plot and then click the ▶️ 'Run Tree Plot' button again.")
   })
+  
   
   observeEvent(input$resetTree, {
     tree_object(NULL)
@@ -1542,17 +1983,66 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   output$download_TreePlot = renderUI({
     if (TreePlot1() == "Phylogenetic Tree Plot") {
-      downloadButton("DTreePlot", "Download Plot")
+      actionButton(inputId = "show_download_TreePlot", 
+                   label = tagList(shiny::icon("download"), 
+                                   "Download Plot"), 
+                   class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_TreePlot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_width", "Width", value = 12, min = 4, max = 30, step = 1),
+                 numericInput("dl_height", "Height", value = 12, min = 4, max = 30, step = 1),
+                 selectInput("dl_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_format == 'png' || input.dl_format == 'jpeg'",
+                   numericInput("dl_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DTreePlot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DTreePlot = downloadHandler(
-    filename = paste0("Phylogenetic_Tree.pdf"),
+    filename = function() {
+      ext = input$dl_format
+      paste0("Phylogenetic_Tree.", ext)
+    },
     content = function(file) {
       shinyjs::show("TreeStatus")
-      ggsave(file, plot = TreePlot(), device = "pdf", width = 12, height = 12)
+      req(TreePlot())
+      
+      width = input$dl_width
+      height = input$dl_height
+      units = input$dl_unit
+      dpi = input$dl_dpi
+      device = input$dl_format
+      
+      if (device == "pdf") {
+        ggsave(file, plot = TreePlot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = TreePlot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = TreePlot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
       shinyjs::hide("TreeStatus")
-    })
+      removeModal()
+    }
+  )
   
   output$TreePlot1 = renderText({ TreePlot1() })
   output$guide_Tree = renderUI({ div(class = "guide-text-block", guide_Tree()) })

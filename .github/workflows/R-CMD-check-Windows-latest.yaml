@@ -1,4 +1,4 @@
-name: "R-CMD-check (Windows: 4.4.0, 4.4.3, latest)"
+name: "R-CMD-check (Windows: 4.4.0, latest)"
 
 on:
   push:

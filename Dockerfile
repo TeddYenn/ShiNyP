@@ -33,7 +33,7 @@ RUN Rscript -e "install.packages(c(\
   'shiny','shinyjs','ggplot2','RColorBrewer','ggthemes','dplyr','data.table','DT','dartRverse',\
   'rms','haplo.stats','SNPassoc','dartR.base','dartR.popgen','vctrs','sass','stringr','poppr',\
   'ape','statgenGWAS','popkin','pcadapt','tidyr','circlize','hierfstat','ggrepel','remotes',\
-  'fastmap','plotly','ggnewscale','ellmer','rmarkdown','BiocManager'\
+  'fastmap','plotly','ggnewscale','ellmer','rmarkdown','BiocManager', 'bslib', 'httr', 'promises', 'future' \
 ), repos='https://cloud.r-project.org')"
 
 # Set Bioconductor version (compatible with R 4.5)

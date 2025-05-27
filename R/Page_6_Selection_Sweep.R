@@ -181,7 +181,7 @@ Page_6_Selection_Sweep_UI = function() {
                                    selectInput("Manhattan_hover_text", "Hover text variable:", choices = NULL, multiple = TRUE)
                             ),
                             column(3,
-                                   selectInput("Manhattan_color", "Point colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Cool Tone", "Warm Tone", "Earthy", "Vibrant", "Neon")),
+                                   selectInput("Manhattan_color", "Point colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
                                    sliderInput("Manhattan_size", "Point size:", min = 0, max = 2, value = 0.8, step = 0.1),
                                    sliderInput("Manhattan_opacity", "Point opacity:", min = 0, max = 1, value = 0.8, step = 0.1)
                             ),
@@ -361,7 +361,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       fileInput("Site_Info2", "Site Info.* (required)", multiple = F, accept = c(".rds"))
     })
     guide_pcadapt("To run pcadapt, the input data must be in ✅ data.frame format. \nYou also need to upload a ▶️ Site Info file (in RDS format). \nPlease click the 'Run pcadapt' button.")
-  })
+    })
   
   output$pcadaptplot1 = renderPlot({
     req(pcadapt_data(), input$pcadapt_adj)
@@ -422,7 +422,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       text = paste0("Methodology: pcadapt: The PCA-based method utilizes the pcadapt package to identify outlier SNPs associated with selection pressures through principal component analysis (PCA), detecting loci that exhibit significant population structure deviations.", "\n",
                     dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ", length(table(data2[,1])), " chromosomes with the ", input$pcadapt_adj, " P-value adjustment method at α = ", input$pcadapt_alpha, "\n",
                     "Top 10 significant SNPs: ", "SNP positions [Chromosome: Position (base pair)]:", paste(result$Marker, collapse = ", "), ", with p-values ranging from: ", min(result$pvalue), " to ", max(result$pvalue)
-      )
+                    )
       pre_results[[47]] = paste0(text)
       pre_results(pre_results)
       pcadaptplot1()
@@ -792,7 +792,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       text = paste0("Methodology: OutFLANK: The OutFLANK method to pinpoint SNPs under divergent selection by analyzing FST outliers, effectively distinguishing genomic regions subject to selection from neutral genetic variation.", "\n",
                     dim(data2)[1] , " significant selection signatures (SNP loci) were detected across ", length(table(data2[,1])), " chromosomes with the ", input$OutFLANK_adj, " P-value adjustment method at α = ", input$OutFLANK_alpha, "\n",
                     "Top 10 significant SNPs: ", "SNP positions [Chromosome: Position (base pair)]:", paste(result$Marker, collapse = ", "), ", with p-values ranging from: ", min(result$pvalue), " to ", max(result$pvalue)
-      )
+                    )
       
       pre_results[[50]] = text
       pre_results(pre_results)
@@ -1152,7 +1152,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       fileInput("Chr_Info2", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
     guide_IBS = reactiveVal("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run IBS' button.")
-  })
+    })
   
   output$download_IBS_plot = renderUI({
     if (IBStitle1() == "Chromosome Ideogram") {

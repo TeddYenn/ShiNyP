@@ -3,8 +3,10 @@ CSS_UI = function() {
     tags$style(HTML("
       body {
         font-family: 'Sans Serif Collection', sans-serif;
+        letter-spacing: 0.01em;
+        word-spacing: 0.12em;
+        line-height: 1.6;
       }
-    
     
       body.modal-open {
         overflow: auto !important;

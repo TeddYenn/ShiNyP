@@ -111,15 +111,20 @@ Page_2_Data_QC_UI = function() {
              tabPanel("SNP Density",
                       sidebarLayout(
                         sidebarPanel(
-                          uiOutput("Site_Info0"),
-                          uiOutput("Chr_Info0"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info0"),
+                            "Upload: Site Info. (RDS)"
+                          ),
+                          bslib::tooltip(
+                            uiOutput("Chr_Info0"),
+                            "Upload: Chromosome Info. (CSV)"
+                          ),
                           sliderInput("WindowSize0", "Window size (kb)", min = 0, max = 1000, value = 500, step = 10),
                           actionButton("SNPdensity", "Summary", class = "run-action-button"),
                           actionButton("resetSNPdensity", "Reset"),
                           width = 3),
                         mainPanel(
                           uiOutput("guide_SNPdensity"),
-                          tags$hr(),
                           uiOutput("progressUI"),
                           div(id = "SNPdensityStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
                           tags$hr(),
@@ -253,7 +258,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     sampleQCstatus("")
     showNotification("Data have been reset.")
     guide_sampleQC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'Sample QC by Thresholds' button.")
-  })
+    })
   
   output$sampleQCresult = renderText({
     req(SampleQC_sample(), SampleQC_SNP())
@@ -474,7 +479,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     SNPQCstatus("")
     showNotification("Data have been reset.")
     guide_QC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'SNP QC by Thresholds' button.")
-  })
+    })
   
   output$QCresult = renderText({
     req(SNPQC_sample(), SNPQC_SNP())
@@ -546,8 +551,16 @@ Page_2_Data_QC_Server = function(input, output, session) {
   
   observeEvent(input$Site_Info0, {
     req(input$Site_Info0)
-    Site_Info = readRDS(input$Site_Info0$datapath)
-    Site_Info(Site_Info)
+    tryCatch({
+      data = readRDS(input$Site_Info0$datapath)
+      if (!("Chr" %in% names(data))) stop("Site Info file is missing the required 'Chr' column.")
+      # if (any(is.na(data$Chr))) stop("The 'Chr' column in Site Info contains missing (NA) values.")
+      Site_Info(data)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Site_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$Chr_Info0 = renderUI({
@@ -555,55 +568,93 @@ Page_2_Data_QC_Server = function(input, output, session) {
   })
   
   observeEvent(input$Chr_Info0, {
-    Chr_Info = read.csv(input$Chr_Info0$datapath)
-    Chr_Info(Chr_Info)
+    req(input$Chr_Info0)
+    tryCatch({
+      data = read.csv(input$Chr_Info0$datapath, stringsAsFactors = FALSE)
+      required_cols = c("Chr", "Start", "End")
+      missing_cols = setdiff(required_cols, names(data))
+      if (length(missing_cols) > 0) stop(paste("Chromosome Info file is missing required columns:", paste(missing_cols, collapse = ", ")))
+      if (!is.numeric(data$Start) || !is.numeric(data$End)) stop("The 'Start' and 'End' columns in Chromosome Info must be numeric.")
+      if (any(is.na(data$Start)) || any(is.na(data$End))) stop("The 'Start' or 'End' column in Chromosome Info contains missing (NA) values.")
+      Chr_Info(data)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Chr_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$SNPdensity, {
     req(Chr_Info(), Site_Info())
-    shinyjs::show("SNPdensityStatus")
-    progressVal = reactiveVal(NULL)
     
-    Site_Info = Site_Info()
-    Chr_Info = Chr_Info()
-    Site_Info$Chr = as.numeric(Site_Info$Chr)
-    Chr_Info$Length = Chr_Info$End - Chr_Info$Start
-    
-    window_size = as.numeric(input$WindowSize0)*1000
-    SNPdensity = density_analysis(Site_Info, Chr_Info, window_size)
-    SNPdensityresult1(SNPdensity)
-    
-    space_chr = round(Chr_Info[,3]/as.numeric(table(Site_Info$Chr)), 2) # average spacing bp/SNPs
-    space_total = round(sum(Chr_Info[,3])/length(Site_Info$Chr), 2)
-    
-    snp_chr = round(as.numeric(table(Site_Info$Chr))/Chr_Info[,3]*1000, 4) # average spacing SNPs/1000bp
-    snp_total = round(length(Site_Info$Chr)/sum(Chr_Info[,3])*1000, 4)
-    
-    SNPdensityresults2 = data.frame(
-      "Chr" = Chr_Info[,1],
-      "bp_over_SNPs" = space_chr,
-      "SNPs_over_1000bp" = snp_chr
-    )
-    SNPdensityresults2[dim(SNPdensityresults2)[1]+1, 1:3] = c("Total", space_total, snp_total)
-    SNPdensityresults2(SNPdensityresults2)
-    
-    shinyjs::hide("SNPdensityStatus")
-    SNPdensity1("SNP Density Plot")
-    SNPdensity2("SNP Density across All Chromosome")
-    guide_SNPdensity("The SNP density analysis is complete.")
-    
-    output$DSNPdensity_plot = downloadHandler(
-      filename = function() {
-        paste0("SNP_Density_Plot", "-", input$WindowSize0, "kb.pdf")
-      },
-      content = function(file) {
-        shinyjs::show("SNPdensityStatus")
-        pdf(file, width = 12, height = 7)
-        print(densityplot())
-        dev.off()
-        shinyjs::hide("SNPdensityStatus")
-      }
-    )
+    # Defensive check: validate data structures
+    tryCatch({
+      Site_Info_data <- Site_Info()
+      Chr_Info_data  <- Chr_Info()
+      Site_Info_data$Chr = as.numeric(Site_Info_data$Chr)
+      
+      # Check required columns in Site_Info
+      required_site_cols <- c("Chr")
+      missing_site_cols <- setdiff(required_site_cols, names(Site_Info_data))
+      if (length(missing_site_cols) > 0)
+        stop(paste0("Site Info is missing required columns: ", paste(missing_site_cols, collapse = ", ")))
+      
+      # Check required columns in Chr_Info
+      required_chr_cols <- c("Chr", "Start", "End")
+      missing_chr_cols <- setdiff(required_chr_cols, names(Chr_Info_data))
+      if (length(missing_chr_cols) > 0)
+        stop(paste0("Chromosome Info is missing required columns: ", paste(missing_chr_cols, collapse = ", ")))
+      
+      # Type and NA checks
+      if (!is.numeric(Site_Info_data$Chr) && !is.integer(Site_Info_data$Chr))
+        stop("'Chr' in Site Info must be numeric or integer.")
+      if (any(is.na(Site_Info_data$Chr)))
+        stop("'Chr' in Site Info contains missing values.")
+      
+      if (!is.numeric(Chr_Info_data$Start) || !is.numeric(Chr_Info_data$End))
+        stop("'Start' and 'End' in Chromosome Info must be numeric.")
+      if (any(is.na(Chr_Info_data$Start)) || any(is.na(Chr_Info_data$End)))
+        stop("'Start' or 'End' in Chromosome Info contains missing values.")
+      
+      if (nrow(Site_Info_data) == 0)
+        stop("Site Info is empty.")
+      if (nrow(Chr_Info_data) == 0)
+        stop("Chromosome Info is empty.")
+      
+      # All checks passed, continue to analysis
+      shinyjs::show("SNPdensityStatus")
+      progressVal = reactiveVal(NULL)
+      
+      Chr_Info_data$Length = Chr_Info_data$End - Chr_Info_data$Start
+      
+      window_size = as.numeric(input$WindowSize0)*1000
+      SNPdensity = density_analysis(Site_Info_data, Chr_Info_data, window_size)
+      SNPdensityresult1(SNPdensity)
+      
+      space_chr = round(Chr_Info_data[, "Length"] / as.numeric(table(Site_Info_data$Chr)), 2) # average spacing bp/SNPs
+      space_total = round(sum(Chr_Info_data[, "Length"]) / length(Site_Info_data$Chr), 2)
+      
+      snp_chr = round(as.numeric(table(Site_Info_data$Chr)) / Chr_Info_data[, "Length"] * 1000, 4) # average SNPs/1000bp
+      snp_total = round(length(Site_Info_data$Chr) / sum(Chr_Info_data[, "Length"]) * 1000, 4)
+      
+      SNPdensityresults2_df = data.frame(
+        "Chr" = Chr_Info_data$Chr,
+        "bp_over_SNPs" = space_chr,
+        "SNPs_over_1000bp" = snp_chr
+      )
+      SNPdensityresults2_df[nrow(SNPdensityresults2_df) + 1, 1:3] = c("Total", space_total, snp_total)
+      SNPdensityresults2(SNPdensityresults2_df)
+      
+      shinyjs::hide("SNPdensityStatus")
+      SNPdensity1("SNP Density Plot")
+      SNPdensity2("SNP Density across All Chromosome")
+      guide_SNPdensity("The SNP density analysis is complete.")
+      
+    }, error = function(e) {
+      shinyjs::hide("SNPdensityStatus")
+      showNotification(paste("Fail: ", e$message), type = "error")
+      return(NULL)
+    })
   })
   
   observeEvent(input$resetSNPdensity, {
@@ -620,7 +671,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
       fileInput("Chr_Info0", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
     guide_SNPdensity("Need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease select the optimal window size and step, then click the 'Summary' button.")
-  })
+    })
   
   output$SNPdensity_result1 = renderText({
     req(SNPdensityresults2(), Chr_Info(), Site_Info())
@@ -642,7 +693,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     "Average number of SNPs per 1000bp: ", data[last_row, 3], " SNPs", "\n", 
                     "SNP spacing across chromosomes, ", data[1,1], " to ", length(Chr_Info[,1]), ": ",
                     paste(as.numeric(data[1:last_row-1, 2]), collapse = ", "), "\n"
-      )
+                    )
       pre_results = pre_results()
       pre_results[[2]] = "## Data Input"
       pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)
@@ -704,9 +755,67 @@ Page_2_Data_QC_Server = function(input, output, session) {
   
   output$download_SNPdensity_plot = renderUI({
     if (SNPdensity1() == "SNP Density Plot") {
-      downloadButton("DSNPdensity_plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_SNPdensity_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
   })
+  
+  observeEvent(input$show_download_SNPdensity_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_snpdensity_width", "Width", value = 12, min = 3, max = 30, step = 0.5),
+                 numericInput("dl_snpdensity_height", "Height", value = 5, min = 3, max = 15, step = 0.5),
+                 selectInput("dl_snpdensity_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_snpdensity_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_snpdensity_format == 'png' || input.dl_snpdensity_format == 'jpeg'",
+                   numericInput("dl_snpdensity_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DSNPdensity_plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DSNPdensity_plot = downloadHandler(
+    filename = function() {
+      ext = input$dl_snpdensity_format
+      paste0("SNP_Density_Plot-", input$WindowSize0, "kb.", ext)
+    },
+    content = function(file) {
+      shinyjs::show("SNPdensityStatus")
+      req(densityplot())
+      
+      width = input$dl_snpdensity_width
+      height = input$dl_snpdensity_height
+      units = input$dl_snpdensity_unit
+      device = input$dl_snpdensity_format
+      dpi = input$dl_snpdensity_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = densityplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = densityplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = densityplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("SNPdensityStatus")
+      removeModal()
+    }
+  )
+  
   
   output$SNPdensity_result2 = DT::renderDataTable({
     req(SNPdensityresults2())

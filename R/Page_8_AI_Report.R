@@ -6,6 +6,7 @@ Page_8_AI_Report_UI = function() {
   tabPanel("AI Report",
            div(class = "AIReport-tab",
                fluidPage(
+                 theme = bs_theme(version = 5), # For tooltip
                  uiOutput("guide_AI"),
                  tags$hr(),
                  fluidRow(
@@ -14,7 +15,10 @@ Page_8_AI_Report_UI = function() {
                           textInput("AI_species", "Specify the species for your SNP data:", value = "", placeholder = "Ex: Wild rice (Oryza rufipogon)"),
                           actionButton("autogenerate", "Auto-generate", class = "AI1-action-button"),
                           tags$hr(class = "dashed-hr"),
-                          actionButton("Input_autogenerate", "Or click here to upload...", class = "S-action-button"),
+                          bslib::tooltip(
+                            actionButton("Input_autogenerate", "Or click here to upload", class = "S-action-button"),
+                            "Upload: Compilied preliminary results"
+                          ),
                           actionButton("Input_autogenerate_Reset", "Reset", class = "AI2-action-button")
                    ),
                    column(9,
@@ -29,15 +33,34 @@ Page_8_AI_Report_UI = function() {
                  fluidRow(
                    column(3,
                           tags$h4("2. AI-Driven Report", class = "custom-h4"),
-                          selectInput("AI_model", "AI model:",
-                                      choices = names(AI_model_choice), selected = "Gemini 2.0 Flash"),
-                          selectInput("AI_prompt", "AI task:",
-                                      choices = c("Summary Request", "Data Interpretation", "Report Structuring", "Idea Expansion"), selected = "Data Interpretation"),
-                          selectInput("AI_turn", "Conversation:",
-                                      choices = c("Single-Turn", "Multi-Turn"), selected = "Single-Turn"),
-                          selectInput("AI_lang", "Language:",
-                                      choices = c("English", "繁體中文", "简体中文", "Español", "日本語", "Français", "Deutsch", "Português", "Русский язык", "Meow 🐱"), selected = "English"),
-                          fileInput("AI_api_key", "API key file:", multiple = F, accept = c(".txt")),
+                          bslib::tooltip(
+                            selectInput("AI_model", "AI model:", 
+                                        choices = names(AI_model_choice), 
+                                        selected = "Gemini 2.0 Flash (API Free)"),
+                            "Choose an LLM-based model"
+                          ),
+                          bslib::tooltip(
+                            selectInput("AI_prompt", "AI task:",
+                                        choices = c("Summary Request", "Data Interpretation", "Report Structuring", "Idea Expansion"),
+                                        selected = "Data Interpretation"),
+                            "Select the type of task you want the AI to perform"
+                          ),
+                          bslib::tooltip(
+                            selectInput("AI_turn", "Conversation:",
+                                        choices = c("Single-Turn", "Multi-Turn"),
+                                        selected = "Single-Turn"),
+                            "Single-Turn: one-shot; Multi-Turn: five-shot with longer responses"
+                          ),
+                          bslib::tooltip(
+                            selectInput("AI_lang", "Language:",
+                                        choices = c("English", "繁體中文", "简体中文", "Español", "日本語", "Français", "Deutsch", "Português", "Русский язык", "Meow 🐱"),
+                                        selected = "English"),
+                            "Select the report language"
+                          ),
+                          bslib::tooltip(
+                            fileInput("AI_api_key", "API key file:", multiple = FALSE, accept = c(".txt")),
+                            "Upload a .txt file containing your API key"
+                          ),
                           actionButton("runAIreport", "Get Report", class = "AI1-action-button"),
                           actionButton("AIreport_Reset", "Reset", class = "AI2-action-button"),
                           div(id = "AIStatus", style = "color: #7A1CAC; font-weight: bold;", "Generating...")
@@ -123,9 +146,36 @@ Page_8_AI_Report_Server = function(input, output, session) {
     }
   )
   
+  ##### API 
+  observeEvent(input$AI_model, {
+    if (input$AI_model == "Gemini 2.0 Flash (API Free)") {
+      showModal(modalDialog(
+        title = "API Not Required",
+        tagList(
+          p("The selected model ", tags$b("does not require"), " an API key."),
+          p("You can proceed without uploading one.")
+        ),
+        easyClose = TRUE,
+        footer = modalButton("Close")
+      ))
+    } else {
+      showModal(modalDialog(
+        title = "API Key Required",
+        tagList(
+          p("The selected model (", input$AI_model, ") ", tags$b("requires "), "a valid API key."),
+          p("Please upload your API key"),
+          p(tags$a(href = "https://teddyenn.github.io/ShiNyP-guide/sec-ai-report.html#how-to-get-the-api-key", 
+                   "How to get the API Key - ShiNyP User Guide", target = "_blank"))
+        ),
+        easyClose = TRUE,
+        footer = modalButton("Close")
+      ))
+    }
+  }, ignoreInit = TRUE)
+  
   ##### STEP 2
   observeEvent(input$runAIreport, {
-    req(preliminary_results(), input$AI_api_key$datapath)
+    req(preliminary_results())
     shinyjs::show("AIStatus")
     
     if (input$AI_prompt == "Summary Request"){
@@ -147,44 +197,46 @@ Page_8_AI_Report_Server = function(input, output, session) {
                    "Please prepare a Markdown-formatted report written in formal academic", input$AI_lang,
                    "Do not include a main title, but provide a clear section heading as a level-two heading (##) for each section. Use level-three headings (###) for any subheadings within the section. Do not apply numerical ordering to headings. Refrain from introducing any fictional or fabricated content.",
                    "Do not explain, respond, or greet—just directly write the report."
-      )
+                   )
     } else{
       Role = paste(Role, 
                    "Please prepare a Markdown-formatted report composed exclusively of the word 'Meow' and cat-related words (as many times as possible) along with numerous cat-related symbols.",
                    "Do not include a main title, but ensure that each section contains a heading (text only, without numerical ordering).",
                    "Do not explain, respond, or greet—just directly write the report."
-      )
+                   )
     }
     
     result = tryCatch({
-      key = readLines(input$AI_api_key$datapath, warn = FALSE)
+      
+      if (input$AI_model == "Gemini 2.0 Flash (API Free)") {
+        key = API_KEY_GOOGLE_Gemini
+      } else{
+        req(input$AI_api_key$datapath)
+        key = readLines(input$AI_api_key$datapath, warn = FALSE)
+      }
+      
       model = AI_model_choice[input$AI_model]
       
-      if (model %in% c("o1-mini", "o3-mini", "o4-mini")){
+      if (model %in% c("o3-mini", "o4-mini")){
         chat = chat_openai(
-          system_prompt = NULL,
-          turns = NULL,
+          system_prompt = Start,
           base_url = "https://api.openai.com/v1",
           api_key = key,
           model = model,
-          seed = NULL,
           echo = "text"
         )
       } else if (model %in% c("deepseek-chat")){
         chat = chat_deepseek(
           system_prompt = Start,
-          turns = NULL,
           base_url = "https://api.deepseek.com",
           api_key = key,
           model = model,
-          seed = NULL,
           api_args = list(timeout = 1200, max_tokens = 1000, stream = TRUE),
           echo = "text"
         )
       } else if (model %in% c("gemini-2.0-flash", "gemini-2.0-flash-lite")){
-        chat = chat_gemini(
+        chat = chat_google_gemini(
           system_prompt = Start,
-          turns = NULL,
           base_url = "https://generativelanguage.googleapis.com/v1beta/",
           api_key = key,
           model = model,
@@ -193,11 +245,9 @@ Page_8_AI_Report_Server = function(input, output, session) {
       } else{
         chat = chat_openai(
           system_prompt = Start,
-          turns = NULL,
           base_url = "https://api.openai.com/v1",
           api_key = key,
           model = model,
-          seed = NULL,
           echo = "text"
         )
       }
@@ -239,9 +289,9 @@ Page_8_AI_Report_Server = function(input, output, session) {
       
       report = paste0("───── ✅  Successful Request  ─────","\n", "\n",
                       "- AI Model: ", input$AI_model, "\n", "\n",
-                      "- AI Task: ", input$AI_prompt, "\n", "\n",
-                      "- AI Conversation Type: ", input$AI_turn, "\n", "\n",
-                      "- AI Report Language: ", input$AI_lang, "\n", "\n",
+                      "- Task: ", input$AI_prompt, "\n", "\n",
+                      "- Conversation Mode: ", input$AI_turn, "\n", "\n",
+                      "- Report Language: ", input$AI_lang, "\n", "\n",
                       content, "\n", "\n",
                       "## WARNING: ", "\n",
                       "*This report was generated with the assistance of AI model and is for informational purposes only.*", "\n", "\n",
@@ -262,21 +312,21 @@ Page_8_AI_Report_Server = function(input, output, session) {
   
   output$download_AI_report_txt = renderUI({
     if (AItitle2() == "Here's Your AI Report!") {
-      downloadButton("DAI_report1", "Download as a .txt file",
+      downloadButton("DAI_report1", "Download .txt file",
                      style = "color: #f6f9f9; background-color: #00a595")
     }
   })
   
   output$DAI_report1 = downloadHandler(
-    filename = paste0("AI_Report-", input$AI_model, "-", input$AI_prompt,".txt"),
-    content = function(file) {
-      write.table(AI_report(), file, row.names = FALSE, col.names = FALSE, quote = FALSE)
-    }
-  )
+      filename = paste0("AI_Report-", input$AI_model, "-", input$AI_prompt,".txt"),
+      content = function(file) {
+        write.table(AI_report(), file, row.names = FALSE, col.names = FALSE, quote = FALSE)
+        }
+      )
   
   output$download_AI_report_word = renderUI({
     if (AItitle2() == "Here's Your AI Report!") {
-      downloadButton("DAI_report2", "Download as a .docx file",
+      downloadButton("DAI_report2", "Download .docx file",
                      style = "color: #f6f9f9; background-color: #00a595")
     }
   })

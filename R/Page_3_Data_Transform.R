@@ -10,7 +10,10 @@ Page_3_Data_Transform_UI = function() {
                verbatimTextOutput("CfileInfo"),
                tags$hr(),
                tags$h5("1. data.frame to genlight"),
-               uiOutput("groupfile1"),
+               bslib::tooltip(
+                 uiOutput("groupfile1"),
+                 "Upload: Group Info. (CSV)"
+               ),
                actionButton("Cdf2gl", "Transform to genlight", class = "run-action-button"),
                tags$hr(),
                verbatimTextOutput("glfileInfo"),
@@ -19,7 +22,7 @@ Page_3_Data_Transform_UI = function() {
                tags$h5("2. From genlight to"),
                selectInput(
                  inputId = "Transform_method", 
-                 label = "Export the genlight object to:",
+                 label = "Export to:",
                  choices = c("genlight with Group Info. (RDS)" = "gl2genlight_group",
                              "genind (RDS)" = "gl2genind",
                              "PLINK (PED & MAP)" = "gl2PLINK",
@@ -132,23 +135,39 @@ Page_3_Data_Transform_Server = function(input, output, session) {
   
   observeEvent(input$Cdf2gl, {
     req(df())
-    pre_results = pre_results()
-    pre_results[[17]] = paste0("### Number of samples: ", dim(df())[1])
-    pre_results[[18]] = paste0("### Number of SNPs: ", dim(df())[2])
-    pre_results(pre_results)
-    shinyjs::show("glStatus")
-    if (!is.null(groupInfo1())){
-      req(groupInfo1())
-      gl = new("genlight", df())
-      pop(gl) = as.vector(groupInfo1())
-    }else{
-      gl = new("genlight", df())
-    }
-    gl(gl)
-    Cstatus2("data.frame to genlight")
-    shinyjs::hide("glStatus")
-    guide_C("The data.frame has been transformed to genlight format.")
+    tryCatch({
+      data = df()
+      if (!is.data.frame(data)) stop("Input is not a valid data.frame.")
+      pre_results_data = pre_results()
+      pre_results_data[[17]] = paste0("### Number of samples: ", nrow(data))
+      pre_results_data[[18]] = paste0("### Number of SNPs: ", ncol(data))
+      pre_results(pre_results_data)
+      
+      shinyjs::show("glStatus")
+      
+      if (!is.null(groupInfo1())) {
+        group_vec = as.vector(groupInfo1())
+        if (length(group_vec) != nrow(data)) {
+          stop("Length of Group Info. does not match the number of samples in data.frame.")
+        }
+        gl_obj = new("genlight", data)
+        pop(gl_obj) = group_vec
+      } else {
+        gl_obj = new("genlight", data)
+      }
+      gl(gl_obj)
+      Cstatus2("data.frame to genlight")
+      shinyjs::hide("glStatus")
+      guide_C("The data.frame has been transformed to genlight format.")
+    }, error = function(e) {
+      shinyjs::hide("glStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      Cstatus2("")
+      guide_C("Please check the input data and try again.")
+      gl(NULL)
+    })
   })
+  
   
   output$download_gl = renderUI({
     if (Cstatus2() == "data.frame to genlight") {
@@ -195,127 +214,173 @@ Page_3_Data_Transform_Server = function(input, output, session) {
   })
   
   observeEvent(input$Cgl2, {
-    transform = input$Transform_method
     req(gl())
-    shinyjs::show("gl2Status")
-    guide_C("Running...")
-    gl = gl()
-    gl = gl.compliance.check(gl, verbose = 0)
-    class(gl) = "genlight"
-    gl(gl)
-    
-    if (transform == "gl2genlight_group"){
-      req(T2_Group1Info())
-      pop(gl) = as.vector(T2_Group1Info())
-      gl(gl)
-      Cstatus3("genlight with Group Info.")
-      output$Cstatus3 = renderText({ Cstatus3() })
-      output$CTable3 = renderText({
-        if (Cstatus3() == "genlight with Group Info."){
-          if (nPop(gl) > 1){
-            group.info = "Added"
-            file.name = "File name: genlight_group_"
-          }else{
-            group.info = "NaN"
-            file.name = "File name: genlight_"
-          }
-          paste0("Type: ", class(gl()), "\n",
-                 "Number of samples: ", nInd(gl()) , "\n",
-                 "Number of SNPs: ", nLoc(gl()), "\n",
-                 "Group Info.: ", group.info, "\n",
-                 file.name, nInd(gl()) , "_", nLoc(gl()), "SNPs", "\n",
-                 "Size in RAM: ", size2size(as.numeric(object.size(gl())))
-          )
-        }
-      })
-      output$download_gl2 = renderUI({
-        if (Cstatus3() == "genlight with Group Info.") {
-          downloadButton("Dgl2", "Download genlight File")
-        }
-      })
-      output$Dgl2 = downloadHandler(
-        filename = function() {
-          paste("genlight_", nInd(gl()) , "_", nLoc(gl()), "SNPs.rds", sep = "")},
-        content = function(file) {
-          shinyjs::show("glStatus")
-          saveRDS(gl(), file)
-          shinyjs::hide("glStatus")
-        })
+    tryCatch({
+      transform = input$Transform_method
+      shinyjs::show("gl2Status")
+      guide_C("Running...")
       
-    } else if (transform == "gl2genind"){
-      if (!is.null(T2_Group2Info())){
-        pop(gl) = as.vector(T2_Group2Info())
-        gl(gl)
-      }
-      gi = gl2gi(gl(), probar = FALSE, verbose = 0)
-      gi(gi)
-      Cstatus3("genlight to genind")
-      output$Cstatus3 = renderText({ Cstatus3() })
-      output$CTable3 = renderText({
-        if (Cstatus3() == "genlight to genind"){
-          if (nPop(gi)>1){
-            group.info = "Added"
-            file.name = "File name: genind_group_"
-          }else{
-            group.info = "NaN"
-            file.name = "File name: genind_"
+      gl_obj = gl()
+      if (!inherits(gl_obj, "genlight")) stop("Input is not a valid 'genlight' object.")
+      gl_obj = gl.compliance.check(gl_obj, verbose = 0)
+      class(gl_obj) = "genlight"
+      gl(gl_obj)
+      
+      if (transform == "gl2genlight_group") {
+        req(T2_Group1Info())
+        # Defensive: Group info length must match sample size
+        group1 = as.vector(T2_Group1Info())
+        if (length(group1) != nInd(gl_obj)) {
+          stop("Group information does not match the number of samples.")
+        }
+        pop(gl_obj) = group1
+        gl(gl_obj)
+        Cstatus3("genlight with Group Info.")
+        
+        output$Cstatus3 = renderText({ Cstatus3() })
+        output$CTable3 = renderText({
+          if (Cstatus3() == "genlight with Group Info.") {
+            group.info = if (nPop(gl_obj) > 1) "Added" else "NaN"
+            file.name  = if (nPop(gl_obj) > 1) "File name: genlight_group_" else "File name: genlight_"
+            paste0("Type: ", class(gl()), "\n",
+                   "Number of samples: ", nInd(gl()), "\n",
+                   "Number of SNPs: ", nLoc(gl()), "\n",
+                   "Group Info.: ", group.info, "\n",
+                   file.name, nInd(gl()), "_", nLoc(gl()), "SNPs", "\n",
+                   "Size in RAM: ", size2size(as.numeric(object.size(gl())))
+            )
           }
-          paste0("Type: ", class(gi), "\n",
-                 "Number of samples: ", nInd(gi), "\n",
-                 "Number of SNPs: ", nLoc(gi), "\n",
-                 "Group Info.: ", group.info, "\n",
-                 file.name, nLoc(gi), "_", nInd(gi), "SNPs", "\n",
-                 "Size in RAM: ", size2size(as.numeric(object.size(gi))))
-        }
-      })
-      output$download_gl2 = renderUI({
-        if (Cstatus3() == "genlight to genind") {
-          downloadButton("Dgl2", "Download genind File")
-        }
-      })
-      output$Dgl2 = downloadHandler(
-        filename = function() {
-          paste("genind_", length(gi@ploidy), "_", length(gi@loc.n.all), "SNPs.rds", sep = "")},
-        content = function(file) {
-          shinyjs::show("glStatus")
-          saveRDS(gi, file)
-          shinyjs::hide("glStatus")
         })
-    } else if (transform == "gl2PLINK") {
-      if (is.null(input$T2_Path1) || input$T2_Path1 == "") {
-        showNotification("Please specify a valid output path.", type = "error")
-      } else {
-        gl2plink(gl(), outfile = "PLINK", outpath = input$T2_Path1, verbose = 0)
-        Cstatus3("PLINK (PED & MAP) file has already been generated")
+        output$download_gl2 = renderUI({
+          if (Cstatus3() == "genlight with Group Info.") {
+            downloadButton("Dgl2", "Download genlight File")
+          }
+        })
+        output$Dgl2 = downloadHandler(
+          filename = function() {
+            paste("genlight_", nInd(gl()), "_", nLoc(gl()), "SNPs.rds", sep = "")
+          },
+          content = function(file) {
+            shinyjs::show("glStatus")
+            saveRDS(gl(), file)
+            shinyjs::hide("glStatus")
+          }
+        )
+      } else if (transform == "gl2genind") {
+        if (!is.null(T2_Group2Info())) {
+          group2 = as.vector(T2_Group2Info())
+          if (length(group2) != nInd(gl_obj)) {
+            stop("Group information does not match the number of samples.")
+          }
+          pop(gl_obj) = group2
+          gl(gl_obj)
+        }
+        gi_obj = gl2gi(gl(), probar = FALSE, verbose = 0)
+        gi(gi_obj)
+        Cstatus3("genlight to genind")
+        output$Cstatus3 = renderText({ Cstatus3() })
+        output$CTable3 = renderText({
+          if (Cstatus3() == "genlight to genind") {
+            group.info = if (nPop(gi_obj) > 1) "Added" else "NaN"
+            file.name  = if (nPop(gi_obj) > 1) "File name: genind_group_" else "File name: genind_"
+            paste0("Type: ", class(gi_obj), "\n",
+                   "Number of samples: ", nInd(gi_obj), "\n",
+                   "Number of SNPs: ", nLoc(gi_obj), "\n",
+                   "Group Info.: ", group.info, "\n",
+                   file.name, nLoc(gi_obj), "_", nInd(gi_obj), "SNPs", "\n",
+                   "Size in RAM: ", size2size(as.numeric(object.size(gi_obj)))
+            )
+          }
+        })
+        output$download_gl2 = renderUI({
+          if (Cstatus3() == "genlight to genind") {
+            downloadButton("Dgl2", "Download genind File")
+          }
+        })
+        output$Dgl2 = downloadHandler(
+          filename = function() {
+            paste("genind_", length(gi_obj@ploidy), "_", length(gi_obj@loc.n.all), "SNPs.rds", sep = "")
+          },
+          content = function(file) {
+            shinyjs::show("glStatus")
+            saveRDS(gi_obj, file)
+            shinyjs::hide("glStatus")
+          }
+        )
+      } else if (transform == "gl2PLINK") {
+        if (is.null(input$T2_Path1) || input$T2_Path1 == "") {
+          stop("Please specify a valid output path for PLINK files.")
+        } else {
+          gl2plink(gl(), outfile = "PLINK", outpath = input$T2_Path1, verbose = 0)
+          Cstatus3("PLINK (PED & MAP) file has been generated.")
+        }
+      } else if (transform == "gl2GenAlEx") {
+        if (is.null(input$T2_Path2) || input$T2_Path2 == "") {
+          stop("Please specify a valid output path for GenAlEx files.")
+        } else {
+          gl2genalex(gl(), outfile = "GenAlEx.csv", outpath = input$T2_Path2, verbose = 0)
+          Cstatus3("GenAlEx (CSV) file has been generated.")
+        }
+      } else if (transform == "gl2LEA") {
+        if (is.null(input$T2_Path3) || input$T2_Path3 == "") {
+          stop("Please specify a valid output path for LEA files.")
+        } else {
+          gl2geno(gl(), outfile = "geno", outpath = input$T2_Path3, verbose = 0)
+          Cstatus3("LEA (GENO & LFMM) file has been generated.")
+        }
+      } else if (transform == "gl2gds") {
+        if (is.null(input$T2_Path4) || input$T2_Path4 == "") {
+          stop("Please specify a valid output path for GDS files.")
+        } else {
+          gl2gds(gl(), outfile = "GDS.GDS", outpath = input$T2_Path4, verbose = 0)
+          Cstatus3("GDS (GDS) file has been generated.")
+        }
+      } else if (transform == "gl2STRUCTURE") {
+        if (is.null(input$T2_Path5) || input$T2_Path5 == "") {
+          stop("Please specify a valid output path for STRUCTURE files.")
+        } else {
+          gl2structure(gl(), outfile = "STRUCTURE.str", outpath = input$T2_Path5, verbose = 0)
+          Cstatus3("STRUCTURE (STR) file has been generated.")
+        }
+      } else if (transform == "gl2fastStructure") {
+        if (is.null(input$T2_Path6) || input$T2_Path6 == "") {
+          stop("Please specify a valid output path for fastStructure files.")
+        } else {
+          gl2faststructure(gl(), outfile = "fastStructure.str", outpath = input$T2_Path6, verbose = 0)
+          Cstatus3("fastStructure (STR) file has been generated.")
+        }
+      } else if (transform == "gl2PHYLIP") {
+        if (is.null(input$T2_Path7) || input$T2_Path7 == "") {
+          stop("Please specify a valid output path for PHYLIP files.")
+        } else {
+          gl2phylip(gl(), outfile = "PHYLIP.txt", outpath = input$T2_Path7, verbose = 0)
+          Cstatus3("PHYLIP (TXT) file has been generated.")
+        }
+      } else if (transform == "gl2Treemix") {
+        if (is.null(input$T2_Path8) || input$T2_Path8 == "") {
+          stop("Please specify a valid output path for Treemix files.")
+        } else {
+          result = gl2treemix(gl(), outfile = "Treemix.gz", outpath = input$T2_Path8, verbose = 0)
+          Cstatus3("Treemix (GZ) file has been generated.")
+        }
+      } else if (transform == "gl2BayeScan") {
+        if (is.null(input$T2_Path9) || input$T2_Path9 == "") {
+          stop("Please specify a valid output path for BayeScan files.")
+        } else {
+          gl2bayescan(gl(), outfile = "BayeScan.txt", outpath = input$T2_Path9, verbose = 0)
+          Cstatus3("BayeScan (TXT) file has been generated.")
+        }
       }
-    } else if (transform == "gl2GenAlEx"){
-      gl2genalex(gl(), outfile = "GenAlEx.csv", outpath = input$T2_Path2, verbose = 0)
-      Cstatus3("GenAlEx (CSV) file has already been generated")
-    } else if (transform == "gl2LEA"){
-      gl2geno(gl(), outfile = "geno", outpath = input$T2_Path3, verbose = 0)
-      Cstatus3("LEA (GENO & LFMM) file has already been generated")
-    } else if (transform == "gl2gds"){
-      gl2gds(gl(), outfile = "GDS.GDS", outpath = input$T2_Path4, verbose = 0)
-      Cstatus3("GDS (GDS) file has already been generated")
-    } else if (transform == "gl2STRUCTURE"){
-      gl2structure(gl(), outfile = "STRUCTURE.str", outpath = input$T2_Path5, verbose = 0)
-      Cstatus3("STRUCTURE (STR) file has already been generated")
-    } else if (transform == "gl2fastStructure"){
-      gl2faststructure(gl(), outfile = "fastStructure.str", outpath = input$T2_Path6, verbose = 0)
-      Cstatus3("fastStructure (STR) file has already been generated")
-    } else if (transform == "gl2PHYLIP"){
-      gl2phylip(gl(), outfile = "PHYLIP.txt", outpath = input$T2_Path7, verbose = 0)
-      Cstatus3("PHYLIP (TXT) file has already been generated")
-    } else if (transform == "gl2Treemix"){
-      result = gl2treemix(gl(), outfile = "Treemix.gz", outpath = input$T2_Path8, verbose = 0)
-      Cstatus3("Treemix (GZ) file has already been generated")
-    } else if (transform == "gl2BayeScan"){
-      gl2bayescan(gl(), outfile = "BayeScan.txt", outpath = input$T2_Path9, verbose = 0)
-      Cstatus3("BayeScan (TXT) file has already been generated")
-    }
-    output$Cstatus3 = renderText({ Cstatus3() })
-    shinyjs::hide("gl2Status")
-    guide_C("The data has been transformed")
+      output$Cstatus3 = renderText({ Cstatus3() })
+      shinyjs::hide("gl2Status")
+      guide_C("The data has been transformed.")
+      
+    }, error = function(e) {
+      shinyjs::hide("gl2Status")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      Cstatus3("")
+      guide_C("Please check the input and try again.")
+    })
   })
   
   output$guide_C = renderUI({ div(class = "guide-text-block", guide_C()) })

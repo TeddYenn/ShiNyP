@@ -4,6 +4,44 @@
 run_ShiNyP = function() {
   ShiNyP_ui = tagList(
     CSS_UI(),
+    CSS_UI_Bot(),
+    HTML1_UI_Bot(),
+    HTML2_UI_Bot(),
+    HTML3_UI_Bot(),
+    HTML4_UI_Bot(),
+    tags$head(
+      tags$script(src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js")
+    ),
+    actionButton(
+      inputId = "ai-fab",
+      label = NULL,
+      icon = icon("comment-dots"),
+      style = "position: fixed; right:30px; bottom:30px; z-index:1050; background:#0C1844;color:white;width:60px;height:60px;border-radius:50%;border:none;font-size:32px;box-shadow:0 4px 10px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;"
+    ),
+    tags$div(
+      id = "ai-chat-panel",
+      tags$div(class = "ai-resizer top"),
+      tags$div(class = "ai-resizer right"),
+      tags$div(class = "ai-resizer bottom"),
+      tags$div(class = "ai-resizer left"),
+      tags$div(
+        id = "ai-chat-header",
+        tags$em("🐣 ShiNyP 🇦🇮"),
+        tags$button(id = "ai-chat-close", icon("circle-xmark"), style = "border:none; background:transparent; color:white; font-size:20px;")
+      ),
+      tags$div(
+        id = "ai-chat-messages", 
+        tags$span(
+          style = "color: #888;", 
+          "Try asking: How to get 'Group Info' file in ShiNyP?"
+        )
+      ),
+      tags$div(
+        id = "ai_chat_input-row",
+        tags$textarea(id = "ai_chat_input", placeholder = "Type your message...", style = "width:100%; border-radius:8px; min-height:40px; resize:vertical;"),
+        actionButton("ai_chat_send", "Send", style = "margin-left:8px;")
+      )
+    ),
     navbarPage(
       title = HTML("<strong><em>ShiNyP</em></strong>"),
       theme = bslib::bs_theme(bootswatch = "zephyr", bg = "#f3f1e5", fg = "#0C1844"),
@@ -19,6 +57,7 @@ run_ShiNyP = function() {
     )
   )
   ShiNyP_server = function(input, output, session) {
+    AI_Bot_Server(input, output, session)
     Page_0_Home_Server(input, output, session)
     Page_1_Data_Input_Server(input, output, session)
     Page_2_Data_QC_Server(input, output, session)

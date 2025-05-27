@@ -17,8 +17,8 @@ vcf2df = function(VCF, diploidize) {
       total_steps = ncol(VCF_data)
       for (i in 1:total_steps) {
         VCF_data[, i] = ifelse(VCF_data[, i] == "0/0", 0, 
-                               ifelse(VCF_data[, i] %in% c("0/1", "1/0"), 1, 
-                                      ifelse(VCF_data[, i] == "1/1", 2, NA)))
+                                ifelse(VCF_data[, i] %in% c("0/1", "1/0"), 1, 
+                                       ifelse(VCF_data[, i] == "1/1", 2, NA)))
         incProgress(1 / total_steps, message = sprintf("Converting the data... (%d/%d)", i, total_steps))
       }
     }
@@ -70,14 +70,14 @@ hwe_test = function(df) {
   N = N_AA + N_Aa + N_aa
   p = (2 * N_AA + N_Aa) / (2 * N)
   q = 1 - p
-  
+
   E_AA = p^2 * N
   E_Aa = 2 * p * q * N
   E_aa = q^2 * N
-  
+
   chi_square = ((N_AA - E_AA)^2 / E_AA) + ((N_Aa - E_Aa)^2 / E_Aa) + ((N_aa - E_aa)^2 / E_aa)
   p_value = pchisq(chi_square, df = 1, lower.tail = FALSE)
-  
+
   return(p_value)
 }
 
@@ -152,23 +152,23 @@ popgen2 = function(M, subgroups = NULL){
     if(any(hasAllMiss))
       warning("There are some markers with all data missing. These markers were removed from dataset")
     Z = as.matrix(M[, !hasAllMiss])
-    
+
     incProgress(0.1, message = "Processing data...")
     if(is.null(subgroups))
       subgroups = 1
     labelSG = unique(subgroups)
     nSG = length(labelSG)
-    
+
     incProgress(0.2, message = "Calculating statistics per sites...")
     general = g.of.p(Z)
     bygroup = c("There are no subgroups")
-    
+
     if(nSG > 1){
       incProgress(0.3, message = "Calculating statistics by group...")
       bygroup = lapply(labelSG, function(i) g.of.p(Z[subgroups == i, ]))
       names(bygroup) = labelSG
       pbyg = sapply(X = as.vector(labelSG), FUN = function(x) bygroup[[x]]$Markers$p)
-      
+
       for(i in 1:nSG){
         fxd = pbyg[,i] == 1 | pbyg[,i] == 0
         exc = (pbyg[,i]>0 & apply(pbyg[,-i, drop = FALSE] == 0, 1, all)) |
@@ -193,20 +193,20 @@ popgen2 = function(M, subgroups = NULL){
       Hss = sapply(bygroup, function(x) x$Markers[,"He"])
       Hsg = matrix(colMeans(Hss), ncol = nSG)
       Ht = matrix(general$Markers[,"He"], ncol = 1, dimnames = list(rownames(general$Markers), NULL))
-      
+
       Fstatsg = F.stats(Hi = Hig, Hs = Hsg, Ht = mean(Ht), ngroups = ngroups)
       Fstatsm = F.stats(Hi = His, Hs = Hss, Ht = Ht, ngroups = ngroups)
-      
+
       incProgress(0.4, message = "Calculating pairwise F statistics...")
       pw = combn(x = labelSG, m = 2)
       matFST = matrix(0, nrow = nSG, ncol = nSG, dimnames = list(labelSG, labelSG))
-      
+
       Fstspw = round(data.frame("Fis" = numeric(ncol(pw)+1),
                                 "Fst" = numeric(ncol(pw)+1),
                                 "Fit" = numeric(ncol(pw)+1),
                                 row.names = c("All_Pop", paste(pw[1,], pw[2,], sep = "-"))), 4)
       Fstspw[1,] = Fstatsg
-      
+
       for(i in 1:ncol(pw)){
         sel = labelSG %in% pw[,i]
         nsbg = ngroups[sel]
@@ -215,13 +215,13 @@ popgen2 = function(M, subgroups = NULL){
         Fstspw[i+1,] = F.stats(Hi = Hisg, Hs = Hssg, Ht = mean(Ht), ngroups = nsbg)
         matFST[pw[1,i], pw[2,i]] = matFST[pw[2,i], pw[1,i]] = Fstspw[i+1, 2]
       }
-      
+
       Fstats = list("Genotypes" = Fstspw, "Markers" = Fstatsm)
-      
+
       bygroup = c(bygroup, list("F.stats" = Fstats))
     }
     incProgress(0.5, message = "Finished processing data...")
-    
+
     out = list("whole" = general, "bygroup" = bygroup)
     return(out)
   })
@@ -232,7 +232,7 @@ popgen2 = function(M, subgroups = NULL){
 g.of.p = function(M){
   m=ncol(M)
   g=nrow(M)
-  
+
   p = colMeans(M, na.rm = T)/2
   q = 1-p
   Minor = pmin(p, q)
@@ -255,28 +255,28 @@ g.of.p = function(M){
                   hwetest)
   markers[is.nan(markers)] = NA
   markers = as.data.frame(markers)
-  
+
   Hg.obs = round(rowMeans(M == 1, na.rm = TRUE), 4)
   Fi = round(inbreeding.fun(mat = M, p = p), 4)
-  
+
   genotypes = cbind("Ho" = Hg.obs, "Fi" = Fi)
-  
+
   meanMrk = colMeans(markers, na.rm = TRUE)
   rangeMrk = t(apply(X = markers, MARGIN = 2, FUN = function(x) range(x, na.rm = TRUE)))
-  
+
   meanGen = colMeans(genotypes, na.rm = TRUE)
   rangeGen = t(apply(X = genotypes, MARGIN = 2, FUN = function(x) range(x, na.rm = TRUE)))
-  
+
   population = round(rbind(cbind(meanMrk, rangeMrk)[c(5,6,7,3),], cbind(meanGen, rangeGen)), 4)
   rownames(population) = c(rownames(population)[1:5], "F")
   colnames(population) = c("mean", "lower", "upper")
-  
+
   Ne = (1/(2*mean(Fi)))*g
   Va = sum(2*p*q)
   Vd = sum((2*p*q)^2)
   variance = t(round(data.frame(Ne, Va, Vd, "number of genotypes" = g, "number of markers" = m),4))
   colnames(variance) = ("estimate")
-  
+
   average = list("Markers" = markers, "Genotypes" = genotypes, "Population" = population, "Variability" = variance)
   return(average)
 }
@@ -285,14 +285,14 @@ g.of.p = function(M){
 #' @export
 F.stats = function(Hi, Hs, Ht, ngroups){
   n.harm = matrix(ngroups/sum(ngroups), nrow = 1)
-  
+
   if(nrow(Hi) > 1){
     n.harm = n.harm[rep(1, nrow(Hi)),]
   }
-  
+
   Hs.pop = rowSums(Hs * n.harm)
   Hi.pop = rowSums(Hi * n.harm)
-  
+
   Fis.pop = (Hs.pop - Hi.pop)/Hs.pop
   Fst.pop = (Ht - Hs.pop)/Ht
   Fit.pop = (Ht - Hi.pop)/Ht
@@ -315,13 +315,13 @@ inbreeding.fun = function(mat, p){
 #' @export
 chiS = function(counts){
   p = ((2 * counts[,"2"]) + counts[,"1"])/(2*rowSums(counts))
-  
+
   Expfr = Vectorize(FUN = function(p){
     return(c("0" = (1-p)**2, "1" = 2*p*(1-p), "2" = p**2))
   })
-  
+
   E = t(Expfr(p)) * rowSums(counts)
-  
+
   sumChi = rowSums((E - counts)^2/E)
   pvalue = pchisq(sumChi, 1, lower.tail = FALSE)
   resSQ = cbind("chiSq" = round(sumChi, 4), "pval" = pvalue)
@@ -339,15 +339,15 @@ GDsiteplot = function(data, y_axis, y_label){
     }
   }
   data$Pos = as.numeric(data$Pos)
-  
+
   Chr_axis = data %>%
     group_by(Chr) %>%
     summarise(center = (max(Pos) + min(Pos)) / 2, .groups = "drop")
-  
+
   data$Chr = factor(data$Chr, levels = sort(unique(as.numeric(as.character(data$Chr)))))
   n_chr = length(levels(data$Chr))
   colors = rep(c("#A4BE7B", "#dfaa52"), length.out = n_chr)
-  
+
   plot = ggplot(data, aes(x = Pos, y = get(y_axis))) +
     geom_point(aes(color = as.factor(Chr)), alpha = 0.6, size = 0.8) +
     scale_color_manual(values = colors) +
@@ -488,12 +488,12 @@ core.set = function(data.set, coverage = coverage, difference = difference){
   coverage.table = NULL
   rnames = rownames(data.set)
   cnames = colnames(data.set)
-  
+
   var.num = vector()
   ide.num = rep(0, nr)
   var.num = apply(data.set, 1, function(x){length(unique(x[!is.na(x)]))})
   mpe=sum(var.num - 1)
-  
+
   result = NULL
   result.idx = NULL
   overlap.score = function(x){
@@ -511,7 +511,7 @@ core.set = function(data.set, coverage = coverage, difference = difference){
   step0 = NULL
   step0 = data.frame(apply(counts, 1, overlap.score))
   rownames(step0) = cnames
-  
+
   for (idx in 1:mpe){
     withProgress(message = paste("Running: iteration ", idx, "..."), value = NULL, {
       not.na.counts = apply(counts, 2, function(x){
@@ -529,9 +529,9 @@ core.set = function(data.set, coverage = coverage, difference = difference){
         step01 = step0[candidate,]
         overlap = apply(step01, 1, function(x){mean(x[!is.na(x)])})
       }
-      
+
       select = which(overlap == max(overlap))
-      
+
       if (length(select)==1){
         final.select = select
         final.select.idx = which(names(select) == colnames(data.set))
@@ -557,12 +557,12 @@ core.set = function(data.set, coverage = coverage, difference = difference){
         result = c(result, names(final.select))
         result.idx = c(result.idx, final.select.idx)
       }
-      
+
       coreset = data.frame(data.set[, result.idx])
       colnames(coreset) = result
       ide.num = apply(coreset, 1, function(x){length(unique(x[!is.na(x)]))})
       coverage1 = round(mean(ide.num/var.num*100), 4)
-      
+
       if (idx == 1 & prenum ==0){
         dy = coverage1
       } else if (idx == 1 & prenum != 0){
@@ -575,12 +575,12 @@ core.set = function(data.set, coverage = coverage, difference = difference){
       dy = round(dy, 4)
       coverage.table = rbind(coverage.table, c(idx, names(final.select), coverage1, dy))
       colnames(coverage.table) = c("Iteration","ID", "Coverage", "Difference")
-      
+
       if(coverage1 >= coverage | dy < difference){
         break
       } else {
         step0 = data.frame(step0[,-rm.idx])
-        
+
         if (prenum == 0){
           for (i in 1:nc){
             idx1 = which(as.vector(coreset[, idx]) == as.vector(counts[, i]))
@@ -616,16 +616,16 @@ IBS_analysis = function(data, Site_Info, REF, OBJ, Sliding.window = TRUE, window
     } else {
       data_HM = data
     }
-    
+
     OBJ_loc = which(row.names(data_HM) %in% OBJ)
     Diff = as.numeric(data_HM[REF_loc,]) - as.numeric(data_HM[OBJ_loc,])
-    
+
     nchr = length(unique(Site_Info$Chr))
     CHR = data.frame()
     start_pos = c()
     r = 1
     window_data = as.data.frame(0)
-    
+
     if (Sliding.window == TRUE){
       Site_Info$Diff = Diff
       for (i in 1:nchr) {
@@ -682,10 +682,10 @@ density_analysis = function(Site_Info, Chr_Info, window.size){
     start_pos = numeric()
     r = 1
     window_data = data.frame(matrix(ncol = 4, nrow = 0))
-    
+
     for (i in 1:nchr) {
       shiny::setProgress(value = i / nchr, message = sprintf("Processing Chromosome %d of %d", i, nchr))
-      
+
       CHR = Site_Info[Site_Info$Chr == i, ]
       max = Chr_Info$Length[i]
       n = 1
@@ -695,13 +695,13 @@ density_analysis = function(Site_Info, Chr_Info, window.size){
         } else {
           start_pos[n] = window.size * (n - 1)
         }
-        
+
         if (start_pos[n] + window.size >= max) {
           break
         }
         n = n + 1
       }
-      
+
       for (j in 1:n) {
         loc = which(CHR$Pos >= start_pos[j] & CHR$Pos <= start_pos[j] + window.size)
         if (length(loc) > 0) {
@@ -713,7 +713,7 @@ density_analysis = function(Site_Info, Chr_Info, window.size){
         }
       }
     }
-    
+
     colnames(window_data) = c("Chr", "Start", "End", "Count")
     return(window_data)
   })
@@ -729,53 +729,86 @@ my_palette = function(scatter_color, n_groups) {
                           "Black - single color" = c("black"),
                           "Grey - single color" = c("grey"),
                           "Bright" = c("#90AACB", "#88D66C", "#FDDE55", "#ffb366", "#FFA38F", "#bb738b"),
-                          "Cool Tone" = c("#0457ac", "#308fac", "#37bd79", "#a7e237", "#f4e604", "#ee9b6f", "#ac5904"),
-                          "Warm Tone" = c("#D9CE3F", "#9FC088", "#D49B54",  "#C74B50", "#46244C"),
-                          "Earthy" = c("#0a458c", "#0a8c51", "#D8B365"),
-                          "Vibrant" = c("#ff0000", "#00ff00", "#ff8800", "#47cacc", "#0000ff"),
-                          "Neon" = c("#d8f6b8","#00aaff", "#aa00ff", "#ff00aa", "#ff002b", "#ff9939"),
+                          "Vivid" = c("#E41A1C", "#FF7F00", "#FFFF33", "#4DAF4A", "#377EB8", "#984EA3"),
+                          "Viridis" = c("#fdd525", "#7AD151FF", "#22A884FF", "#2A788EFF", "#414487FF", "#440154FF"),
+                          "Metro" = c("#AC3EC1FF", "#477BD1FF", "#46B298FF", "#90BA4CFF", "#DD9D31FF", "#E25247FF"),
+                          "Vibrant" = c("#ff8700", "#ffd300", "#deff0a", "#a1ff0a", "#0aff99", "#0aefff", "#147df5", "#580aff", "#be0aff", "#ff1a1a"),
                           "Red" = "red",
                           "Dark red" = "darkred",
                           "Black" = "black",
                           "Grey" = "grey"
   )
-  colors = colorRampPalette(custom_palette)(n_groups)
+  if (length(custom_palette) == 1) {
+    colors = rep(custom_palette, n_groups)
+  } else if (length(custom_palette) >= n_groups) {
+    colors = custom_palette[1:n_groups]
+  } else {
+    colors = colorRampPalette(custom_palette)(n_groups)
+  }
   return(colors)
 }
 
 #' @title parse_sections
 #' @export
-parse_sections <- function(text) {
-  lines <- unlist(strsplit(text, "\n"))
+parse_sections = function(text) {
+  lines = unlist(strsplit(text, "\n"))
   
-  sections <- list()
-  current_section <- NULL
-  current_subsection <- NULL
-  current_content <- c()
+  sections = list()
+  current_section = NULL
+  current_subsection = NULL
+  current_content = c()
   
   for (line in lines) {
     if (grepl("^## [^#]", line)) {
       if (!is.null(current_section)) {
-        sections[[current_section]][[current_subsection]] <- paste(current_content, collapse = "\n")
+        sections[[current_section]][[current_subsection]] = paste(current_content, collapse = "\n")
       }
-      current_section <- trimws(sub("^## ", "", line))
-      sections[[current_section]] <- list()
-      current_subsection <- "Overview"
-      current_content <- c()
+      current_section = trimws(sub("^## ", "", line))
+      sections[[current_section]] = list()
+      current_subsection = "Overview"
+      current_content = c()
     } else if (grepl("^### ", line)) {
       if (!is.null(current_subsection)) {
-        sections[[current_section]][[current_subsection]] <- paste(current_content, collapse = "\n")
+        sections[[current_section]][[current_subsection]] = paste(current_content, collapse = "\n")
       }
-      current_subsection <- trimws(sub("^### ", "", line))
-      current_content <- c()
+      current_subsection = trimws(sub("^### ", "", line))
+      current_content = c()
     } else {
-      current_content <- c(current_content, line)
+      current_content = c(current_content, line)
     }
   }
   
   if (!is.null(current_section) && !is.null(current_subsection)) {
-    sections[[current_section]][[current_subsection]] <- paste(current_content, collapse = "\n")
+    sections[[current_section]][[current_subsection]] = paste(current_content, collapse = "\n")
   }
   
   return(sections)
+}
+
+#' @title llama_retrieve_answer
+#' @export
+llama_retrieve_answer <- function(query_text) {
+  api_key <- "llx-He8NGNKtO1ASA1ObE2yDOsWX2CB2J7x0ArJxEPVQCDFNUG1C"
+  endpoint_url <- "https://api.cloud.llamaindex.ai/api/v1/pipelines/10fe69d0-a808-4d77-9821-ef922be6b251/retrieve"
+  
+  response <- POST(
+    url = endpoint_url,
+    add_headers(
+      Authorization = paste("Bearer", api_key),
+      "Content-Type" = "application/json"
+    ),
+    body = list(query = query_text),
+    encode = "json"
+  )
+  
+  if (status_code(response) == 200) {
+    result <- content(response, as = "parsed", encoding = "UTF-8")
+    answer <- paste(
+      vapply(result$retrieval_nodes[1:4], function(x) x$node$text, character(1)),
+      collapse = "\n\n"
+    )
+    return(answer)
+  } else {
+    return(status_code(response))
+  }
 }

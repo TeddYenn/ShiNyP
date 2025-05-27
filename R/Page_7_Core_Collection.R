@@ -14,9 +14,15 @@ Page_7_Core_Collection_UI = function() {
                           verbatimTextOutput("CoreSamplefileInfo"),
                           tags$style("#CoreSamplefileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          sliderInput("coverage", "Coverage (%)", min = 90, max = 100, value = 95, step = 0.1),
-                          selectInput("diff", "Coverage differences between iterations", choices = c(1, 0.1, 0.01, 0.001),
-                                      selected = 0.001),
+                          bslib::tooltip(
+                            sliderInput("coverage", "Coverage (%)", min = 80, max = 100, value = 95, step = 0.1),
+                            "Minimal coverage"
+                          ),
+                          bslib::tooltip(
+                            selectInput("diff", "Minimal differences", choices = c(1, 0.1, 0.01, 0.001),
+                                        selected = 0.001),
+                            "Minimal coverage differences between iterations"
+                          ),
                           actionButton("runCoreSample", "Run Core Sample", class = "run-action-button"),
                           actionButton("resetCoreSample", "Reset"),
                           width = 3),
@@ -49,8 +55,14 @@ Page_7_Core_Collection_UI = function() {
                           verbatimTextOutput("CoreSNPfileInfo"),
                           tags$style("#CoreSNPfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("Site_Info5"),
-                          uiOutput("Chr_Info3"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info5"),
+                            "Upload: Site Info. (RDS)"
+                          ),
+                          bslib::tooltip(
+                            uiOutput("Chr_Info3"),
+                            "Upload: Chromosome Info. (CSV)"
+                          ),
                           tags$hr(),
                           selectInput(
                             inputId = "CoreSNPmethod", 
@@ -64,12 +76,12 @@ Page_7_Core_Collection_UI = function() {
                             fileInput("CoreSNPdata", "DAPC Object* (required)", 
                                       multiple = FALSE, accept = c(".rds")),
                             sliderInput("CoreSNPratio", 
-                                        "Core SNP Ratio (%)", 
+                                        "Maximize ratio (%)", 
                                         min = 0, max = 100, value = 10, step = 0.1)),
                           conditionalPanel(
                             condition = "input.CoreSNPmethod == 'random_percentage'",
                             sliderInput("random_percentage", 
-                                        "Sampling percentage (%)", 
+                                        "Sampling ratio (%)", 
                                         min = 0, max = 100, value = 10, step = 0.1)),
                           conditionalPanel(
                             condition = "input.CoreSNPmethod == 'random_density'",
@@ -101,6 +113,7 @@ Page_7_Core_Collection_UI = function() {
 Page_7_Core_Collection_Server = function(input, output, session) {
   ##### Page 7: Core Collection #####
   ##### Core Sample Set #####
+  # ---- Select File ----
   output$fileSelection_CoreSample = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -110,59 +123,73 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     selectInput("FileforCoreSample", "Dataset for core sample set:", choices)
   })
   
+  # ---- Core Functions ----
   observeEvent(input$runCoreSample, {
-    req(input$FileforCoreSample)
-    shinyjs::show("CoreSampleStatus")
-    # data = switch(input$FileforCoreSample, "df" = df())
-    core_sample = core.set(as.data.frame(t(df())), coverage = as.numeric(input$coverage), difference = as.numeric(input$diff))
-    core_sample_coverage(core_sample$coverage.table)
-    dataset = as.data.frame(t(core_sample$coreset))
-    colnames(dataset) = colnames(df())
-    row.names(dataset) = core_sample$coverage.table[,2]
-    core_sample_dataset(dataset)
-    
-    core_sample_info = data.frame("ID" = row.names(df()),
-                                  "Core_sample" = ifelse(row.names(df()) %in% core_sample_coverage()[,2], "TRUE", "FALSE"))
-    core_sample_info(core_sample_info)
-    
-    shinyjs::hide("CoreSampleStatus")
-    CoreSampletitle1("Core Sample Set")
-    CoreSampletitle2("Coverage Plot of Core Sample Set")
-    guide_CoreSample("The core sample set is completed.")
-    
-    
-    pre_results = pre_results()
-    pre_results[[51]] = "## Core Collection"
-    pre_results[[52]] = "### Core Sample Set"
-    text = paste0("Methodology: Establish a core collection that represents the genetic variation of the entire population. This approach is modified function from GenoCore (Jeong et al. 2017).", "\n",
-                  "Number of core samples: ", length(core_sample_coverage()[,2]), " (", round(length(core_sample_coverage()[,2])/dim(df())[1], 4)* 100, "%)", "\n",
-                  "Total coverage: ", max(as.numeric(core_sample_coverage()[,3])), "%", "\n",
-                  "The top representative core samples are: ", paste0(head(core_sample_coverage())[,2], collapse = ", "), ", with cumulative coverage values of ", paste(head(core_sample_coverage()[,3]), collapse = ", "), "%, respectively.")
-    pre_results[[53]] = paste0(text)
-    pre_results(pre_results)
-    
-    output$DCoreSample_plot = downloadHandler(
-      filename = function() {
-        paste0("Core_Sample_Plot-", "coverage", input$coverage, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("CoreSampleStatus")
-        pdf(file, width = 10, height = 8)
-        print(CoreSampleplot())
-        dev.off()
+    tryCatch({
+      req(input$FileforCoreSample)
+      
+      shinyjs::show("CoreSampleStatus")
+      
+      data = df()
+      if (is.null(data) || !is.data.frame(data)) {
         shinyjs::hide("CoreSampleStatus")
+        showNotification("Error: The input data is not available or is not a data frame.", type = "error")
+        return()
       }
-    )
-    
-    output$Dcore_sample_dataset = downloadHandler(
-      filename = paste0("data.frame_", dim(core_sample_dataset())[1], "_", dim(core_sample_dataset())[2], "SNPs_", "Core_Sample_Set.rds"),
-      content = function(file) {
-        shinyjs::show("CoreSampleStatus")
-        saveRDS(core_sample_dataset(), file)
+      
+      if (nrow(data) < 2 || ncol(data) < 2) {
         shinyjs::hide("CoreSampleStatus")
+        showNotification("Error: The input data must contain at least two samples and two SNPs.", type = "error")
+        return()
       }
-    )
-    
+      
+      core_sample = core.set(as.data.frame(t(data)), 
+                              coverage = as.numeric(input$coverage), 
+                              difference = as.numeric(input$diff))
+      
+      if (is.null(core_sample$coverage.table) || is.null(core_sample$coreset)) {
+        shinyjs::hide("CoreSampleStatus")
+        showNotification("Error: Core set result is invalid or incomplete.", type = "error")
+        return()
+      }
+      
+      core_sample_coverage(core_sample$coverage.table)
+      dataset = as.data.frame(t(core_sample$coreset))
+      colnames(dataset) = colnames(data)
+      row.names(dataset) = core_sample$coverage.table[,2]
+      core_sample_dataset(dataset)
+      
+      core_sample_info = data.frame(
+        "ID" = row.names(data),
+        "Core_sample" = ifelse(row.names(data) %in% core_sample_coverage()[,2], "TRUE", "FALSE")
+      )
+      core_sample_info(core_sample_info)
+      
+      shinyjs::hide("CoreSampleStatus")
+      CoreSampletitle1("Core Sample Set")
+      CoreSampletitle2("Coverage Plot of Core Sample Set")
+      guide_CoreSample("The core sample set is completed.")
+      
+      pre_results = pre_results()
+      pre_results[[51]] = "## Core Collection"
+      pre_results[[52]] = "### Core Sample Set"
+      text = paste0(
+        "Methodology: Establish a core collection that represents the genetic variation of the entire population. ",
+        "This approach is a modified function from GenoCore (Jeong et al. 2017).\n",
+        "Number of core samples: ", length(core_sample_coverage()[,2]), " (", 
+        round(length(core_sample_coverage()[,2])/dim(data)[1], 4)* 100, "%)\n",
+        "Total coverage: ", max(as.numeric(core_sample_coverage()[,3])), "%\n",
+        "The top representative core samples are: ", paste0(head(core_sample_coverage())[,2], collapse = ", "), 
+        ", with cumulative coverage values of ", paste(head(core_sample_coverage()[,3]), collapse = ", "), "%, respectively."
+      )
+      pre_results[[53]] = text
+      pre_results(pre_results)
+      
+    }, error = function(e) {
+      shinyjs::hide("CoreSampleStatus")
+      showNotification(paste("Error:", e$message), type = "error")
+      return()
+    })
   })
   
   observeEvent(input$resetCoreSample, {
@@ -172,7 +199,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSampletitle2("")
     showNotification("Data have been reset.")
     guide_CoreSample("To run core sample set, the input data must be in ✅ data.frame format. \nPlease click the 'Run Core Sample' button.")
-  })
+    })
   
   output$CoreSamplefileInfo = renderText({
     req(df())
@@ -190,6 +217,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     }
   })
   
+  # ---- Show Plot  ----
   output$CoreSampleplot = renderPlot({
     req(input$coverage, input$diff, core_sample_coverage())
     if (CoreSampletitle2() == "Coverage Plot of Core Sample Set") {
@@ -227,11 +255,85 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     }
   })
   
+  # ---- Download Plot  ----
   output$download_core_sample_plot = renderUI({
     if (CoreSampletitle2() == "Coverage Plot of Core Sample Set") {
-      downloadButton("DCoreSample_plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_core_sample_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
   })
+  
+  observeEvent(input$show_download_core_sample_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_core_width", "Width", value = 10, min = 1, max = 30, step = 1),
+                 numericInput("dl_core_height", "Height", value = 6, min = 1, max = 30, step = 1),
+                 selectInput("dl_core_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_core_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_core_format == 'png' || input.dl_core_format == 'jpeg'",
+                   numericInput("dl_core_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DCoreSample_plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DCoreSample_plot = downloadHandler(
+    filename = function() {
+      ext = input$dl_core_format
+      cov = if (!is.null(input$coverage)) input$coverage else "coverage"
+      paste0("Core_Sample_Plot-", cov, ".", ext)
+    },
+    content = function(file) {
+      shinyjs::show("CoreSampleStatus")
+      req(CoreSampleplot())
+      width = input$dl_core_width
+      height = input$dl_core_height
+      units = input$dl_core_unit
+      device = input$dl_core_format
+      dpi = input$dl_core_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = CoreSampleplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = CoreSampleplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = CoreSampleplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("CoreSampleStatus")
+      removeModal()
+    }
+  )
+  
+  # ---- Download Table  ----
+  output$download_core_sample_dataset = renderUI({
+    if (CoreSampletitle1() == "Core Sample Set") {
+      downloadButton("Dcore_sample_dataset", "Download data.frame of Core Samples Set")
+    }
+  })
+  
+  output$Dcore_sample_dataset = downloadHandler(
+    filename = paste0("data.frame_", dim(core_sample_dataset())[1], "_", dim(core_sample_dataset())[2], "SNPs_", "Core_Sample_Set.rds"),
+    content = function(file) {
+      shinyjs::show("CoreSampleStatus")
+      saveRDS(core_sample_dataset(), file)
+      shinyjs::hide("CoreSampleStatus")
+    }
+  )
   
   output$download_core_sample_coverage = renderUI({
     if (CoreSampletitle1() == "Core Sample Set") {
@@ -247,12 +349,6 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       shinyjs::hide("CoreSampleStatus")
     }
   )
-  
-  output$download_core_sample_dataset = renderUI({
-    if (CoreSampletitle1() == "Core Sample Set") {
-      downloadButton("Dcore_sample_dataset", "Download data.frame of Core Samples Set")
-    }
-  })
   
   output$download_core_sample_info = renderUI({
     if (CoreSampletitle1() == "Core Sample Set") {
@@ -274,6 +370,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$CoreSampletitle2 = renderText({ CoreSampletitle2() })
   
   ##### Core SNP Set #####
+  # ---- Select File ----
   output$fileSelection_CoreSNP = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -306,126 +403,181 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     fileInput("CoreSNPdata", "DAPC Object* (required)", multiple = F, accept = c(".rds"))
   })
   
+  # ---- Core Functions ----
   observeEvent(input$runCoreSNP, {
-    method_chosen = input$CoreSNPmethod
-    req(input$FileforCoreSNP, Site_Info())
-    shinyjs::show("CoreSNPStatus")
-    guide_CoreSNP("Running...")
-    # data = switch(input$FileforCoreSNP, "df" = df())
-    
-    selected_SNPs = character(0)
-    
-    if (method_chosen == "dapc") {
-      req(input$CoreSNPdata) 
-      text = "Methodology: DAPC-based selection method, ShiNyP first calculates the proportion of variance explained by each discriminant component. This proportion is then used to select the top SNPs for each component based on the absolute values of their loading scores. The final set of selected SNPs is obtained by taking the union of these individual marker sets."
-      DAPC = readRDS(input$CoreSNPdata$datapath)
-      loading = DAPC$var.contr
-      ID      = row.names(loading)
-      ID_trim = substr(ID, 1, nchar(ID) - 2)
-      ID_retain_loc = which(duplicated(ID_trim) == TRUE)
-      row.names(loading) = ID_trim
-      loading = loading[ID_retain_loc, ]
-      percent = DAPC$eig / sum(DAPC$eig)
+    tryCatch({
+      # --- Basic requirement checks ---
+      req(input$FileforCoreSNP, Site_Info())
+      method_chosen = input$CoreSNPmethod
+      df_data = df()
+      site_info = Site_Info()
       
-      ratio = as.numeric(input$CoreSNPratio)/100
-      num   = ratio * nrow(loading)
-      sel   = round(num * percent, 0)
+      shinyjs::show("CoreSNPStatus")
+      guide_CoreSNP("Running...")
       
-      select = list()
-      for (i in seq_len(ncol(loading))) {
-        select[[i]] = names(sort(abs(loading[,i]), 
-                                 decreasing = TRUE)[1:sel[i]])
-      }
-      selected_SNPs = unique(unlist(select))
-      
-    } else if (method_chosen == "random_percentage") {
-      text = "Methodology: Random percentage-based selection, a specified percentage of SNPs is randomly selected."
-      pct = input$random_percentage / 100
-      
-      total_snps  = ncol(df())
-      sample_size = round(total_snps * pct)
-      selected_SNPs = sample(colnames(df()), sample_size)
-      
-    } else if (method_chosen == "random_density") {
-      text = "Methodology: Random density-based selection, SNPs are selected at regular intervals based on their density within each chromosome."
-      bp_per_snp = input$random_density
-      req(Chr_Info()) 
-      Chr_Info  = Chr_Info()
-      Site_Info = Site_Info()
-      
-      chr_length = Chr_Info[,3]
-      n_snp_target = floor(chr_length / bp_per_snp)
-      site_info_by_chr = split(Site_Info, Site_Info[,1])
-      n_snp_in_chr = sapply(site_info_by_chr, nrow)
-      n_snp_in_chr_sorted = n_snp_in_chr[order(as.numeric(names(n_snp_in_chr)))]
-      
-      selected_chr_list = lapply(names(site_info_by_chr), function(chr) {
-        df_chr = site_info_by_chr[[chr]] 
-        n_snp_target_chr = n_snp_target[as.numeric(chr)]
-        n_snp_target_chr = min(n_snp_target_chr, nrow(df_chr))
-        sample(df_chr[,3], n_snp_target_chr)
-      })
-      selected_SNPs = unique(unlist(selected_chr_list))
-    }
-    subset_data = df()[, selected_SNPs, drop = FALSE]
-    subset_data = lapply(subset_data, function(x) as.numeric(as.character(x)))
-    subset_data = as.data.frame(subset_data)
-    colnames(subset_data) = selected_SNPs
-    row.names(subset_data) = row.names(df())
-    subset_data = subset_data[, order(as.numeric(gsub(":.*", "", colnames(subset_data))), as.numeric(gsub(".*:", "", colnames(subset_data))))]
-    core_SNP_dataset(subset_data)
-    
-    core_SNP_info = data.frame(
-      "ID"       = colnames(df()),
-      "Core_SNP" = ifelse(colnames(df()) %in% selected_SNPs, "TRUE", "FALSE")
-    )
-    core_SNP_info(core_SNP_info)
-    
-    Site_Info = Site_Info()
-    selected_Site_Info = Site_Info[which(Site_Info[,3] %in% selected_SNPs), ]
-    selected_Site_Info(selected_Site_Info)
-    
-    shinyjs::hide("CoreSNPStatus")
-    CoreSNPtitle1("Core SNP Set")
-    CoreSNPtitle2("Distribution of Core SNPs")
-    guide_CoreSNP("The core SNP set is completed.\nYou can input the core set (as a data.frame file), run a PCA analysis, and then review the results.")
-    
-    pre_results = pre_results()
-    pre_results[[51]] = "## Core Collection"
-    pre_results[[55]] = "### Core SNPs set"
-    text = paste0(text, "\n",
-                  "Number of core SNPs: ", length(selected_SNPs), " (", round(length(selected_SNPs)/ncol(df()), 4)*100, "%)")
-    pre_results[[56]] = text
-    pre_results(pre_results)
-    
-    output$Dcore_SNP_dataset = downloadHandler(
-      filename = paste0("data.frame_", 
-                        nrow(core_SNP_dataset()), "_", 
-                        ncol(core_SNP_dataset()), 
-                        "SNPs_", 
-                        "Core_SNP_Set.rds"),
-      content = function(file) {
-        shinyjs::show("CoreSNPStatus")
-        saveRDS(core_SNP_dataset(), file)
+      # --- General data checks ---
+      if (is.null(df_data) || !is.data.frame(df_data)) {
         shinyjs::hide("CoreSNPStatus")
+        showNotification("Error: Genotype data is not available or not in a valid data.frame format.", type = "error")
+        return()
       }
-    )
-    
-    output$D_CoreSNP_site_info = downloadHandler(
-      filename = paste0("Site_Info_", 
-                        nrow(core_SNP_dataset()), "_", 
-                        ncol(core_SNP_dataset()), 
-                        "SNPs_", 
-                        "Core_SNP_Set.rds"),
-      content = function(file) {
-        shinyjs::show("CoreSNPStatus")
-        saveRDS(selected_Site_Info(), file)
+      if (ncol(df_data) < 2 || nrow(df_data) < 2) {
         shinyjs::hide("CoreSNPStatus")
+        showNotification("Error: The input data must have at least two samples and two SNPs.", type = "error")
+        return()
       }
-    )
+      if (is.null(site_info) || !is.data.frame(site_info)) {
+        shinyjs::hide("CoreSNPStatus")
+        showNotification("Error: SNP site information (Site_Info) is missing or invalid.", type = "error")
+        return()
+      }
+      selected_SNPs = character(0)
+      text = ""
+      
+      # --- DAPC method ---
+      if (method_chosen == "dapc") {
+        req(input$CoreSNPdata)
+        # Data check for DAPC input
+        if (is.null(input$CoreSNPdata$datapath) || !file.exists(input$CoreSNPdata$datapath)) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: DAPC result file not found.", type = "error")
+          return()
+        }
+        DAPC = readRDS(input$CoreSNPdata$datapath)
+        if (is.null(DAPC$var.contr) || is.null(DAPC$eig)) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: DAPC object is incomplete or invalid.", type = "error")
+          return()
+        }
+        loading = DAPC$var.contr
+        ID = row.names(loading)
+        ID_trim = substr(ID, 1, nchar(ID) - 2)
+        ID_retain_loc = which(duplicated(ID_trim) == TRUE)
+        if (length(ID_retain_loc) == 0) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: No duplicated SNP IDs found in DAPC loadings. Check the DAPC results.", type = "error")
+          return()
+        }
+        row.names(loading) = ID_trim
+        loading = loading[ID_retain_loc, ]
+        percent = DAPC$eig / sum(DAPC$eig)
+        ratio = as.numeric(input$CoreSNPratio) / 100
+        num = ratio * nrow(loading)
+        sel = round(num * percent, 0)
+        if (any(sel < 1)) sel[sel < 1] = 1
+        select = list()
+        for (i in seq_len(ncol(loading))) {
+          select[[i]] = names(sort(abs(loading[, i]), decreasing = TRUE)[1:sel[i]])
+        }
+        selected_SNPs = unique(unlist(select))
+        text = "Methodology: DAPC-based selection method. ShiNyP first calculates the proportion of variance explained by each discriminant component. This proportion is then used to select the top SNPs for each component based on the absolute values of their loading scores. The final set of selected SNPs is obtained by taking the union of these individual marker sets."
+        
+        # --- Random percentage method ---
+      } else if (method_chosen == "random_percentage") {
+        if (is.null(input$random_percentage) || is.na(input$random_percentage)) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: Please specify the percentage for random SNP selection.", type = "error")
+          return()
+        }
+        pct = input$random_percentage / 100
+        total_snps = ncol(df_data)
+        sample_size = round(total_snps * pct)
+        if (sample_size < 1) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: The selected percentage results in zero SNPs.", type = "error")
+          return()
+        }
+        selected_SNPs = sample(colnames(df_data), sample_size)
+        text = "Methodology: Random percentage-based selection. A specified percentage of SNPs is randomly selected."
+        
+        # --- Random density method ---
+      } else if (method_chosen == "random_density") {
+        if (is.null(input$random_density) || is.na(input$random_density) || input$random_density <= 0) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: Please provide a valid SNP density value (bp per SNP).", type = "error")
+          return()
+        }
+        req(Chr_Info())
+        chr_info = Chr_Info()
+        if (is.null(chr_info) || ncol(chr_info) < 3) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: Chromosome information (Chr_Info) is missing or invalid.", type = "error")
+          return()
+        }
+        bp_per_snp = input$random_density
+        chr_length = chr_info[, 3]
+        n_snp_target = floor(chr_length / bp_per_snp)
+        site_info_by_chr = split(site_info, site_info[, 1])
+        n_snp_in_chr = sapply(site_info_by_chr, nrow)
+        n_snp_in_chr_sorted = n_snp_in_chr[order(as.numeric(names(n_snp_in_chr)))]
+        
+        selected_chr_list = lapply(names(site_info_by_chr), function(chr) {
+          df_chr = site_info_by_chr[[chr]] 
+          n_snp_target_chr = n_snp_target[as.numeric(chr)]
+          n_snp_target_chr = min(n_snp_target_chr, nrow(df_chr))
+          sample(df_chr[,3], n_snp_target_chr)
+        })
+        selected_SNPs = unique(unlist(selected_chr_list))
+        
+        if (length(selected_SNPs) == 0) {
+          shinyjs::hide("CoreSNPStatus")
+          showNotification("Error: No SNPs were selected by random density. Please check your parameters.", type = "error")
+          return()
+        }
+        text = "Methodology: Random density-based selection. SNPs are selected at regular intervals based on their density within each chromosome."
+        
+      } else {
+        shinyjs::hide("CoreSNPStatus")
+        showNotification("Error", type = "error")
+        return()
+      }
+      
+      # --- Subset and check selected SNPs ---
+      if (length(selected_SNPs) == 0) {
+        shinyjs::hide("CoreSNPStatus")
+        showNotification("Error: No SNPs selected. Please check your selection parameters.", type = "error")
+        return()
+      }
+      subset_data = df_data[, selected_SNPs, drop = FALSE]
+      # Data conversion
+      subset_data = lapply(subset_data, function(x) as.numeric(as.character(x)))
+      subset_data = as.data.frame(subset_data)
+      colnames(subset_data) = selected_SNPs
+      row.names(subset_data) = row.names(df_data)
+      # Optional: sort columns if needed
+      subset_data = subset_data[, order(as.numeric(gsub(":.*", "", colnames(subset_data))),
+                                         as.numeric(gsub(".*:", "", colnames(subset_data))))]
+      
+      core_SNP_dataset(subset_data)
+      
+      core_SNP_info = data.frame(
+        "ID"       = colnames(df_data),
+        "Core_SNP" = ifelse(colnames(df_data) %in% selected_SNPs, "TRUE", "FALSE")
+      )
+      core_SNP_info(core_SNP_info)
+      
+      selected_Site_Info = site_info[which(site_info[, 3] %in% selected_SNPs), ]
+      selected_Site_Info(selected_Site_Info)
+      
+      shinyjs::hide("CoreSNPStatus")
+      CoreSNPtitle1("Core SNP Set")
+      CoreSNPtitle2("Distribution of Core SNPs")
+      guide_CoreSNP("The core SNP set is completed.\nYou can input the core set (as a data.frame file), run a PCA analysis, and then review the results.")
+      
+      pre_results = pre_results()
+      pre_results[[51]] = "## Core Collection"
+      pre_results[[55]] = "### Core SNPs set"
+      text = paste0(text, "\n",
+                     "Number of core SNPs: ", length(selected_SNPs), " (",
+                     round(length(selected_SNPs)/ncol(df_data), 4)*100, "%)")
+      pre_results[[56]] = text
+      pre_results(pre_results)
+    }, error = function(e) {
+      shinyjs::hide("CoreSNPStatus")
+      showNotification(paste("Error:", e$message), type = "error")
+      return()
+    })
   })
-  
-  
   
   observeEvent(input$resetCoreSNP, {
     core_SNP_dataset(NULL)
@@ -434,7 +586,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     selected_Site_Info(NULL)
     showNotification("Data have been reset.")
     guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run Core SNP' button.")
-  })
+    })
   
   output$CoreSNPfileInfo = renderText({
     req(df())
@@ -451,6 +603,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     }
   })
   
+  # ---- Show Plot  ----
   output$CoreSNPplot = renderPlot({
     req(selected_Site_Info())
     if (CoreSNPtitle2() == "Distribution of Core SNPs") {
@@ -501,31 +654,88 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     }
   })
   
-  
+  # ---- Download Plot  ----
   output$download_core_SNP_plot = renderUI({
     if (CoreSNPtitle2() == "Distribution of Core SNPs") {
-      downloadButton("DCoreSNP_plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_core_SNP_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
+  })
+  
+  observeEvent(input$show_download_core_SNP_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_coreSNP_width", "Width", value = 12, min = 1, max = 30, step = 1),
+                 numericInput("dl_coreSNP_height", "Height", value = 5, min = 1, max = 30, step = 1),
+                 selectInput("dl_coreSNP_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_coreSNP_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_coreSNP_format == 'png' || input.dl_coreSNP_format == 'jpeg'",
+                   numericInput("dl_coreSNP_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DCoreSNP_plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
   })
   
   output$DCoreSNP_plot = downloadHandler(
     filename = function() {
-      paste0("Core_SNP_Plot.pdf")
+      ext = input$dl_coreSNP_format
+      paste0("Core_SNP_Plot.", ext)
     },
     content = function(file) {
       shinyjs::show("CoreSNPStatus")
-      pdf(file, width = 12, height = 5)
-      print(CoreSNPplot())
-      dev.off()
+      req(CoreSNPplot())
+      width = input$dl_coreSNP_width
+      height = input$dl_coreSNP_height
+      units = input$dl_coreSNP_unit
+      device = input$dl_coreSNP_format
+      dpi = input$dl_coreSNP_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = CoreSNPplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = CoreSNPplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = CoreSNPplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
       shinyjs::hide("CoreSNPStatus")
+      removeModal()
     }
   )
   
+  # ---- Download Table  ----
   output$download_core_SNP_dataset = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
       downloadButton("Dcore_SNP_dataset", "Download data.frame")
     }
   })
+  
+  output$Dcore_SNP_dataset = downloadHandler(
+    filename = paste0("data.frame_", 
+                      nrow(core_SNP_dataset()), "_", 
+                      ncol(core_SNP_dataset()), 
+                      "SNPs_", 
+                      "Core_SNP_Set.rds"),
+    content = function(file) {
+      shinyjs::show("CoreSNPStatus")
+      saveRDS(core_SNP_dataset(), file)
+      shinyjs::hide("CoreSNPStatus")
+    }
+  )
   
   output$download_core_SNP_info = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
@@ -547,6 +757,19 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       downloadButton("D_CoreSNP_site_info", "Download Site Info.")
     }
   })
+  
+  output$D_CoreSNP_site_info = downloadHandler(
+    filename = paste0("Site_Info_", 
+                      nrow(core_SNP_dataset()), "_", 
+                      ncol(core_SNP_dataset()), 
+                      "SNPs_", 
+                      "Core_SNP_Set.rds"),
+    content = function(file) {
+      shinyjs::show("CoreSNPStatus")
+      saveRDS(selected_Site_Info(), file)
+      shinyjs::hide("CoreSNPStatus")
+    }
+  )
   
   output$guide_CoreSNP = renderUI({ div(class = "guide-text-block", guide_CoreSNP()) })
   output$CoreSNPtitle1 = renderText({ CoreSNPtitle1() })

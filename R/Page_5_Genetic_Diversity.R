@@ -24,7 +24,7 @@ Page_5_Genetic_Diversity_UI = function() {
                           div(id = "GDStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("GDtitle1")),
-                          plotOutput("GDplot", width = "950px", height = "350px"),
+                          plotOutput("GDplot", width = "900px", height = "350px"),
                           uiOutput("Type"),
                           uiOutput("Parameter"),
                           uiOutput("download_GD_plot"),
@@ -193,90 +193,97 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     req(df(), Site_Info())
     shinyjs::show("GDStatus")
     
-    GD_data = switch(input$FileforGD, "df" = df())
-    if (!is.null(groupInfo3())){
-      popgen = popgen2(GD_data, groupInfo3())
-      
-      if (!is.null(Site_Info())){
-        site_stat = cbind(Site_Info(), popgen$whole$Markers, popgen$bygroup$F.stats$Markers)
+    tryCatch({
+      GD_data = switch(input$FileforGD, "df" = df())
+      if (!is.null(groupInfo3())) {
+        popgen = popgen2(GD_data, groupInfo3())
+        
+        if (!is.null(Site_Info())){
+          site_stat = cbind(Site_Info(), popgen$whole$Markers, popgen$bygroup$F.stats$Markers)
+        } else{
+          site_stat = cbind(popgen$whole$Markers, popgen$bygroup$F.stats$Markers)
+        }
+        site_stat$Fst = ifelse(site_stat$Fst < 0, 0, site_stat$Fst)
+        site_stat(site_stat)
+        
+        ngroup = sort(as.character(unique(groupInfo3())))
+        GD_names = c("Sample_size", "Nei", "PIC", "Pi", "He", "Ho", "Fis", "Exclusive_allele", "Fixed_allele")
+        group_stat = matrix(nrow = length(GD_names), ncol = length(ngroup)+1,
+                            dimnames = list(GD_names, c("Overall", paste("Group", ngroup))))
+        group_stat[, 1] = c(length(popgen$whole$Genotypes)/2, popgen$whole$Population[, 1], NA, NA)
+        for (i in seq_along(ngroup)) {
+          group_stat[1, i + 1] = length(popgen$bygroup[[ngroup[i]]]$Genotypes) / 2
+          group_stat[2:7, i + 1] = popgen$bygroup[[ngroup[i]]]$Population[, 1]
+          group_stat[8, i + 1] = if (!is.na(popgen$bygroup[[ngroup[i]]]$exclusive[1])) {length(popgen$bygroup[[ngroup[i]]]$exclusive)} else {0}
+          group_stat[9, i + 1] = if (!is.na(popgen$bygroup[[ngroup[i]]]$fixed[1])) {length(popgen$bygroup[[ngroup[i]]]$fixed)} else {0}
+        }
+        group_stat = t(group_stat)
+        group_stat = group_stat[, c(1, 5:6, 2:4, 7:9)]
+        group_stat(group_stat)
+        
+        f_data = as.data.frame(popgen$bygroup$F.stats$Genotypes)
+        f_data$Comparison = rownames(f_data)
+        f_data = f_data[-1,]
+        f_data = f_data %>%
+          separate(Comparison, into = c("Comparison1", "Comparison2"), sep = "-", fill = "right")
+        fst_data = f_data[,c(2,4,5)]
+        
+        fst_matrix = matrix(0, nrow = length(ngroup), ncol = length(ngroup))
+        rownames(fst_matrix) = colnames(fst_matrix) = paste("Group", ngroup)
+        for (i in 1:nrow(fst_data)) {
+          row = as.numeric(fst_data$Comparison1[i])
+          col = as.numeric(fst_data$Comparison2[i])
+          value = fst_data$Fst[i]
+          fst_matrix[row, col] = value
+          fst_matrix[col, row] = value
+        }
+        fst_matrix(fst_matrix)
+        output$Type = renderUI({
+          selectInput("Type", "By each group:", choices = c("Statistics per site", "Statistics by group"), selected = "Statistics by group")
+        })
+        output$GDgroupresults = DT::renderDataTable({
+          DT::datatable(group_stat())
+        })
+        GDtitle3("Genetic Diversity Statistics by Group")
+        pre_results = pre_results()
+        pre_results[[30]] = "## Genetic Diversity"
+        pre_results[[31]] = paste0("The average observed heterozygosity (Ho) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,3], collapse = ", "))
+        pre_results[[32]] = paste0("The average expected heterozygosity (He) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,2], collapse = ", "))
+        pre_results[[33]] = paste0("The average Unbiased pi diversity (Pi) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,6], collapse = ", "))
+        pre_results[[34]] = paste0("The number of exclusive allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,8], collapse = ", "))
+        pre_results[[35]] = paste0("The number of fixed allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,9], collapse = ", "))
+        pre_results(pre_results)
       } else{
-        site_stat = cbind(popgen$whole$Markers, popgen$bygroup$F.stats$Markers)
+        popgen = popgen2(GD_data)
+        if (!is.null(Site_Info())){
+          site_stat = cbind(Site_Info(), popgen$whole$Markers)
+        } else{
+          site_stat = popgen$whole$Markers
+        }
+        site_stat(site_stat)
+        output$Type = renderUI({
+          selectInput("Type", "By per site:", choices = c("Statistics per site"), selected = "Statistics per site")
+        })
       }
-      site_stat$Fst = ifelse(site_stat$Fst < 0, 0, site_stat$Fst)
-      site_stat(site_stat)
-      
-      ngroup = sort(as.character(unique(groupInfo3())))
-      GD_names = c("Sample_size", "Nei", "PIC", "Pi", "He", "Ho", "Fis", "Exclusive_allele", "Fixed_allele")
-      group_stat = matrix(nrow = length(GD_names), ncol = length(ngroup)+1,
-                          dimnames = list(GD_names, c("Overall", paste("Group", ngroup))))
-      group_stat[, 1] = c(length(popgen$whole$Genotypes)/2, popgen$whole$Population[, 1], NA, NA)
-      for (i in seq_along(ngroup)) {
-        group_stat[1, i + 1] = length(popgen$bygroup[[ngroup[i]]]$Genotypes) / 2
-        group_stat[2:7, i + 1] = popgen$bygroup[[ngroup[i]]]$Population[, 1]
-        group_stat[8, i + 1] = if (!is.na(popgen$bygroup[[ngroup[i]]]$exclusive[1])) {length(popgen$bygroup[[ngroup[i]]]$exclusive)} else {0}
-        group_stat[9, i + 1] = if (!is.na(popgen$bygroup[[ngroup[i]]]$fixed[1])) {length(popgen$bygroup[[ngroup[i]]]$fixed)} else {0}
-      }
-      group_stat = t(group_stat)
-      group_stat = group_stat[, c(1, 5:6, 2:4, 7:9)]
-      group_stat(group_stat)
-      
-      f_data = as.data.frame(popgen$bygroup$F.stats$Genotypes)
-      f_data$Comparison = rownames(f_data)
-      f_data = f_data[-1,]
-      f_data = f_data %>%
-        separate(Comparison, into = c("Comparison1", "Comparison2"), sep = "-", fill = "right")
-      fst_data = f_data[,c(2,4,5)]
-      
-      fst_matrix = matrix(0, nrow = length(ngroup), ncol = length(ngroup))
-      rownames(fst_matrix) = colnames(fst_matrix) = paste("Group", ngroup)
-      for (i in 1:nrow(fst_data)) {
-        row = as.numeric(fst_data$Comparison1[i])
-        col = as.numeric(fst_data$Comparison2[i])
-        value = fst_data$Fst[i]
-        fst_matrix[row, col] = value
-        fst_matrix[col, row] = value
-      }
-      fst_matrix(fst_matrix)
-      output$Type = renderUI({
-        selectInput("Type", "By each group:", choices = c("Statistics per site", "Statistics by group"), selected = "Statistics by group")
+      popgen(popgen)
+      shinyjs::hide("GDStatus")
+      guide_GD("The analysis of genetic diversity is complete. \nPlease review the results.")
+      GDtitle2("Genetic Diversity Statistics by per Site")
+      output$GDresults = DT::renderDataTable({
+        DT::datatable(site_stat(), options = list(pageLength = 5))
       })
-      output$GDgroupresults = DT::renderDataTable({
-        DT::datatable(group_stat())
-      })
-      GDtitle3("Genetic Diversity Statistics by Group")
       pre_results = pre_results()
       pre_results[[30]] = "## Genetic Diversity"
-      pre_results[[31]] = paste0("The average observed heterozygosity (Ho) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,3], collapse = ", "))
-      pre_results[[32]] = paste0("The average expected heterozygosity (He) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,2], collapse = ", "))
-      pre_results[[33]] = paste0("The average Unbiased pi diversity (Pi) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,6], collapse = ", "))
-      pre_results[[34]] = paste0("The number of exclusive allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,8], collapse = ", "))
-      pre_results[[35]] = paste0("The number of fixed allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,9], collapse = ", "))
+      pre_results[[31]] = paste0("Across all chromosomes, the average missing rate, minor allele frequency (MAF), and nucleotide diversity π were ",
+                                 round(mean(popgen$whole$Markers[,8])*100,4), "%, ", round(mean(popgen$whole$Markers[,1]),4), ", and ", round(mean(popgen$whole$Markers[,7]),4), ", respectively.")
       pre_results(pre_results)
-    } else{
-      popgen = popgen2(GD_data)
-      if (!is.null(Site_Info())){
-        site_stat = cbind(Site_Info(), popgen$whole$Markers)
-      } else{
-        site_stat = popgen$whole$Markers
-      }
-      site_stat(site_stat)
-      output$Type = renderUI({
-        selectInput("Type", "By per site:", choices = c("Statistics per site"), selected = "Statistics per site")
-      })
-    }
-    popgen(popgen)
-    shinyjs::hide("GDStatus")
-    guide_GD("The analysis of genetic diversity is complete. \nPlease review the results.")
-    GDtitle2("Genetic Diversity Statistics by per Site")
-    output$GDresults = DT::renderDataTable({
-      DT::datatable(site_stat(), options = list(pageLength = 5))
+    }, error = function(e) {
+      shinyjs::hide("GDStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      guide_GD("")
     })
-    pre_results = pre_results()
-    pre_results[[30]] = "## Genetic Diversity"
-    pre_results[[31]] = paste0("Across all chromosomes, the average missing rate, minor allele frequency (MAF), and nucleotide diversity π were ",
-                               round(mean(popgen$whole$Markers[,8])*100,4), "%, ", round(mean(popgen$whole$Markers[,1]),4), ", and ", round(mean(popgen$whole$Markers[,7]),4), ", respectively.")
-    pre_results(pre_results)
   })
+  
   
   observeEvent(input$resetGD, {
     GDfileInfo = reactiveVal("")
@@ -300,7 +307,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$GDgroupresults = DT::renderDataTable({ DT::datatable(NULL) })
     showNotification("Data have been reset.")
     guide_GD("To analyze genetic diversity, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Site Info file (in RDS format).\nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Analysis' button.")
-  })
+    })
   
   observeEvent(input$Type, {
     req(site_stat())
@@ -386,21 +393,64 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   
   output$download_GD_plot = renderUI({
     if (GDtitle2() == "Genetic Diversity Statistics by per Site") {
-      downloadButton("DGDplot", "Download Plot")
+      actionButton(
+        inputId = "show_download_GD_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
+  })
+  
+  observeEvent(input$show_download_GD_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_gd_width", "Width", value = 8, min = 4, max = 30, step = 1),
+                 numericInput("dl_gd_height", "Height", value = 5.8, min = 4, max = 30, step = 1),
+                 selectInput("dl_gd_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_gd_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_gd_format == 'png' || input.dl_gd_format == 'jpeg'",
+                   numericInput("dl_gd_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DGDplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
   })
   
   output$DGDplot = downloadHandler(
     filename = function() {
-      paste0("Genetic_Diversity_", input$Type, "-", input$Parameter, ".pdf")
+      ext = input$dl_gd_format
+      paste0("Genetic_Diversity_", input$Type, "-", input$Parameter, ".", ext)
     },
     content = function(file) {
       shinyjs::show("GDStatus")
-      width = if (input$Type == "Statistics per site") 8 else 6
-      pdf(file, width = width, height = 5.8)
-      print(GDplot())
-      dev.off()
+      req(GDplot())
+      
+      width = input$dl_gd_width
+      height = input$dl_gd_height
+      units = input$dl_gd_unit
+      device = input$dl_gd_format
+      dpi = if (!is.null(input$dl_gd_dpi)) input$dl_gd_dpi else 300
+      
+      if (device == "pdf") {
+        ggsave(file, plot = GDplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = GDplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = GDplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
       shinyjs::hide("GDStatus")
+      removeModal()
     }
   )
   
@@ -502,59 +552,55 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     req(site_stat())
     shinyjs::show("CircosStatus")
     
-    data = site_stat()
-    window = as.numeric(input$WindowSize * 1000)
-    step = as.numeric(input$StepSize * 1000)
-    SelePara = as.character(input$SelePara)
-    
-    SW_data = data.frame(matrix(ncol = length(SelePara) + 4, nrow = 0))
-    colnames(SW_data) = c("Chr", "Start", "End", "Count", SelePara)
-    
-    nchr = length(unique(data[, 1]))
-    
-    r = 1
-    progressVal = reactiveVal(NULL)
-    withProgress(message = "Processing Data", value = 0, {
-      for (i in 1:nchr) {
-        shiny::setProgress(value = i / nchr, message = sprintf("Processing Chromosome %d of %d", i, nchr))
-        
-        chr = as.numeric(data[, 1])
-        CHR = data[chr == i, ]
-        start_pos = seq(0, max(CHR$Pos), by = step)
-        
-        for (j in seq_along(start_pos)) {
-          loc = which(CHR$Pos >= start_pos[j] & CHR$Pos <= start_pos[j] + window)
+    tryCatch({
+      data = site_stat()
+      window = as.numeric(input$WindowSize * 1000)
+      step = as.numeric(input$StepSize * 1000)
+      SelePara = as.character(input$SelePara)
+      
+      SW_data = data.frame(matrix(ncol = length(SelePara) + 4, nrow = 0))
+      colnames(SW_data) = c("Chr", "Start", "End", "Count", SelePara)
+      
+      nchr = length(unique(data[, 1]))
+      
+      r = 1
+      progressVal = reactiveVal(NULL)
+      withProgress(message = "Processing Data", value = 0, {
+        for (i in 1:nchr) {
+          shiny::setProgress(value = i / nchr, message = sprintf("Processing Chromosome %d of %d", i, nchr))
           
-          if (length(loc) != 0) {
-            SW_data[r, 1] = paste0("Chr", i)
-            SW_data[r, 2] = start_pos[j]
-            SW_data[r, 3] = start_pos[j] + window
-            SW_data[r, 4] = length(loc)
-            SW_data[r, 5:(length(SelePara) + 4)] = round(colMeans(CHR[loc, SelePara], na.rm = TRUE), 4)
-            r = r + 1
+          chr = as.numeric(data[, 1])
+          CHR = data[chr == i, ]
+          start_pos = seq(0, max(CHR$Pos), by = step)
+          
+          for (j in seq_along(start_pos)) {
+            loc = which(CHR$Pos >= start_pos[j] & CHR$Pos <= start_pos[j] + window)
+            
+            if (length(loc) != 0) {
+              SW_data[r, 1] = paste0("Chr", i)
+              SW_data[r, 2] = start_pos[j]
+              SW_data[r, 3] = start_pos[j] + window
+              SW_data[r, 4] = length(loc)
+              SW_data[r, 5:(length(SelePara) + 4)] = round(colMeans(CHR[loc, SelePara], na.rm = TRUE), 4)
+              r = r + 1
+            }
           }
         }
-      }
+      })
+      SW_data$Chr = sapply(SW_data$Chr, chromosome)
+      SW_data(SW_data)
+      
+      shinyjs::hide("CircosStatus")
+      guide_Circos("The 'Sliding Window' analysis is complete. \nPlease select parameters for each track, then click the 'Run Circos Plot' button.")
+      Circostitle1("Sliding Window Data")
+      
+      output$SWresults = DT::renderDataTable({
+        DT::datatable(SW_data(), options = list(pageLength = 5))
+      })
+    }, error = function(e) {
+      shinyjs::hide("CircosStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
     })
-    SW_data$Chr = sapply(SW_data$Chr, chromosome)
-    SW_data(SW_data)
-    
-    shinyjs::hide("CircosStatus")
-    guide_Circos("The 'Sliding Window' analysis is complete. \nPlease select parameters for each track, then click the 'Run Circos Plot' button.")
-    Circostitle1("Sliding Window Data")
-    
-    output$SWresults = DT::renderDataTable({
-      DT::datatable(SW_data(), options = list(pageLength = 5))
-    })
-    
-    output$D_SW = downloadHandler(
-      filename = paste0("Diversity_Sliding_Window-Window_Size", input$WindowSize, "-Step_Size",input$StepSize,".csv"),
-      content = function(file) {
-        shinyjs::show("CircosStatus")
-        write.csv(SW_data(), file, row.names = FALSE)
-        shinyjs::hide("CircosStatus")
-      }
-    )
   })
   
   output$download_SW = renderUI({
@@ -697,7 +743,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     shinyjs::show("GTStatus")
     GT_data = cbind(groupInfo4(), df())
     GT = genet.dist(GT_data, diploid = TRUE, method = GT_method_choice[input$GT_method])
-    GT.mat = as.matrix(GT) %>% round(digits = 3)
+    GT.mat = as.matrix(GT) %>% round(digits = 4)
     GTmatrix = GT.mat[order(as.numeric(rownames(GT.mat))), order(as.numeric(colnames(GT.mat)))]
     rownames(GTmatrix) = colnames(GTmatrix) = paste("Group", colnames(GTmatrix))
     GTmatrix(GTmatrix)
@@ -724,7 +770,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     })
     text = paste0("Methodology: Group-Group Pairwise ", input$GT_method, "\n",
                   paste(combined, collapse = "; ")
-    )
+                  )
     pre_results[[38]] = paste(text)
     pre_results(pre_results)
     
@@ -763,7 +809,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     GTtitle1("")
     GTtitle2("")
     guide_GT("To run the genetic distance analysis, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Group Info. file.")
-  })
+    })
   
   output$GTplot = renderPlot({
     req(GTdf())
@@ -863,7 +909,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     AMOVAtitle3("")
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
     guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page ")
-  })
+    })
   
   observeEvent(input$runTest, {
     req(amova.result())
