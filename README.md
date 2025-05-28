@@ -1,7 +1,8 @@
 
 <img src="https://github.com/user-attachments/assets/b1e125b2-c97d-4a97-9169-5669cadc5bd4" alt="ShiNyP-icon_20250510" width="100"/>
 
-# _ShiNyP_: Platform for SNP Analysis and Visualization
+# _ShiNyP_: SNP Analysis and Visualization Platform.
+
 
 ![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
 ![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Ubuntu-release.yaml?label=R-CMD-check)
@@ -12,18 +13,21 @@
 
 > [!NOTE] 
 > **🆕 _ShiNyP_ v1.0.0  is now available!**
-> - Introduced the new _ShiNyP_ AI chatbot.
+> - Introduced the **new _ShiNyP_ AI chatbot**.
 > - Enhanced AI report features and deprecated older AI models.
 > - Added publication details [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117).
 > - Made minor UI improvements.
 > - Fixed several bugs.
+> <img src="https://github.com/user-attachments/assets/52ff6a2a-8248-4643-97b7-294852138bd9" alt="ShiNyP_AI_Demo" width="300">
 <br>
 
 ##  🧬 Quickstart
 
-[Run *ShiNyP* via R](#run-shinyp-via-r)
+🚀 [Run *ShiNyP* via R](#run-shinyp-via-r)
 
-[Run *ShiNyP* via Docker](#run-shinyp-via-docker)
+🚀 [Run *ShiNyP* via Docker](#run-shinyp-via-docker)
+
+📢 [*ShiNyP* Online Version – Trial Platform](https://teddyhuang.shinyapps.io/ShiNyP_Demo/)
 
 <br>
 
@@ -105,7 +109,7 @@ If you have 🐳 [Docker](https://www.docker.com/) installed, you can launch _Sh
 ### 2️⃣ Start the _ShiNyP_ Platform
    Open your browser and visit 👉 [http://localhost:3838](http://localhost:3838/).
    
-<img src="https://github.com/user-attachments/assets/368ac520-3615-4f4e-b474-ee0942623da4" alt="Run_ShiNyP_via_R_Demo" width="750">
+<img src="https://github.com/user-attachments/assets/368ac520-3615-4f4e-b474-ee0942623da4" alt="Run_ShiNyP_via_Docker_Demo" width="750">
 
 
 <br>
