@@ -18,7 +18,7 @@
 > - Added publication details [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117).
 > - Made minor UI improvements.
 > - Fixed several bugs.
-> <img src="https://github.com/user-attachments/assets/52ff6a2a-8248-4643-97b7-294852138bd9" alt="ShiNyP_AI_Demo" width="300">
+> <img src="https://github.com/user-attachments/assets/96a22260-d75a-4750-b438-1664af8e06b9" alt="ShiNyP_AI_Demo" width="300">
 <br>
 
 ##  🧬 Quickstart
