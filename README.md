@@ -1,7 +1,7 @@
 
 <img src="https://github.com/user-attachments/assets/b1e125b2-c97d-4a97-9169-5669cadc5bd4" alt="ShiNyP-icon_20250510" width="100"/>
 
-# _ShiNyP_: SNP Analysis and Visualization Platform.
+# _ShiNyP_: SNP Analysis and Visualization Platform
 
 
 ![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
