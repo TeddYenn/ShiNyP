@@ -267,7 +267,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
           }
           
           # --- Basic content check ---
-          if (ncol(vcf) < 10) stop("Input file does not contain sufficient columns for VCF format.")
+          if (ncol(vcf) < 2) stop("Input file does not contain sufficient samples.")
           if (!any(c("ID", "#CHROM", "POS") %in% names(vcf))) {
             stop("Missing required columns (e.g., 'ID', '#CHROM', 'POS'). Please check your file format.")
           }
