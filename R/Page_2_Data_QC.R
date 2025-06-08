@@ -19,8 +19,8 @@ Page_2_Data_QC_UI = function() {
                           actionButton("sampleQCH", "Summary", class = "run-action-button"),
                           tags$hr(),
                           tags$h5("2. Sample QC"),
-                          sliderInput("sampleThrMR", "Threshold of missing rate (remove > [threshold])", min = 0, max = 0.5, value = 0.05, step = 0.001),
-                          sliderInput("sampleThrH", "Threshold of heterozygosity rate (remove > [threshold])", min = 0, max = 1, value = 0.10),
+                          sliderInput("sampleThrMR", "Threshold of missing rate (remove > [threshold])", min = 0, max = 1, value = 0.05, step = 0.01),
+                          sliderInput("sampleThrH", "Threshold of heterozygosity rate (remove > [threshold])", min = 0, max = 1, value = 0.10, step = 0.01),
                           actionButton("sampleQC", "Sample QC by Thresholds", class = "run-action-button"),
                           actionButton("resetsampleQC", "Reset"),
                           width = 3),
@@ -66,10 +66,10 @@ Page_2_Data_QC_UI = function() {
                           actionButton("QCHWE", "Summary", class = "run-action-button"),
                           tags$hr(),
                           tags$h5("2. SNP QC"),
-                          sliderInput("ThrMR", "Threshold of missing rate (remove > [threshold])", min = 0, max = 1, value = 0.05),
-                          sliderInput("ThrMAF", "Threshold of MAF (remove < [threshold])", min = 0, max = 0.5, value = 0.05),
-                          sliderInput("ThrH0", "Threshold of heterozygosity rate (remove < [threshold])", min = 0, max = 1, value = 0.0),
-                          sliderInput("ThrH", "Threshold of heterozygosity rate (remove > [threshold])", min = 0, max = 1, value = 0.10),
+                          sliderInput("ThrMR", "Threshold of missing rate (remove > [threshold])", min = 0, max = 1, value = 0.05, step = 0.01),
+                          sliderInput("ThrMAF", "Threshold of MAF (remove < [threshold])", min = 0, max = 0.5, value = 0.05, step = 0.01),
+                          sliderInput("ThrH0", "Threshold of heterozygosity rate (remove < [threshold])", min = 0, max = 1, value = 0.0, step = 0.01),
+                          sliderInput("ThrH", "Threshold of heterozygosity rate (remove > [threshold])", min = 0, max = 1, value = 0.10, step = 0.01),
                           uiOutput("doThrHWE"),
                           checkboxInput("doHWE", "Do SNP QC by HWE", value = FALSE),
                           actionButton("QC", "SNP QC by Thresholds", class = "run-action-button"),
@@ -258,7 +258,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     sampleQCstatus("")
     showNotification("Data have been reset.")
     guide_sampleQC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'Sample QC by Thresholds' button.")
-    })
+  })
   
   output$sampleQCresult = renderText({
     req(SampleQC_sample(), SampleQC_SNP())
@@ -479,7 +479,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     SNPQCstatus("")
     showNotification("Data have been reset.")
     guide_QC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'SNP QC by Thresholds' button.")
-    })
+  })
   
   output$QCresult = renderText({
     req(SNPQC_sample(), SNPQC_SNP())
@@ -671,7 +671,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
       fileInput("Chr_Info0", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
     guide_SNPdensity("Need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease select the optimal window size and step, then click the 'Summary' button.")
-    })
+  })
   
   output$SNPdensity_result1 = renderText({
     req(SNPdensityresults2(), Chr_Info(), Site_Info())
@@ -693,7 +693,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     "Average number of SNPs per 1000bp: ", data[last_row, 3], " SNPs", "\n", 
                     "SNP spacing across chromosomes, ", data[1,1], " to ", length(Chr_Info[,1]), ": ",
                     paste(as.numeric(data[1:last_row-1, 2]), collapse = ", "), "\n"
-                    )
+      )
       pre_results = pre_results()
       pre_results[[2]] = "## Data Input"
       pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)
