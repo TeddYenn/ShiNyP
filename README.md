@@ -12,13 +12,12 @@
 
 
 > [!NOTE] 
-> **🆕 _ShiNyP_ v1.0.0  is now available!**
-> - Introduced the **new _ShiNyP_ AI chatbot**.
-> - Enhanced AI report features and deprecated older AI models.
-> - Added publication details [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117).
-> - Made minor UI improvements.
+> **🆕 _ShiNyP_ v1.1.0  is now available!**
+> - Enhanced AI report features.
+> - Enhanced *ShiNyP AI* chatbot.
+> - Made UI/UX improvements.
 > - Fixed several bugs.
-> <img src="https://github.com/user-attachments/assets/96a22260-d75a-4750-b438-1664af8e06b9" alt="ShiNyP_AI_Demo" width="300">
+
 <br>
 
 ##  🧬 Quickstart
@@ -107,7 +106,7 @@ If you have 🐳 [Docker](https://www.docker.com/) installed, you can launch _Sh
    docker run -d -p 3838:3838 teddyenn/shinyp-platform
    ```   
 ### 2️⃣ Start the _ShiNyP_ Platform
-   Open your browser and visit 👉 [http://localhost:3838](http://localhost:3838/).
+   Open your browser and visit 👉 **http://localhost:3838**.
    
 <img src="https://github.com/user-attachments/assets/368ac520-3615-4f4e-b474-ee0942623da4" alt="Run_ShiNyP_via_Docker_Demo" width="750">
 
@@ -138,7 +137,7 @@ If you use _ShiNyP_ in your research, please cite:
 
 > Huang, Y.-H., Chen, L.-Y., Septiningsih E. M., Kao, P.-H., Kao, C.-F.
 > (2025) _ShiNyP_: Unlocking SNP-Based Population Genetics—An AI-Assisted Platform for Rapid and Interactive Visual Exploration.
-> _Molecular Biology and Evolution_, _43_(6), msaf117. [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117)
+> _Molecular Biology and Evolution_, _42_(6), msaf117. [https://doi.org/10.1093/molbev/msaf117](https://doi.org/10.1093/molbev/msaf117)
 
 In addition, please acknowledge the R packages utilized in your analysis. The relevant citations and descriptions for each module are detailed in the _ShiNyP_ [User Guide](https://teddyenn.github.io/ShiNyP-guide/).
 
@@ -153,6 +152,7 @@ If you encounter any issues or have suggestions for new features, please submit 
 - Feb 2025: Release v0.1.1.
 - Apr 2025: Release v0.2.0.
 - May 2025: Release v1.0.0.
+- Jun 2025: Release v1.1.0.
 
 <br>
 <br>

@@ -14,7 +14,10 @@ Page_6_Selection_Sweep_UI = function() {
                           verbatimTextOutput("pcadaptfileInfo"),
                           tags$style("#pcadaptfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("Site_Info2"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info2"),
+                            "Upload: Site Info. (RDS)"
+                          ),
                           sliderInput("pcadapt_PC", "The number of PC axes retained", min = 1, max = 35, value = 5, step = 1),
                           actionButton("SNPthin", "SNP Thinning", class = "S-action-button"),
                           uiOutput("SNPthin_size"),
@@ -38,6 +41,7 @@ Page_6_Selection_Sweep_UI = function() {
                           ),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("pcadapttitle1")),
+                          uiOutput("pcadapt_top10000"),
                           plotOutput("pcadaptplot1", width = "950px", height = "350px"),
                           uiOutput("download_pcadapt_plot1"),
                           tags$hr(),
@@ -73,7 +77,10 @@ Page_6_Selection_Sweep_UI = function() {
                           verbatimTextOutput("OutFLANKfileInfo"),
                           tags$style("#OutFLANKfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("Site_Info3"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info3"),
+                            "Upload: Site Info. (RDS)"
+                          ),
                           actionButton("runOutFLANK", "Run OutFLANK", class = "run-action-button"),
                           actionButton("resetOutFLANK", "Reset"),
                           width = 3),
@@ -93,6 +100,7 @@ Page_6_Selection_Sweep_UI = function() {
                           ),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("OutFLANKtitle1")),
+                          uiOutput("OutFLANK_top10000"),
                           plotOutput("OutFLANKplot1", width = "950px", height = "350px"), # p-value
                           uiOutput("download_OutFLANK_plot1"),
                           tags$br(),
@@ -131,8 +139,14 @@ Page_6_Selection_Sweep_UI = function() {
                           verbatimTextOutput("IBSfileInfo"),
                           tags$style("#IBSfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("Site_Info4"),
-                          uiOutput("Chr_Info2"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info4"),
+                            "Upload: Site Info. (RDS)"
+                          ),
+                          bslib::tooltip(
+                            uiOutput("Chr_Info2"),
+                            "Upload: Chromosome Info. (CSV)"
+                          ),
                           selectInput("REF", "Reference", choices = NULL),
                           selectInput("COMPAR", "Comparison", choices = NULL),
                           sliderInput("WindowSize2", "Window size (kb)", min = 0, max = 1000, value = 500, step = 10),
@@ -178,7 +192,8 @@ Page_6_Selection_Sweep_UI = function() {
                             column(3,
                                    selectInput("Manhattan_y_axis", "Y axis variable:", choices = NULL),
                                    selectInput("Manhattan_y_axis_trans", "Y axis transformation:", choices = c("NULL", "-log10", "Standardization", "Mean-Centering"), selected = "-log10"),
-                                   selectInput("Manhattan_hover_text", "Hover text variable:", choices = NULL, multiple = TRUE)
+                                   selectInput("Manhattan_hover_text", "Hover text variable:", choices = NULL, multiple = TRUE),
+                                   selectInput("Manh_top10000", "Show top SNPs only:", choices = c("NULL", "5000", "10000", "20000"), selected = "10000")
                             ),
                             column(3,
                                    selectInput("Manhattan_color", "Point colors:", choices = c("Default", "Black - single color", "Grey - single color", "Bright", "Vivid", "Viridis", "Metro", "Vibrant")),
@@ -215,8 +230,11 @@ Page_6_Selection_Sweep_UI = function() {
 #' @title Page_6_Selection_Sweep_Server
 #' @export
 Page_6_Selection_Sweep_Server = function(input, output, session) {
-  ##### Page 6: Selection Sweep #####
-  ##### pcadapt #####
+  
+  #### pcadapt ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_pcadapt = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -239,25 +257,40 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   
   observeEvent(input$Site_Info2, {
     req(input$Site_Info2)
-    Site_Info = readRDS(input$Site_Info2$datapath)
-    Site_Info(Site_Info)
-    
-    Site_Info$Pos = as.numeric(Site_Info$Pos)
-    Site_Info$Chr = as.character(Site_Info$Chr)
-    
-    for (i in 1:length(unique(Site_Info$Chr))) {
-      if (i>1){
-        end = max(Site_Info[Site_Info$Chr == i-1, 2])
-        Site_Info[Site_Info$Chr == i, 2] = as.numeric(Site_Info[Site_Info$Chr == i, 2]) + end
+    tryCatch({
+      Site_Info = readRDS(input$Site_Info2$datapath)
+      
+      df_data = df()
+      if (!is.data.frame(Site_Info)) stop("Not a data.frame file.")
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(Site_Info))
+      if (length(missing_cols) > 0) stop(paste("Site Info. is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      
+      Site_Info(Site_Info)
+      Site_Info$Pos = as.numeric(Site_Info$Pos)
+      Site_Info$Chr = as.character(Site_Info$Chr)
+      
+      for (i in 1:length(unique(Site_Info$Chr))) {
+        if (i > 1) {
+          end = max(Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i-1], 2])
+          Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i], 2] = 
+            as.numeric(Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i], 2]) + end
+        }
       }
-    }
-    
-    SNP_Info(Site_Info)
-    Chr_axis = SNP_Info() %>%
-      group_by(Chr) %>%
-      summarise(center = (max(Pos, na.rm = TRUE) + min(Pos, na.rm = TRUE)) / 2, .groups = "drop")
-    Chr_axis(Chr_axis)
+      
+      SNP_Info(Site_Info)
+      Chr_axis = SNP_Info() %>%
+        group_by(Chr) %>%
+        summarise(center = (max(Pos, na.rm = TRUE) + min(Pos, na.rm = TRUE)) / 2, .groups = "drop")
+      Chr_axis(Chr_axis)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
+  
+  # ---- Setting ----
   
   observeEvent(input$SNPthin, {
     output$SNPthin_size = renderUI({
@@ -268,80 +301,119 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     })
   })
   
+  output$pcadapt_adj = renderUI({
+    if (pcadapttitle1() == "Manhattan Plot") {
+      selectInput("pcadapt_adj", "P-value adjustment method", choices = names(pval_adj_method_choice), selected = "Benjamini & Hochberg (FDR)")
+    }
+  })
+  
+  output$pcadapt_alpha = renderUI({
+    if (pcadapttitle1() == "Manhattan Plot") {
+      selectInput("pcadapt_alpha", "Level of significance (alpha)", choices = c(0.1, 0.05, 0.01, 0.005, 0.001), selected = 0.1)
+    }
+  })
+  
+  output$pcadapt_top10000 = renderUI({
+    if (pcadapttitle1() == "Manhattan Plot") {
+      checkboxInput("pcadapt_top10000", "Show top 10000 SNPs only", value = TRUE)
+    }
+  })
+  
+  # ---- Core Functions ----
+  
   observeEvent(input$runpcadapt, {
     req(input$Fileforpcadapt)
     shinyjs::show("pcadaptStatus")
-    data = switch(input$Fileforpcadapt, "df" = df())
-    data = read.pcadapt(data, type = "lfmm")
-    if (!is.null(input$pcadapt_size)){
-      pcadapt_res = pcadapt(input = data, K = input$pcadapt_PC, LD.clumping = list(size = input$pcadapt_size, thr = input$pcadapt_thr))
-    } else{
-      pcadapt_res = pcadapt(input = data, K = input$pcadapt_PC)
-    }
     
-    pvalue = pcadapt_res$pvalues
-    chi2.stat = pcadapt_res$chi2.stat
-    pvalue[is.na(pvalue)] = 1
-    chi2.stat[is.na(chi2.stat)] = mean(chi2.stat, na.rm = T)
-    
-    pcadapt_data = data.frame(
-      pvalue = pvalue,
-      observed = -log10(sort(pvalue)),
-      expected = -log10(ppoints(length(pvalue))),
-      statistic = chi2.stat)
-    pcadapt_data(pcadapt_data)
-    
-    max_range = max(c(max(pcadapt_data$expected), max(pcadapt_data$observed)))
-    pcadaptplot2 = ggplot(pcadapt_data, aes(x = expected, y = observed)) +
-      geom_point(size = 1, color = "#186da9") +
-      geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", linewidth = 0.7) +
-      labs(x = expression(Expected -log[10](italic(p))), y = expression(Observed -log[10](italic(p)))) +
-      theme_classic() +
-      theme(
-        axis.title.x =   element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10)) +
-      scale_x_continuous(limits = c(0, max_range)) +
-      scale_y_continuous(limits = c(0, max_range))
-    pcadaptplot2(pcadaptplot2)
-    
-    pcadaptplot3 = ggplot(pcadapt_data, aes(x = pvalue)) +
-      geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
-      theme_classic() +
-      labs(x = expression(italic(p)), y = "Frequency") +
-      scale_x_continuous(expand = c(0, 0.01),
-                         breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-                         labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")) +
-      scale_y_continuous(expand = c(0.01, 0.01)) +
-      theme(
-        axis.title.x =   element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
-    pcadaptplot3(pcadaptplot3)
-    
-    pcadaptplot4 = ggplot(pcadapt_data, aes(x = statistic)) +
-      geom_histogram(aes(y = ..density..), binwidth = max(pcadapt_data$statistic)/50, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
-      geom_density(color = "#cb1d2c", size = 1) +
-      labs(x = "Test statistic", y = "Density") +
-      theme_classic() +
-      scale_x_continuous(expand = c(0.01, 0.01)) +
-      scale_y_continuous(expand = c(0.01, 0)) +
-      theme(
-        axis.title.x =   element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
-    pcadaptplot4(pcadaptplot4)
-    
-    shinyjs::hide("pcadaptStatus")
-    pcadapttitle1("Manhattan Plot")
-    pcadapttitle2("QQ Plot of p-values")
-    pcadapttitle3("Histogram of p-values")
-    pcadapttitle4("Histogram of Test Statistics")
-    pcadapttitle5("Significant SNPs")
-    guide_pcadapt("The pcadapt analysis is complete.")
+    tryCatch({
+      data = switch(input$Fileforpcadapt, "df" = df())
+      data = read.pcadapt(data, type = "lfmm")
+      
+      if (!is.null(input$pcadapt_size)) {
+        pcadapt_res = pcadapt(input = data, K = input$pcadapt_PC,
+                               LD.clumping = list(size = input$pcadapt_size, thr = input$pcadapt_thr))
+      } else {
+        pcadapt_res = pcadapt(input = data, K = input$pcadapt_PC)
+      }
+      
+      pvalue = pcadapt_res$pvalues
+      chi2.stat = pcadapt_res$chi2.stat
+      pvalue[is.na(pvalue)] = 1
+      chi2.stat[is.na(chi2.stat)] = mean(chi2.stat, na.rm = TRUE)
+      pcadapt_df = data.frame(
+        pvalue = pvalue,
+        observed = -log10(sort(pvalue)),
+        expected = -log10(ppoints(length(pvalue))),
+        statistic = chi2.stat
+      )
+      pcadapt_data(pcadapt_df)
+      
+      max_range = max(c(max(pcadapt_df$expected), max(pcadapt_df$observed)))
+      pcadaptplot2(
+        ggplot(pcadapt_df, aes(x = expected, y = observed)) +
+          geom_point(size = 1, color = "#186da9") +
+          geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", linewidth = 0.7) +
+          labs(x = expression(Expected -log[10](italic(p))), y = expression(Observed -log[10](italic(p)))) +
+          theme_classic() +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          ) +
+          scale_x_continuous(limits = c(0, max_range)) +
+          scale_y_continuous(limits = c(0, max_range))
+      )
+      
+      pcadaptplot3(
+        ggplot(pcadapt_df, aes(x = pvalue)) +
+          geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
+          theme_classic() +
+          labs(x = expression(italic(p)), y = "Frequency") +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+            labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")
+          ) +
+          scale_y_continuous(expand = c(0.01, 0.01)) +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          )
+      )
+      
+      pcadaptplot4(
+        ggplot(pcadapt_df, aes(x = statistic)) +
+          geom_histogram(aes(y = ..density..), binwidth = max(pcadapt_df$statistic) / 50,
+                         fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
+          geom_density(color = "#cb1d2c", size = 1) +
+          labs(x = "Test statistic", y = "Density") +
+          theme_classic() +
+          scale_x_continuous(expand = c(0.01, 0.01)) +
+          scale_y_continuous(expand = c(0.01, 0)) +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          )
+      )
+      
+      shinyjs::hide("pcadaptStatus")
+      pcadapttitle1("Manhattan Plot")
+      pcadapttitle2("QQ Plot of p-values")
+      pcadapttitle3("Histogram of p-values")
+      pcadapttitle4("Histogram of Test Statistics")
+      pcadapttitle5("Significant SNPs")
+      guide_pcadapt("The pcadapt analysis is complete.")
+      
+    }, error = function(e) {
+      shinyjs::hide("pcadaptStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      guide_pcadapt("")
+    })
   })
   
   observeEvent(input$resetpcadapt, {
@@ -360,8 +432,10 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     output$Site_Info2 = renderUI({
       fileInput("Site_Info2", "Site Info.* (required)", multiple = F, accept = c(".rds"))
     })
-    guide_pcadapt("To run pcadapt, the input data must be in ✅ data.frame format. \nYou also need to upload a ▶️ Site Info file (in RDS format). \nPlease click the 'Run pcadapt' button.")
+    guide_pcadapt("To run pcadapt, the input data must be in ✅ data.frame format. \nYou also need to upload a ▶️ Site Info file (in RDS). \nPlease click the 'Run pcadapt' button.")
     })
+  
+  # ---- Show Plot  ----
   
   output$pcadaptplot1 = renderPlot({
     req(pcadapt_data(), input$pcadapt_adj)
@@ -379,19 +453,32 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         mutate(pvalue = pcadapt_data$pvalue) %>%
         mutate(adjust_pvalue = padj) %>%
         mutate(signif = ifelse(row_number() %in% outliers, "Yes", "No"))
-      data$Chr = factor(data$Chr, levels = sort(unique(as.numeric(data$Chr))))
-      n_chr = length(levels(data$Chr))
-      colors = rep(c("#cbbc1d", "#5e929d"), length.out = n_chr)
+      plot_data = data
+      if (isTRUE(input$pcadapt_top10000)) {
+        plot_data = plot_data %>%
+          mutate(logp = -log10(pvalue)) %>%
+          arrange(desc(logp)) %>%
+          slice_head(n = 10000) %>%
+          arrange(Pos)
+      }
+      plot_data <- plot_data %>%
+        mutate(Chr = factor(Chr, levels = sort(unique(as.integer(Chr)))))
+      chr_levels <- levels(plot_data$Chr)
+      colors <- rep(c("#cbbc1d", "#5e929d"), length.out = length(chr_levels))
+      names(colors) <- chr_levels
       
       data2 = data
       Site_Info = Site_Info()
       data2[,1:3] = Site_Info[,1:3]
       pcadapt_data3(data2)
       
-      
-      pcadaptplot1 = ggplot(data, aes(x = Pos, y = -log10(pvalue))) +
-        geom_point(aes(color = as.factor(Chr)), alpha = 0.6, size = 0.8) +
-        scale_color_manual(values = colors) +
+      pcadaptplot1 <- ggplot(plot_data, aes(x = Pos, y = -log10(pvalue), colour = Chr)) +
+        geom_point(alpha = 0.6, size = 0.8) +
+        scale_color_manual(
+          name   = "Chromosome",
+          values = colors,
+          drop   = FALSE
+        ) +
         scale_x_continuous(label = Chr_axis$Chr, breaks = Chr_axis$center, expand = c(0.01, 0)) +
         scale_y_continuous(expand = c(0.01, 0)) +
         theme_classic() +
@@ -406,10 +493,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         )
       data2 = subset(data, signif == "Yes")
       pcadapt_data2(data2)
-      if (dim(data2)[1]>0){
+      highlight_data = subset(plot_data, signif == "Yes")
+      if (nrow(highlight_data) > 0){
         pcadaptplot1 = pcadaptplot1 +
-          geom_point(data = data2, aes(Pos, -log10(pvalue)), color = "red", size = 1, alpha = 0.9) +
-          geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
+          geom_point(data = highlight_data, aes(Pos, -log10(pvalue)), color = "red", size = 1, alpha = 0.9) +
+          geom_hline(yintercept = min(-log10(highlight_data$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
       }
       pcadaptplot1(pcadaptplot1)
       
@@ -429,30 +517,19 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   })
   
-  output$pcadapt_adj = renderUI({
-    if (pcadapttitle1() == "Manhattan Plot") {
-      selectInput("pcadapt_adj", "P-value adjustment method", choices = names(pval_adj_method_choice), selected = "Benjamini & Hochberg (FDR)")
-    }
-  })
-  
-  output$pcadapt_alpha = renderUI({
-    if (pcadapttitle1() == "Manhattan Plot") {
-      selectInput("pcadapt_alpha", "Level of significance (alpha)", choices = c(0.1, 0.05, 0.01, 0.005, 0.001), selected = 0.1)
-    }
-  })
-  
   output$pcadapt_result = renderText({
     req(pcadapt_data2())
     chr = table(pcadapt_data2()[,1])
+    chr_names = names(chr)
+    chr_names = chr_names[order(as.numeric(chr_names))]
     out = c()
-    for (i in seq_len(length(chr))) {
-      if (as.numeric(chr[i]) > 0){
-        out[i] = paste0("Chr ", names(chr)[i], ": ", as.numeric(chr[i]), " significant SNPs", "\n")
-      } else{
-        out[i] = paste0("NA", "\n")
+    for (i in seq_along(chr_names)) {
+      cnt = as.numeric(chr[chr_names[i]])
+      if (cnt > 0) {
+        out[i] = paste0("Chr ", chr_names[i], ": ", cnt, " significant SNPs", "\n")
       }
     }
-    out = out[!grepl("NA", out)]
+    out = out[!is.na(out)]
     out = paste(out, collapse = "")
     paste("Number of significant SNPs: ", dim(pcadapt_data2())[1], "\n",
           "---------------", "\n",
@@ -460,19 +537,92 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
           sep = "")
   })
   
+  # ---- Download Plot  ----
+  
   output$download_pcadapt_plot1 = renderUI({
     if (pcadapttitle1() == "Manhattan Plot") {
-      downloadButton("Dpcadapt_plot1", "Download Plot")
+      actionButton(
+        inputId = "show_download_pcadapt_plot1",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  output$download_pcadapt_plot1 = renderUI({
+    if (pcadapttitle1() == "Manhattan Plot") {
+      actionButton(
+        inputId = "show_download_pcadapt_plot1",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
+    }
+  })
+  
+  observeEvent(input$show_download_pcadapt_plot1, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_pcadapt1_width", "Width", value = 10, min = 4, max = 30, step = 1),
+                 numericInput("dl_pcadapt1_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_pcadapt1_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_pcadapt1_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_pcadapt1_format == 'png' || input.dl_pcadapt1_format == 'jpeg'",
+                   numericInput("dl_pcadapt1_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("Dpcadapt_plot1", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$Dpcadapt_plot1 = downloadHandler(
-    filename = "pcadapt_Manhattan_Plot.pdf",
+    filename = function() {
+      ext = input$dl_pcadapt1_format
+      paste0("pcadapt_Manhattan_Plot.", ext)
+    },
     content = function(file) {
       shinyjs::show("pcadaptStatus")
-      pdf(file, width = 10, height = 4)
-      print(pcadaptplot1())
-      dev.off()
+      req(pcadaptplot1())
+      
+      width = input$dl_pcadapt1_width
+      height = input$dl_pcadapt1_height
+      units = input$dl_pcadapt1_unit
+      device = input$dl_pcadapt1_format
+      dpi = input$dl_pcadapt1_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = pcadaptplot1(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = pcadaptplot1(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = pcadaptplot1(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("pcadaptStatus")
+      removeModal()
+    }
+  )
+  
+  output$download_pcadapt = renderUI({
+    if (pcadapttitle1() == "Manhattan Plot") {
+      downloadButton("Dpcadapt", "Download pcadapt p-value (per site)")
+    }
+  })
+  
+  output$Dpcadapt = downloadHandler(
+    filename = "pcadapt_p-value_per_site.rds",
+    content = function(file) {
+      shinyjs::show("pcadaptStatus")
+      saveRDS(pcadapt_data3(), file)
       shinyjs::hide("pcadaptStatus")
     }
   )
@@ -564,6 +714,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   )
   
+  # ---- Download Table  ----
+  
   output$pcadapt_Sign_SNP = DT::renderDataTable({
     req(pcadapt_data())
     DT::datatable(pcadapt_data2(), options = list(pageLength = 10))
@@ -584,6 +736,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   )
   
+  # ---- Text  ----
+  
   output$guide_pcadapt = renderUI({ div(class = "guide-text-block", guide_pcadapt()) })
   output$pcadapttitle1 = renderText({ pcadapttitle1() })
   output$pcadapttitle2 = renderText({ pcadapttitle2() })
@@ -591,7 +745,10 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$pcadapttitle4 = renderText({ pcadapttitle4() })
   output$pcadapttitle5 = renderText({ pcadapttitle5() })
   
-  ##### OutFLANK #####
+  #### OutFLANK ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_OutFLANK = renderUI({
     if (!is.null(gl())){ choices = c("genlight file" = "gl") } else { choices = "" }
     selectInput("FileforOutFLANK", "Dataset for OutFLANK:", choices)
@@ -612,102 +769,156 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   
   observeEvent(input$Site_Info3, {
     req(input$Site_Info3)
-    Site_Info = readRDS(input$Site_Info3$datapath)
-    
-    Site_Info(Site_Info)
-    
-    Site_Info$Pos = as.numeric(Site_Info$Pos)
-    Site_Info$Chr = as.character(Site_Info$Chr)
-    
-    for (i in 1:length(unique(Site_Info$Chr))) {
-      if (i>1){
-        end = max(Site_Info[Site_Info$Chr == i-1, 2])
-        Site_Info[Site_Info$Chr == i, 2] = as.numeric(Site_Info[Site_Info$Chr == i, 2]) + end
+    tryCatch({
+      Site_Info = readRDS(input$Site_Info3$datapath)
+      
+      if (is.null(gl())) stop("Main genotype data is not loaded.")
+      if (!nLoc(gl()) == dim(Site_Info)[1]) {
+        stop("Column length of Site Info. do not match those of SNP data.")
       }
-    }
-    SNP_Info(Site_Info)
-    
-    Chr_axis = SNP_Info() %>%
-      group_by(Chr) %>%
-      summarise(center = (max(Pos, na.rm = TRUE) + min(Pos, na.rm = TRUE)) / 2, .groups = "drop")
-    Chr_axis(Chr_axis)
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(Site_Info))
+      if (length(missing_cols) > 0) stop(paste("Site Info. is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      
+      Site_Info(Site_Info)
+      Site_Info$Pos = as.numeric(Site_Info$Pos)
+      Site_Info$Chr = as.character(Site_Info$Chr)
+      
+      for (i in 1:length(unique(Site_Info$Chr))) {
+        if (i > 1) {
+          end = max(Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i-1], 2])
+          Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i], 2] = 
+            as.numeric(Site_Info[Site_Info$Chr == unique(Site_Info$Chr)[i], 2]) + end
+        }
+      }
+      
+      SNP_Info(Site_Info)
+      Chr_axis = SNP_Info() %>%
+        group_by(Chr) %>%
+        summarise(center = (max(Pos, na.rm = TRUE) + min(Pos, na.rm = TRUE)) / 2, .groups = "drop")
+      Chr_axis(Chr_axis)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
+  
+  # ---- Setting ----
+  
+  output$OutFLANK_adj = renderUI({
+    if (OutFLANKtitle1() == "Manhattan Plot") {
+      selectInput("OutFLANK_adj", "P-value adjustment method", choices = names(pval_adj_method_choice), selected = "Benjamini & Hochberg (FDR)")
+    }
+  })
+  
+  output$OutFLANK_alpha = renderUI({
+    if (OutFLANKtitle1() == "Manhattan Plot") {
+      selectInput("OutFLANK_alpha", "Level of significance (alpha)", choices = c(0.1, 0.05, 0.01, 0.005, 0.001), selected = 0.1)
+    }
+  })
+  
+  output$OutFLANK_top10000 = renderUI({
+    if (OutFLANKtitle1() == "Manhattan Plot") {
+      checkboxInput("OutFLANK_top10000", "Show top 10000 SNPs only", value = TRUE)
+    }
+  })
+  
+  # ---- Core Functions ----
   
   observeEvent(input$runOutFLANK, {
     req(input$FileforOutFLANK, gl()@pop, SNP_Info())
     shinyjs::show("OutFLANKStatus")
-    data = switch(input$FileforOutFLANK, "gl" = gl())
-    outflank = gl.outflank(data, plot = FALSE)
-    outflank(outflank)
     
-    pvalue = outflank$outflank$results$pvaluesRightTail
-    FST = outflank$outflank$results$FST
-    pvalue[is.na(pvalue)] = 1
-    FST[is.na(FST)] = mean(FST, na.rm = T)
-    
-    outflank_data = data.frame(
-      pvalue = pvalue,
-      observed = -log10(sort(pvalue)),
-      expected = -log10(ppoints(length(pvalue))),
-      FST = FST)
-    
-    max_range = max(c(max(outflank_data$expected), max(outflank_data$observed)))
-    OutFLANKplot3 = ggplot(outflank_data, aes(x = expected, y = observed)) +
-      geom_point(size = 1, color = "#186da9") +
-      geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", linewidth = 0.7) +
-      labs(x = expression(Expected -log[10](italic(p))), y = expression(Observed -log[10](italic(p)))) +
-      theme_classic() +
-      theme(
-        axis.title.x =   element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10)) +
-      scale_x_continuous(limits = c(0, max_range)) +
-      scale_y_continuous(limits = c(0, max_range))
-    OutFLANKplot3(OutFLANKplot3)
-    
-    OutFLANKplot4 = ggplot(outflank_data, aes(x = pvalue)) +
-      geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
-      theme_classic() +
-      labs(x = expression(italic(p)), y = "Frequency") +
-      scale_x_continuous(expand = c(0, 0.01),
-                         breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-                         labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")) +
-      scale_y_continuous(expand = c(0.01, 0.01)) +
-      theme(
-        axis.title.x =   element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
-    OutFLANKplot4(OutFLANKplot4)
-    
-    OutFLANKplot5 = ggplot(outflank_data, aes(x = FST)) +
-      geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
-      theme_classic() +
-      labs(x = expression(F[ST]), y = "Frequency") +
-      scale_x_continuous(expand = c(0, 0.01),
-                         breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-                         labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")) +
-      scale_y_continuous(expand = c(0.01, 0.01)) +
-      theme(
-        axis.title.x = element_text(size = 12),
-        axis.title.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10))
-    OutFLANKplot5(OutFLANKplot5)
-    
-    
-    shinyjs::hide("OutFLANKStatus")
-    OutFLANKtitle1("Manhattan Plot")
-    OutFLANKtitle2("QQ Plot of p-values")
-    OutFLANKtitle3("Histogram of p-values")
-    OutFLANKtitle4("Histogram of FST")
-    OutFLANKtitle5("Significant SNPs")
-    guide_OutFLANK("The OutFLANK analysis is complete.")
+    tryCatch({
+      data = switch(input$FileforOutFLANK, "gl" = gl())
+      outflank = gl.outflank(data, plot = FALSE)
+      outflank(outflank)
+      
+      pvalue = outflank$outflank$results$pvaluesRightTail
+      FST = outflank$outflank$results$FST
+      pvalue[is.na(pvalue)] = 1
+      FST[is.na(FST)] = mean(FST, na.rm = TRUE)
+      
+      outflank_data = data.frame(
+        pvalue = pvalue,
+        observed = -log10(sort(pvalue)),
+        expected = -log10(ppoints(length(pvalue))),
+        FST = FST
+      )
+      
+      max_range = max(c(max(outflank_data$expected), max(outflank_data$observed)))
+      
+      OutFLANKplot3(
+        ggplot(outflank_data, aes(x = expected, y = observed)) +
+          geom_point(size = 1, color = "#186da9") +
+          geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed", linewidth = 0.7) +
+          labs(x = expression(Expected -log[10](italic(p))), y = expression(Observed -log[10](italic(p)))) +
+          theme_classic() +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          ) +
+          scale_x_continuous(limits = c(0, max_range)) +
+          scale_y_continuous(limits = c(0, max_range))
+      )
+      
+      OutFLANKplot4(
+        ggplot(outflank_data, aes(x = pvalue)) +
+          geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
+          theme_classic() +
+          labs(x = expression(italic(p)), y = "Frequency") +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+            labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")
+          ) +
+          scale_y_continuous(expand = c(0.01, 0.01)) +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          )
+      )
+      
+      OutFLANKplot5(
+        ggplot(outflank_data, aes(x = FST)) +
+          geom_histogram(binwidth = 0.02, fill = "#186da9", color = "grey70", linewidth = 0.2, alpha = 0.8) +
+          theme_classic() +
+          labs(x = expression(F[ST]), y = "Frequency") +
+          scale_x_continuous(
+            expand = c(0, 0.01),
+            breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+            labels = c("0.0", "0.2", "0.4", "0.6", "0.8", "1.0")
+          ) +
+          scale_y_continuous(expand = c(0.01, 0.01)) +
+          theme(
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12),
+            axis.text.x = element_text(size = 10),
+            axis.text.y = element_text(size = 10)
+          )
+      )
+      
+      shinyjs::hide("OutFLANKStatus")
+      OutFLANKtitle1("Manhattan Plot")
+      OutFLANKtitle2("QQ Plot of p-values")
+      OutFLANKtitle3("Histogram of p-values")
+      OutFLANKtitle4("Histogram of FST")
+      OutFLANKtitle5("Significant SNPs")
+      guide_OutFLANK("The OutFLANK analysis is complete.")
+      
+    }, error = function(e) {
+      shinyjs::hide("OutFLANKStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetOutFLANK, {
-    guide_OutFLANK("To run OutFLANK, the input data must be in ✅ genlight file with 'Group Info.' \nYou also need to upload a ▶️ Site Info file (in RDS format).\nPlease click the 'Run OutFLANK' button.")
+    guide_OutFLANK("To run OutFLANK, the input data must be in ✅ genlight file with 'Group Info.' \nYou also need to upload a ▶️ Site Info file (in RDS).\nPlease click the 'Run OutFLANK' button.")
     OutFLANKfileInfo("")
     OutFLANKtitle1("")
     OutFLANKtitle2("")
@@ -730,6 +941,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     })
   })
   
+  # ---- Show Plot  ----
+  
   output$OutFLANKplot1 = renderPlot({
     req(outflank(), Chr_axis(), input$OutFLANK_adj)
     if (OutFLANKtitle1() == "Manhattan Plot") {
@@ -746,21 +959,36 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         mutate(adjust_pvalue = padj) %>%
         mutate(FST = outflank$outflank$results$FST) %>%
         mutate(signif = ifelse(row_number() %in% outliers, "Yes", "No"))
-      outflank_data3$Chr = factor(outflank_data3$Chr, levels = sort(unique(as.numeric(outflank_data3$Chr))))
-      n_chr = length(levels(outflank_data3$Chr))
-      colors = rep(c("#cbbc1d", "#5e929d"), length.out = n_chr)
+      plot_data = outflank_data3
+      if (isTRUE(input$OutFLANK_top10000)) {
+        plot_data = plot_data %>%
+          mutate(logp = -log10(pvalue)) %>%
+          arrange(desc(logp)) %>%
+          slice_head(n = 10000) %>%
+          arrange(Pos)
+      }
       
-      outflank_data3$FST = ifelse(outflank_data3$FST < 0, 0, outflank_data3$FST)
-      outflank_data3(outflank_data3)
+      plot_data <- plot_data %>%
+        mutate(Chr = factor(Chr, levels = sort(unique(as.integer(Chr)))))
+      chr_levels <- levels(plot_data$Chr)
+      colors <- rep(c("#cbbc1d", "#5e929d"), length.out = length(chr_levels))
+      names(colors) <- chr_levels
+      
+      plot_data$FST = ifelse(plot_data$FST < 0, 0, plot_data$FST)
+      outflank_data3(plot_data)
       
       Site_Info = Site_Info()
       outflank_data4 = outflank_data3
       outflank_data4[,1:3] = Site_Info[,1:3]
       outflank_data4(outflank_data4)
       
-      OutFLANKplot1 = ggplot(outflank_data3, aes(x = Pos, y = -log10(pvalue))) +
-        geom_point(aes(color = as.factor(Chr)), alpha = 0.6, size = 0.8) +
-        scale_color_manual(values = colors) +
+      OutFLANKplot1 = ggplot(plot_data, aes(x = Pos, y = -log10(pvalue), colour = Chr)) +
+        geom_point(alpha = 0.6, size = 0.8) +
+        scale_color_manual(
+          name   = "Chromosome",
+          values = colors,
+          drop   = FALSE
+        ) +
         scale_x_continuous(label = Chr_axis$Chr, breaks = Chr_axis$center, expand = c(0.01, 0)) +
         scale_y_continuous(expand = c(0.01, 0)) +
         theme_classic() +
@@ -775,10 +1003,11 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
         )
       data2 = subset(outflank_data3, signif == "Yes")
       outflank_data2(data2)
-      if (dim(data2)[1]>0){
+      highlight_data = subset(plot_data, signif == "Yes")
+      if (nrow(highlight_data) > 0){
         OutFLANKplot1 = OutFLANKplot1 +
-          geom_point(data = data2, aes(Pos, -log10(pvalue)), color = "red", size = 1, alpha = 0.9) +
-          geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
+          geom_point(data = highlight_data, aes(Pos, -log10(pvalue)), color = "red", size = 1, alpha = 0.9) +
+          geom_hline(yintercept = min(-log10(highlight_data$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
       }
       OutFLANKplot1(OutFLANKplot1)
       
@@ -827,30 +1056,19 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     OutFLANKplot2()
   })
   
-  output$OutFLANK_adj = renderUI({
-    if (OutFLANKtitle1() == "Manhattan Plot") {
-      selectInput("OutFLANK_adj", "P-value adjustment method", choices = names(pval_adj_method_choice), selected = "Benjamini & Hochberg (FDR)")
-    }
-  })
-  
-  output$OutFLANK_alpha = renderUI({
-    if (OutFLANKtitle1() == "Manhattan Plot") {
-      selectInput("OutFLANK_alpha", "Level of significance (alpha)", choices = c(0.1, 0.05, 0.01, 0.005, 0.001), selected = 0.1)
-    }
-  })
-  
   output$OutFLANK_result = renderText({
     req(outflank_data2())
     chr = table(outflank_data2()[,1])
+    chr_names = names(chr)
+    chr_names = chr_names[order(as.numeric(chr_names))]
     out = c()
-    for (i in seq_len(length(chr))) {
-      if (as.numeric(chr[i]) > 0){
-        out[i] = paste0("Chr ", names(chr)[i], ": ", as.numeric(chr[i]), " significant SNPs", "\n")
-      } else{
-        out[i] = paste0("NA", "\n")
+    for (i in seq_along(chr_names)) {
+      cnt = as.numeric(chr[chr_names[i]])
+      if (cnt > 0) {
+        out[i] = paste0("Chr ", chr_names[i], ": ", cnt, " significant SNPs", "\n")
       }
     }
-    out = out[!grepl("NA", out)]
+    out = out[!is.na(out)]
     out = paste(out, collapse = "")
     paste("Number of significant SNPs: ", dim(outflank_data2())[1], "\n",
           "---------------", "\n",
@@ -858,20 +1076,68 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
           sep = "")
   })
   
+  # ---- Download Plot  ----
+  
   output$download_OutFLANK_plot1 = renderUI({
     if (OutFLANKtitle1() == "Manhattan Plot") {
-      downloadButton("DOutFLANK_plot1", "Download Plot")
+      actionButton(
+        inputId = "show_download_OutFLANK_plot1",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
   
+  observeEvent(input$show_download_OutFLANK_plot1, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_OutFLANK1_width", "Width", value = 10, min = 4, max = 30, step = 1),
+                 numericInput("dl_OutFLANK1_height", "Height", value = 4, min = 4, max = 30, step = 1),
+                 selectInput("dl_OutFLANK1_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_OutFLANK1_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_OutFLANK1_format == 'png' || input.dl_OutFLANK1_format == 'jpeg'",
+                   numericInput("dl_OutFLANK1_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DOutFLANK_plot1", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
   output$DOutFLANK_plot1 = downloadHandler(
-    filename = "OutFLANK_Manhattan_Plot_pvalue.pdf",
+    filename = function() {
+      ext = input$dl_OutFLANK1_format
+      paste0("OutFLANK_Manhattan_Plot_pvalue.", ext)
+    },
     content = function(file) {
       shinyjs::show("OutFLANKStatus")
-      pdf(file, width = 10, height = 4)
-      print(OutFLANKplot1())
-      dev.off()
+      req(OutFLANKplot1())
+      
+      width = input$dl_OutFLANK1_width
+      height = input$dl_OutFLANK1_height
+      units = input$dl_OutFLANK1_unit
+      device = input$dl_OutFLANK1_format
+      dpi = input$dl_OutFLANK1_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = OutFLANKplot1(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = OutFLANKplot1(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = OutFLANKplot1(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
       shinyjs::hide("OutFLANKStatus")
+      removeModal()
     }
   )
   
@@ -979,6 +1245,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   )
   
+  # ---- Download Table  ----
+  
   output$OutFLANK_Sign_SNP = DT::renderDataTable({
     req(outflank())
     DT::datatable(outflank_data2(), options = list(pageLength = 10))
@@ -999,6 +1267,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   )
   
+  # ---- Text  ----
+  
   output$guide_OutFLANK = renderUI({ div(class = "guide-text-block", guide_OutFLANK()) })
   output$OutFLANKtitle1 = renderText({ OutFLANKtitle1() })
   output$OutFLANKtitle2 = renderText({ OutFLANKtitle2() })
@@ -1006,7 +1276,10 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   output$OutFLANKtitle4 = renderText({ OutFLANKtitle4() })
   output$OutFLANKtitle5 = renderText({ OutFLANKtitle5() })
   
-  ##### IBS #####
+  #### IBS ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_IBS = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -1031,8 +1304,22 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   
   observeEvent(input$Site_Info4, {
     req(input$Site_Info4)
-    Site_Info = readRDS(input$Site_Info4$datapath)
-    Site_Info(Site_Info)
+    shinyjs::show("IBSStatus")
+    tryCatch({
+      Site_Info_obj = readRDS(input$Site_Info4$datapath)
+      if (!is.data.frame(Site_Info_obj)) stop("Not a data.frame file.")
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(Site_Info_obj))
+      if (length(missing_cols) > 0) stop(paste("Site Info. is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      Site_Info(Site_Info_obj)
+      shinyjs::hide("IBSStatus")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("IBSStatus")
+      Site_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$Chr_Info2 = renderUI({
@@ -1040,47 +1327,61 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   })
   
   observeEvent(input$Chr_Info2, {
-    Chr_Info = read.csv(input$Chr_Info2$datapath)
-    Chr_Info(Chr_Info)
+    req(input$Chr_Info2)
+    shinyjs::show("IBSStatus")
+    tryCatch({
+      Chr_Info_obj = read.csv(input$Chr_Info2$datapath, stringsAsFactors = FALSE)
+      if (!is.data.frame(Chr_Info_obj)) stop("Not a CSV data.frame.")
+      if (!is.numeric(Chr_Info_obj$Start) || !is.numeric(Chr_Info_obj$End))
+        stop("The 'Start' and 'End' columns in Chromosome Info must be numeric.")
+      Chr_Info(Chr_Info_obj)
+      shinyjs::hide("IBSStatus")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("IBSStatus")
+      Chr_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
+  # ---- Core Functions ----
   
   observeEvent(input$runIBS, {
     req(input$FileforIBS, Site_Info())
     shinyjs::show("IBSStatus")
-    data = switch(input$FileforIBS, "df" = df())
-    progressVal = reactiveVal(NULL)
-    IBS_result = IBS_analysis(data, Site_Info(), input$REF, input$COMPAR, Sliding.window = TRUE,
-                              window.size = input$WindowSize2*1000, step.size = input$StepSize2*1000, remove_RM = input$rmH)
-    IBS_result(IBS_result)
-    shinyjs::hide("IBSStatus")
-    IBStitle1("Chromosome Ideogram")
-    IBStitle2("Sliding Window Data")
-    guide_IBS("The IBS analysis is complete.")
-    
-    output$DIBS_plot = downloadHandler(
-      filename = function() {
-        paste0("IBS_Chromosome_Ideogram-", input$REF, "_vs_", input$COMPAR, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("IBSStatus")
-        pdf(file, width = 12, height = 5)
-        print(IBSplot())
-        dev.off()
-        shinyjs::hide("IBSStatus")
-      }
-    )
-    
-    output$DIBS_SW = downloadHandler(
-      filename = function() {
-        paste0("IBS_Sliding_Window-", input$REF, " vs ", input$COMPAR, ".csv")
-      },
-      content = function(file) {
-        shinyjs::show("IBSStatus")
-        write.csv(IBS_result()$window_data, file, row.names = FALSE)
-        shinyjs::hide("IBSStatus")
-      }
-    )
+    tryCatch({
+      data = switch(input$FileforIBS, "df" = df())
+      progressVal = reactiveVal(NULL)
+      IBS_result_obj = IBS_analysis(
+        data, Site_Info(), input$REF, input$COMPAR, 
+        Sliding.window = TRUE,
+        window.size = input$WindowSize2 * 1000,
+        step.size = input$StepSize2 * 1000,
+        remove_RM = input$rmH
+      )
+      IBS_result(IBS_result_obj)
+      shinyjs::hide("IBSStatus")
+      IBStitle1("Chromosome Ideogram")
+      IBStitle2("Sliding Window Data")
+      guide_IBS("The IBS analysis is complete.")
+    }, error = function(e) {
+      shinyjs::hide("IBSStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
+  })
+  
+  observeEvent(input$resetIBS, {
+    IBS_result(NULL)
+    IBStitle1("")
+    IBStitle2("")
+    showNotification("Data have been reset.")
+    output$Site_Info4 = renderUI({
+      fileInput("Site_Info4", "Site Info.* (required)", multiple = F, accept = c(".rds"))
+    })
+    output$Chr_Info2 = renderUI({
+      fileInput("Chr_Info2", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
+    })
+    guide_IBS("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run IBS' button.")
   })
   
   output$IBSres = renderText({
@@ -1096,6 +1397,8 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       )
     }
   })
+  
+  # ---- Show Plot  ----
   
   output$IBSplot = renderPlot({
     req(IBS_result(), Chr_Info())
@@ -1140,25 +1443,72 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   })
   
-  observeEvent(input$resetIBS, {
-    IBS_result(NULL)
-    IBStitle1("")
-    IBStitle2("")
-    showNotification("Data have been reset.")
-    output$Site_Info4 = renderUI({
-      fileInput("Site_Info4", "Site Info.* (required)", multiple = F, accept = c(".rds"))
-    })
-    output$Chr_Info2 = renderUI({
-      fileInput("Chr_Info2", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
-    })
-    guide_IBS = reactiveVal("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run IBS' button.")
-    })
+  # ---- Download Plot  ----
   
   output$download_IBS_plot = renderUI({
     if (IBStitle1() == "Chromosome Ideogram") {
-      downloadButton("DIBS_plot", "Download Plot")
+      actionButton(
+        inputId = "show_download_IBS_plot",
+        label = tagList(shiny::icon("download"), "Download Plot"),
+        class = "AI1-action-button"
+      )
     }
   })
+  
+  observeEvent(input$show_download_IBS_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_IBS_width", "Width", value = 12, min = 4, max = 30, step = 1),
+                 numericInput("dl_IBS_height", "Height", value = 5, min = 4, max = 30, step = 1),
+                 selectInput("dl_IBS_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_IBS_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_IBS_format == 'png' || input.dl_IBS_format == 'jpeg'",
+                   numericInput("dl_IBS_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DIBS_plot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DIBS_plot = downloadHandler(
+    filename = function() {
+      ext = input$dl_IBS_format
+      paste0("IBS_Chromosome_Ideogram-", input$REF, "_vs_", input$COMPAR, ".", ext)
+    },
+    content = function(file) {
+      shinyjs::show("IBSStatus")
+      req(IBSplot())
+      
+      width = input$dl_IBS_width
+      height = input$dl_IBS_height
+      units = input$dl_IBS_unit
+      device = input$dl_IBS_format
+      dpi = input$dl_IBS_dpi
+      
+      if (device == "pdf") {
+        ggsave(file, plot = IBSplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = IBSplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = IBSplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("IBSStatus")
+      removeModal()
+    }
+  )
+  
+  # ---- Download Table  ----
   
   output$IBS_SW = DT::renderDataTable({
     req(IBS_result())
@@ -1171,19 +1521,47 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     }
   })
   
+  output$DIBS_SW = downloadHandler(
+    filename = function() {
+      paste0("IBS_Sliding_Window-", input$REF, " vs ", input$COMPAR, ".csv")
+    },
+    content = function(file) {
+      shinyjs::show("IBSStatus")
+      write.csv(IBS_result()$window_data, file, row.names = FALSE)
+      shinyjs::hide("IBSStatus")
+    }
+  )
+  
+  # ---- Text  ----
+  
   output$guide_IBS = renderUI({ div(class = "guide-text-block", guide_IBS()) })
   output$IBStitle1 = renderText({ IBStitle1() })
   output$IBStitle2 = renderText({ IBStitle2() })
   
+  #### Manhattan Plot ####
   
-  ##### Manhattan Plot #####
   output$Manhattan_Upload = renderUI({
     fileInput("Manhattandata1", "", multiple = F, accept = c(".rds"))
   })
   
   observeEvent(input$Manhattandata1, {
-    data = readRDS(input$Manhattandata1$datapath)
-    Manhattan_data(data)
+    req(input$Manhattandata1)
+    shinyjs::show("ManhattanStatus")
+    tryCatch({
+      data_obj = readRDS(input$Manhattandata1$datapath)
+      if (!is.data.frame(data_obj)) stop("Not a data.frame file.")
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(data_obj))
+      if (length(missing_cols) > 0) stop(paste("Site Info. is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      Manhattan_data(data_obj)
+      shinyjs::hide("ManhattanStatus")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("ManhattanStatus")
+      Manhattan_data(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$Manhattan_fileInfo = renderText({
@@ -1206,8 +1584,21 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   })
   
   observeEvent(input$Manhattandata2, {
-    Chr_Info = read.csv(input$Manhattandata2$datapath)
-    Chr_Info(Chr_Info)
+    req(input$Manhattandata2)
+    shinyjs::show("ManhattanStatus")
+    tryCatch({
+      data_obj = read.csv(input$Manhattandata2$datapath, stringsAsFactors = FALSE)
+      if (!is.data.frame(data_obj)) stop("Not a CSV data.frame.")
+      if (!is.numeric(data_obj$Start) || !is.numeric(data_obj$End))
+        stop("The 'Start' and 'End' columns in Chromosome Info must be numeric.")
+      Chr_Info(data_obj)
+      shinyjs::hide("ManhattanStatus")
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("ManhattanStatus")
+      Chr_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$Manhattan_fileInfo2 = renderText({
@@ -1223,91 +1614,106 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   observeEvent(input$runManhattan, {
     req(Manhattan_data(), Chr_Info())
     shinyjs::show("ManhattanStatus")
-    data = Manhattan_data()
-    Chr_Info = Chr_Info()
-    data$Chr = as.numeric(data$Chr)
-    data$Pos = as.numeric(data$Pos)
-    data$AdjPos = as.numeric(data$Pos)
-    
-    for (i in 1:length(unique(data$Chr))) {
-      if (i>1){
-        end = sum(Chr_Info$End[1:i-1])
-        data$AdjPos[data$Chr == i] = as.numeric(data$AdjPos[data$Chr == i]) + end
+    tryCatch({
+      data = Manhattan_data()
+      Chr_Info = Chr_Info()
+      data$Chr = as.numeric(data$Chr)
+      data$Pos = as.numeric(data$Pos)
+      data$AdjPos = as.numeric(data$Pos)
+      
+      for (i in 1:length(unique(data$Chr))) {
+        if (i>1){
+          end = sum(Chr_Info$End[1:i-1])
+          data$AdjPos[data$Chr == i] = as.numeric(data$AdjPos[data$Chr == i]) + end
+        }
       }
-    }
-    
-    Chr_axis = data %>%
-      group_by(Chr) %>%
-      summarise(center = (max(AdjPos, na.rm = TRUE) + min(AdjPos, na.rm = TRUE)) / 2, .groups = "drop")
-    
-    sele_columns = input$Manhattan_hover_text
-    text_content = apply(data, 1, function(row) {
-      paste0(sapply(sele_columns, function(col) paste0(col, ": ", row[col])), collapse = "\n")
+      
+      Chr_axis = data %>%
+        group_by(Chr) %>%
+        summarise(center = (max(AdjPos, na.rm = TRUE) + min(AdjPos, na.rm = TRUE)) / 2, .groups = "drop")
+      
+      sele_columns = input$Manhattan_hover_text
+      text_content = apply(data, 1, function(row) {
+        paste0(sapply(sele_columns, function(col) paste0(col, ": ", row[col])), collapse = "\n")
+      })
+      data$text = text_content
+      
+      loc = which(colnames(data) == input$Manhattan_y_axis)
+      data$trans = data[, loc]
+      if (input$Manhattan_y_axis_trans == "-log10"){
+        data$trans = -log10(data$trans)
+      } else if (input$Manhattan_y_axis_trans == "Standardization"){
+        data$trans = (data$trans - mean(data$trans)) / sd(data$trans)
+      } else if (input$Manhattan_y_axis_trans == "Mean-Centering"){
+        data$trans = data$trans - mean(data$trans)
+      }
+      
+      if (input$Manh_top10000 == "NULL"){
+        plot_data <- data
+      } else{
+        plot_data <- data %>%
+          arrange(desc(trans)) %>%
+          slice_head(n = as.numeric(input$Manh_top10000)) %>%
+          arrange(Pos)
+      }
+      
+      plot_data <- plot_data %>%
+        mutate(Chr = factor(Chr, levels = sort(unique(as.integer(Chr)))))
+      chr_levels <- levels(plot_data$Chr)
+      
+      if (input$Manhattan_color == "Default"){
+        colors <- rep(c("#cbbc1d", "#5e929d"), length.out = length(chr_levels))
+      } else {
+        colors = my_palette(input$Manhattan_color, 2)
+      }
+      names(colors) <- chr_levels
+      
+      ManhattanPlot_tmp = ggplot(plot_data, aes(x = AdjPos, y = trans, text = text)) +
+        geom_point(aes(color = Chr), alpha = input$Manhattan_opacity, size  = input$Manhattan_size) +
+        scale_color_manual(values = colors, drop = FALSE) +
+        scale_x_continuous(label = Chr_axis$Chr, breaks = Chr_axis$center, expand = c(0.01, 0)) +
+        scale_y_continuous(expand = c(0.01, 0)) +
+        theme_classic() +
+        theme(legend.position = "none",
+              panel.border = element_blank(),
+              axis.text.x = element_text(size = input$Manhattan_x_axis_text_size),
+              axis.title.x = element_text(size = input$Manhattan_x_axis_title_size),
+              axis.text.y = element_text(size = input$Manhattan_y_axis_text_size),
+              axis.title.y = element_text(size = input$Manhattan_y_axis_title_size)
+        )
+      if (input$Manhattan_x_axis_title == "Show"){
+        ManhattanPlot_tmp = ManhattanPlot_tmp + xlab("Chromosome")
+      } else{
+        ManhattanPlot_tmp = ManhattanPlot_tmp + xlab("")
+      }
+      if (input$Manhattan_y_axis_title == "Show"){
+        ManhattanPlot_tmp = ManhattanPlot_tmp + ylab(input$Manhattan_y_axis)
+      } else{
+        ManhattanPlot_tmp = ManhattanPlot_tmp + ylab("")
+      }
+      if (!is.null(data$signif)){
+        data2 = subset(data, signif == "Yes")
+        if (input$Manhattan_y_threshold == "Show"){
+          ManhattanPlot_tmp = ManhattanPlot_tmp +
+            geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
+        }
+        if (input$Manhattan_highlight_color != "NULL"){
+          ManhattanPlot_tmp = ManhattanPlot_tmp +
+            geom_point(data = data2, aes(AdjPos, -log10(pvalue)), color = input$Manhattan_highlight_color, size = input$Manhattan_highlight_size, alpha = 0.9)
+        }
+      }
+      
+      ManhattanPlot_tmp = ggplotly(ManhattanPlot_tmp, tooltip = "text")
+      ManhattanPlot(ManhattanPlot_tmp)
+      ManhattanPlot1("Manhattan Plot")
+      shinyjs::hide("ManhattanStatus")
+      guide_Manhattan("You can customize the Manhattan plot and then click the ▶️ 'Run Manhattan Plot' button again.")
+    }, error = function(e) {
+      shinyjs::hide("ManhattanStatus")
+      showNotification(paste("Fail: ", e$message), type = "error")
+      ManhattanPlot(NULL)
+      ManhattanPlot1("")
     })
-    data$text = text_content
-    
-    loc = which(colnames(data) == input$Manhattan_y_axis)
-    data$trans = data[, loc]
-    if (input$Manhattan_y_axis_trans == "-log10"){
-      data$trans = -log10(data$trans)
-    } else if (input$Manhattan_y_axis_trans == "Standardization"){
-      data$trans = (data$trans - mean(data$trans)) / sd(data$trans)
-    } else if (input$Manhattan_y_axis_trans == "Mean-Centering"){
-      data$trans = data$trans - mean(data$trans)
-    }
-    
-    if (input$Manhattan_color == "Default"){
-      data$Chr = factor(data$Chr, levels = sort(unique(as.numeric(data$Chr))))
-      n_chr = length(levels(data$Chr))
-      colors = rep(c("#cbbc1d", "#5e929d"), length.out = n_chr)
-    } else {
-      data$Chr = factor(data$Chr, levels = sort(unique(as.numeric(data$Chr))))
-      n_chr = length(levels(data$Chr))
-      colors = my_palette(input$Manhattan_color, 2)
-      colors = rep(colors, length.out = n_chr)
-    }
-    
-    ManhattanPlot = ggplot(data, aes(x = AdjPos, y = trans, text = text)) +
-      geom_point(aes(color = as.factor(Chr)), alpha = input$Manhattan_opacity, size = input$Manhattan_size) +
-      scale_color_manual(values = colors) +
-      scale_x_continuous(label = Chr_axis$Chr, breaks = Chr_axis$center, expand = c(0.01, 0)) +
-      scale_y_continuous(expand = c(0.01, 0)) +
-      theme_classic() +
-      theme(legend.position = "none",
-            panel.border = element_blank(),
-            axis.text.x = element_text(size = input$Manhattan_x_axis_text_size),
-            axis.title.x = element_text(size = input$Manhattan_x_axis_title_size),
-            axis.text.y = element_text(size = input$Manhattan_y_axis_text_size),
-            axis.title.y = element_text(size = input$Manhattan_y_axis_title_size)
-      )
-    if (input$Manhattan_x_axis_title == "Show"){
-      ManhattanPlot = ManhattanPlot + xlab("Chromosome")
-    } else{
-      ManhattanPlot = ManhattanPlot + xlab("")
-    }
-    if (input$Manhattan_y_axis_title == "Show"){
-      ManhattanPlot = ManhattanPlot + ylab(input$Manhattan_y_axis)
-    } else{
-      ManhattanPlot = ManhattanPlot + ylab("")
-    }
-    if (!is.null(data$signif)){
-      data2 = subset(data, signif == "Yes")
-      if (input$Manhattan_y_threshold == "Show"){
-        ManhattanPlot = ManhattanPlot +
-          geom_hline(yintercept = min(-log10(data2$pvalue)), color = "#ff4500", linetype = "dashed", linewidth = 0.6)
-      }
-      if (input$Manhattan_highlight_color != "NULL"){
-        ManhattanPlot = ManhattanPlot +
-          geom_point(data = data2, aes(AdjPos, -log10(pvalue)), color = input$Manhattan_highlight_color, size = input$Manhattan_highlight_size, alpha = 0.9)
-      }
-    }
-    
-    ManhattanPlot = ggplotly(ManhattanPlot, tooltip = "text")
-    ManhattanPlot(ManhattanPlot)
-    
-    ManhattanPlot1("Manhattan Plot")
-    shinyjs::hide("ManhattanStatus")
-    guide_Manhattan("You can customize the Manhattan plot and then click the ▶️ 'Run Manhattan Plot' button again.")
   })
   
   observeEvent(input$resetManhattan, {

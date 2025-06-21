@@ -143,7 +143,7 @@ Page_2_Data_QC_UI = function() {
 #' @title Page_2_Data_QC_Server
 #' @export
 Page_2_Data_QC_Server = function(input, output, session) {
-  ##### Page 2-1: Sample QC #####
+  #### Page 2-1: Sample QC ####
   output$fileSelection1 = renderUI({
     choices = c(
       "Input VCF Data (in data.frame)" = "VCFdf",
@@ -258,7 +258,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     sampleQCstatus("")
     showNotification("Data have been reset.")
     guide_sampleQC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'Sample QC by Thresholds' button.")
-  })
+    })
   
   output$sampleQCresult = renderText({
     req(SampleQC_sample(), SampleQC_SNP())
@@ -309,7 +309,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     Sampleplot(sampleh())
   })
   
-  ##### Page 2-2: SNP QC #####
+  #### Page 2-2: SNP QC ####
   output$fileSelection2 = renderUI({
     choices = c(
       "Sample Post-QC Data" = "QCData",
@@ -479,7 +479,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     SNPQCstatus("")
     showNotification("Data have been reset.")
     guide_QC("1️⃣ Need to obtain the summary statistics first! Then, scroll down to review the results. \n2️⃣ Adjust the thresholds and click the 'SNP QC by Thresholds' button.")
-  })
+    })
   
   output$QCresult = renderText({
     req(SNPQC_sample(), SNPQC_SNP())
@@ -544,7 +544,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     SNPplot_HWE(-log10(HWE()))
   })
   
-  ##### Page 2-3: SNP Density #####
+  #### Page 2-3: SNP Density ####
   output$Site_Info0 = renderUI({
     fileInput("Site_Info0", "Site Info.* (required)", multiple = F, accept = c(".rds"))
   })
@@ -671,7 +671,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
       fileInput("Chr_Info0", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
     guide_SNPdensity("Need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease select the optimal window size and step, then click the 'Summary' button.")
-  })
+    })
   
   output$SNPdensity_result1 = renderText({
     req(SNPdensityresults2(), Chr_Info(), Site_Info())
@@ -693,7 +693,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     "Average number of SNPs per 1000bp: ", data[last_row, 3], " SNPs", "\n", 
                     "SNP spacing across chromosomes, ", data[1,1], " to ", length(Chr_Info[,1]), ": ",
                     paste(as.numeric(data[1:last_row-1, 2]), collapse = ", "), "\n"
-      )
+                    )
       pre_results = pre_results()
       pre_results[[2]] = "## Data Input"
       pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)

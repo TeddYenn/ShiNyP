@@ -283,9 +283,11 @@ Page_4_Population_Structure_UI = function() {
 #' @title Page_4_Population_Structure_Server
 #' @export
 Page_4_Population_Structure_Server = function(input, output, session) {
-  ##### Page 4: Population Structure #####
-  ##### PCA #####
+  
+  #### PCA ####
+  
   # ---- Select File ----
+  
   output$fileSelection_PCA = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -303,6 +305,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   # ---- Core Functions ----
+  
   observeEvent(input$runPCA, {
     req(input$FileforPCA)
     shinyjs::show("PCAStatus")
@@ -356,6 +359,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     })
   
   # ---- Plot Setting ----
+  
   output$pc1 = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot"){
       pca_result = pca_result()
@@ -385,12 +389,24 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   observeEvent(input$groupfile4, {
     req(input$groupfile4)
-    groupfile = read.csv(input$groupfile4$datapath)
-    groupfile4 = as.numeric(groupfile[,2])
-    groupfile4(groupfile4)
+    tryCatch({
+      groupfile = read.csv(input$groupfile4$datapath)
+      if (is.null(df())) {
+        stop("Dataset is not loaded")
+      }
+      if (nrow(groupfile) != nrow(df())) {
+        stop("Sample number in Group Info. does not match dataset")
+      }
+      groupfile4(as.numeric(groupfile[,2]))
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      groupfile4(NULL)
+      showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+    })
   })
   
   # ---- Show Plot  ----
+  
   output$PCAplot = renderPlot({
     req(input$pc1, input$pc2, pca_result(), PCA_SD())
     if (PCAtitle1() == "PCA Scatter Plot") {
@@ -463,6 +479,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   # ---- Download Plot  ----
+  
   output$download_PCA_plot = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot") {
       actionButton(
@@ -590,6 +607,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   )
   
   # ---- Download Table  ----
+  
   output$download_var = renderUI({
     if (PCAtitle1() == "PCA Scatter Plot") {
       downloadButton("Dvar", "Download Explained Variance")
@@ -636,13 +654,15 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   )
   
   # ---- Text  ----
+  
   output$guide_PCA = renderUI({ div(class = "guide-text-block", guide_PCA()) })
   output$PCAtitle1 = renderText({ PCAtitle1() })
   output$PCAtitle2 = renderText({ PCAtitle2() })
   
-  ##### DAPC #####
+  #### DAPC ####
   
   # ---- Select File ----
+  
   output$fileSelection_DAPC = renderUI({
     choices = list()
     if (!is.null(gi()) && !is.null(gl())) {
@@ -684,6 +704,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   # ---- Core Functions ----
+  
   observeEvent(input$runDAPC1, {
     req(input$FileforDAPC, input$npca, input$Maxgrp)
     shinyjs::show("DAPCStatus")
@@ -758,10 +779,11 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     DAPCtitle4("")
     DAPCtitle5("")
     showNotification("Data have been reset.")
-    guide_DAPC("To run DAPC, input data must be genlight or genind file.\nPlease click 'Run DAPC I' button first.")
+    guide_DAPC("To run DAPC, the input data must be in ✅ genlight or ✅ genind format. \nPlease click the 'Run DAPC I' button first.")
   })
   
   # ---- Show Plot ----
+  
   output$BICplot = renderPlot({
     req(DAPC1())
     if (DAPCtitle1() == "Bayesian Information Criterion (BIC) Plot"){
@@ -837,6 +859,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   # ---- Download Plot ----
+  
   output$download_BIC_plot = renderUI({
     if (DAPCtitle1() == "Bayesian Information Criterion (BIC) Plot") {
       actionButton(
@@ -1180,6 +1203,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   )
   
   # ---- Download Table ----
+  
   output$download_DAPC_pop = renderUI({
     if (DAPCtitle4() == "DAPC Scatter Plot") {
       downloadButton("DDAPCpop", "Download DAPC Group Info.")
@@ -1232,6 +1256,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   )
   
   # ---- Text ----
+  
   output$guide_DAPC = renderUI({ div(class = "guide-text-block", guide_DAPC()) })
   output$DAPCtitle1 = renderText({ DAPCtitle1() })
   output$DAPCtitle2 = renderText({ DAPCtitle2() })
@@ -1239,7 +1264,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$DAPCtitle4 = renderText({ DAPCtitle4() })
   output$DAPCtitle5 = renderText({ DAPCtitle5() })
   
-  ##### UPGMA #####
+  #### UPGMA ####
+  
   output$fileSelection_UPGMA = renderUI({
     if (!is.null(gl())){
       choices = c("genlight file" = "gl")
@@ -1329,7 +1355,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$guide_UPGMA = renderUI({ div(class = "guide-text-block", guide_UPGMA()) })
   output$UPGMAtitle1 = renderText({ UPGMAtitle1() })
   
-  ##### NJ #####
+  #### NJ ####
+  
   output$fileSelection_NJ = renderUI({
     if (!is.null(gl())){
       choices = c("genlight file" = "gl")
@@ -1417,7 +1444,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$guide_NJ = renderUI({ div(class = "guide-text-block", guide_NJ()) })
   output$NJtitle1 = renderText({ NJtitle1() })
   
-  ##### Kinship #####
+  #### Kinship ####
+  
   output$fileSelection_Kinship = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -1513,7 +1541,9 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   })
   
   output$DKinshipres = downloadHandler(
-    filename = paste0("Kinship_Matrix_Object-Method_", input$Kinship_method, ".rds"),
+    filename = function(){
+      paste0("Kinship_Matrix_Object-Method_", input$Kinship_method, ".rds")
+    },
     content = function(file) {
       shinyjs::show("KinshipStatus")
       saveRDS(KinshipMatrix(), file)
@@ -1524,7 +1554,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$guide_Kinship = renderUI({ div(class = "guide-text-block", guide_Kinship()) })
   output$Kinshiptitle1 = renderText({ Kinshiptitle1() })
   
-  ##### Scatter plot + #####
+  #### Scatter plot + ####
+  
   output$scatter_Upload = renderUI({
     fileInput("scatterdata1", "", multiple = F, accept = c(".rds"))
   })
@@ -1543,7 +1574,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       pcs = paste0("LD", seq_along(data$eig))
       scatter_data(data$ind.coord[, 1:3, drop = FALSE])
     }
-    
+    showNotification("Uploaded successfully", type = "message")
     updateSelectInput(session, "Scatter_xvar", choices = pcs, selected = pcs[1])
     updateSelectInput(session, "Scatter_yvar", choices = pcs, selected = pcs[2])
     updateSelectInput(session, "Scatter_zvar", choices = pcs, selected = pcs[3])
@@ -1568,6 +1599,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     req(input$scatterdata2)
     df = read.csv(input$scatterdata2$datapath)
     scatterInfo(df)
+    showNotification("Uploaded successfully", type = "message")
   })
   
   output$scatter_fileInfo2 = renderText({
@@ -1591,10 +1623,6 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       
       df_info = scatterInfo()
       col_idx = which(colnames(df_info) == input$Scatter_colvar)
-      if (length(col_idx) == 0) {
-        shinyjs::alert("Selected grouping variable not found in the uploaded CSV.")
-        return()
-      }
       
       extract_axis_number = function(x) as.numeric(stringr::str_extract(x, "\\d+"))
       xvar = extract_axis_number(input$Scatter_xvar) %||% 1
@@ -1666,7 +1694,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       guide_scatter("You can customize the scatter plot and then click the ▶️ 'Run Scatter Plot' button again.")
       
     }, error = function(e) {
-      shinyjs::alert(paste("An error occurred:", e$message))
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
     }, finally = {
       shinyjs::hide("ScatterStatus")
     })
@@ -1732,7 +1760,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   output$scatter2D = renderText({ scatter2D() })
   output$scatter3D = renderText({ scatter3D() })
   
-  ##### Tree Plot + #####
+  #### Tree Plot + ####
+  
   output$Tree_Upload = renderUI({
     fileInput("treedata1", "", multiple = F, accept = c(".rds"))
   })

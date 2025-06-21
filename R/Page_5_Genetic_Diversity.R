@@ -14,8 +14,14 @@ Page_5_Genetic_Diversity_UI = function() {
                           verbatimTextOutput("GDfileInfo"),
                           tags$style("#GDfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("Site_Info1"),
-                          uiOutput("groupfile3"),
+                          bslib::tooltip(
+                            uiOutput("Site_Info1"),
+                            "Upload: Site Info. (RDS)"
+                          ),
+                          bslib::tooltip(
+                            uiOutput("groupfile3"),
+                            "Upload: Group Info. (CSV)"
+                          ),
                           actionButton("runGD", "Run Diversity Analysis", class = "run-action-button"),
                           actionButton("resetGD", "Reset"),
                           width = 3),
@@ -56,9 +62,12 @@ Page_5_Genetic_Diversity_UI = function() {
                           actionButton("resetSW", "Reset"),
                           tags$hr(),
                           tags$h5("STEP II: Circos Plot"),
-                          uiOutput("Chr_Info"), # Track 1
-                          selectInput("Track1", "Track 1 & 2: Chromosome Info.", choices = NULL), # Track 1
-                          uiOutput("Track3"), # Track 3-
+                          bslib::tooltip(
+                            uiOutput("Chr_Info"), # Track 1-2
+                            "Upload: Chromosome Info. (CSV)"
+                          ),
+                          selectInput("Track1", "Track 1 & 2: Chromosome Info.", choices = "Chromosome Info."), # Track 1
+                          uiOutput("Track3"), # Track 3-6
                           actionButton("addTrack", "Add Track", class = "S-action-button"),
                           actionButton("runCircos", "Run Circos Plot", class = "run-action-button"),
                           actionButton("resetCircos", "Reset"),
@@ -86,7 +95,10 @@ Page_5_Genetic_Diversity_UI = function() {
                           verbatimTextOutput("GTfileInfo"),
                           tags$style("#GTfileInfo { font-size: 14px;}"),
                           tags$hr(),
-                          uiOutput("groupfile5"),
+                          bslib::tooltip(
+                            uiOutput("groupfile5"),
+                            "Upload: Group Info. (CSV)"
+                          ),
                           selectInput("GT_method", "Method",
                                       choices = names(GT_method_choice), selected = "Cavalli-Sforza's chord distance"),
                           actionButton("runGT", "Run Genetic Distance", class = "run-action-button"),
@@ -100,6 +112,7 @@ Page_5_Genetic_Diversity_UI = function() {
                             column(6,
                                    div(class = "title-text-style", textOutput("GTtitle1")),
                                    plotOutput("GTplot", width = "400px", height = "400px"),
+                                   uiOutput("GT_digits_slider"),
                                    uiOutput("download_GT_plot")
                             ),
                             column(6,
@@ -154,8 +167,11 @@ Page_5_Genetic_Diversity_UI = function() {
 #' @title Page_5_Genetic_Diversity_Server
 #' @export
 Page_5_Genetic_Diversity_Server = function(input, output, session) {
-  ##### Page 5: Genetic Diversity #####
-  ##### Diversity Parameters #####
+  
+  #### Diversity Parameters ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_GD = renderUI({
     if (!is.null(df())){ choices = c("data.frame file" = "df") } else { choices = "" }
     selectInput("FileforGD", "Dataset for analysis:", choices)
@@ -178,16 +194,40 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   
   observeEvent(input$groupfile3, {
     req(input$groupfile3)
-    groupfile = read.csv(input$groupfile3$datapath)
-    groupInfo3 = groupfile$Group
-    groupInfo3(groupInfo3)
+    tryCatch({
+      groupfile = read.csv(input$groupfile3$datapath)
+      if (is.null(df())) {
+        stop("Dataset is not loaded")
+      }
+      if (nrow(groupfile) != nrow(df())) {
+        stop("Sample number in Group Info. does not match dataset")
+      }
+      groupInfo3(groupfile$Group)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      groupInfo3(NULL)
+      showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$Site_Info1, {
     req(input$Site_Info1)
-    Site_Info = readRDS(input$Site_Info1$datapath)
-    Site_Info(Site_Info)
+    tryCatch({
+      Site_Info_obj = readRDS(input$Site_Info1$datapath)
+      if (!is.data.frame(Site_Info_obj)) stop("Not a data.frame file.")
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(Site_Info_obj))
+      if (length(missing_cols) > 0) stop(paste("Site Info file is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      Site_Info(Site_Info_obj)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Site_Info(NULL)
+      showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+    })
   })
+  
+  # ---- Core Functions ----
   
   observeEvent(input$runGD, {
     req(df(), Site_Info())
@@ -284,30 +324,34 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     })
   })
   
-  
   observeEvent(input$resetGD, {
-    GDfileInfo = reactiveVal("")
-    groupInfo3 = reactiveVal("")
-    group_stat = reactiveVal("")
-    fst_matrix = reactiveVal("")
-    Site_Info = reactiveVal("")
-    popgen = reactiveVal(NULL)
-    site_stat = reactiveVal(NULL)
-    GDplot = reactiveVal(NULL)
+    GDfileInfo("")
+    groupInfo3(NULL)
+    group_stat("")
+    fst_matrix("")
+    Site_Info("")
+    popgen(NULL)
+    site_stat(NULL)
+    GDplot(NULL)
     output$groupfile3 = renderUI({
-      fileInput("groupfile3", "Group Info. (optional)", multiple = F, accept = c(".csv"))
+      fileInput("groupfile3", "Group Info. (optional)", multiple = FALSE, accept = c(".csv"))
     })
     output$Site_Info1 = renderUI({
-      fileInput("Site_Info1", "Site Info. (required)", multiple = F, accept = c(".rds"))
+      fileInput("Site_Info1", "Site Info.* (required)", multiple = FALSE, accept = c(".rds"))
     })
     GDtitle1("")
     GDtitle2("")
     output$GDresults = DT::renderDataTable({ DT::datatable(NULL) })
     GDtitle3("")
     output$GDgroupresults = DT::renderDataTable({ DT::datatable(NULL) })
+    output$Type = renderUI({})
+    output$Parameter = renderUI({})
+    shinyjs::hide("GDStatus")
     showNotification("Data have been reset.")
     guide_GD("To analyze genetic diversity, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Site Info file (in RDS format).\nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Analysis' button.")
     })
+  
+  # ---- Setting ----
   
   observeEvent(input$Type, {
     req(site_stat())
@@ -334,6 +378,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       })
     }
   })
+  
+  # ---- Show Plot  ----
   
   observeEvent(input$Parameter, {
     if (input$Type == "Statistics per site") {
@@ -390,6 +436,15 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       GDtitle1("Plot of Genetic Diversity Statistics by Group")
     }
   })
+  
+  output$GDplot = renderPlot({
+    req(GDplot())
+    if (GDtitle2() == "Genetic Diversity Statistics by per Site") {
+      GDplot()
+    }
+  })
+  
+  # ---- Download Plot  ----
   
   output$download_GD_plot = renderUI({
     if (GDtitle2() == "Genetic Diversity Statistics by per Site") {
@@ -454,6 +509,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     }
   )
   
+  # ---- Download Table  ----
+  
   output$download_GD_site = renderUI({
     if (GDtitle2() == "Genetic Diversity Statistics by per Site") {
       downloadButton("DGD_site", "Download Genetic Diversity (per site)")
@@ -514,12 +571,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     }
   )
   
-  output$GDplot = renderPlot({
-    req(GDplot())
-    if (GDtitle2() == "Genetic Diversity Statistics by per Site") {
-      GDplot()
-    }
-  })
+  # ---- Text  ----
   
   output$guide_GD = renderUI({ div(class = "guide-text-block", guide_GD())})
   output$GDtitle1 = renderText({ GDtitle1() })
@@ -527,6 +579,9 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   output$GDtitle3 = renderText({ GDtitle3() })
   
   ##### Circos Plot #####
+  
+  # ---- Setting ----
+  
   observeEvent(site_stat(), {
     if (!is.null(site_stat())) {
       updateSelectInput(session, "SelePara",
@@ -547,6 +602,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       paste0("No available data!")
     }
   })
+  
+  # ---- Core Functions ----
   
   observeEvent(input$runSW, {
     req(site_stat())
@@ -603,31 +660,58 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     })
   })
   
+  observeEvent(input$resetSW, {
+    SW_data(NULL)
+    Circostitle1("")
+    output$SWresults = DT::renderDataTable({ DT::datatable(NULL) })
+    shinyjs::hide("CircosStatus")
+    showNotification("Data have been reset.")
+    guide_Circos("To run the sliding window analysis, you need to run 'Diversity Parameter' first! \nPlease select the optimal window size and step, then click the 'Run Sliding Window' button.")
+  })
+  
+  # ---- Download Table  ----
+  
   output$download_SW = renderUI({
     if (Circostitle1() == "Sliding Window Data") {
       downloadButton("D_SW", "Download Sliding Window Data")
     }
   })
   
-  observeEvent(input$resetSW, {
-    SW_data = reactiveVal(NULL)
-    Circostitle1("")
-    output$SWresults = DT::renderDataTable({ DT::datatable(NULL) })
-    showNotification("Data have been reset.")
-    guide_Circos("To run the sliding window analysis, you need to run 'Diversity Parameter' first! \nPlease select the optimal window size and step, then click the 'Run Sliding Window' button.")
-  })
+  output$D_SW = downloadHandler(
+    filename = function(){
+      paste0("Diversity_Sliding_Window-Window_Size", input$WindowSize, "-Step_Size",input$StepSize,".csv")
+    },
+    content = function(file) {
+      shinyjs::show("CircosStatus")
+      write.csv(SW_data(), file, row.names = FALSE)
+      shinyjs::hide("CircosStatus")
+    }
+  )
+  
+  # ---- Select File ----
   
   output$Chr_Info = renderUI({
     fileInput("Chr_Info", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
   })
   
   observeEvent(input$Chr_Info, {
+    req(input$Chr_Info)
     Chr_Info = read.csv(input$Chr_Info$datapath)
-    Chr_Info(Chr_Info)
-    if (!is.null(Chr_Info)){
-      updateSelectInput(session, "Track1", choices = "Chromosome Info.", selected = "Chromosome Info.")
-    }
+    
+    tryCatch({
+      Chr_Info = read.csv(input$Chr_Info$datapath)
+      if (!is.data.frame(Chr_Info)) stop("Not a CSV data.frame.")
+      if (!is.numeric(Chr_Info$Start) || !is.numeric(Chr_Info$End))
+        stop("The 'Start' and 'End' columns in Chromosome Info must be numeric.")
+      Chr_Info(Chr_Info)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Chr_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
+  
+  # ---- Setting ----
   
   observeEvent(input$addTrack, {
     if (n_SelePara() < 4) {
@@ -646,36 +730,44 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     })
   })
   
+  # ---- Core Functions ----
+  
   observeEvent(input$runCircos, {
     req(SW_data(), Chr_Info(), input$Track3)
     shinyjs::show("CircosStatus")
     
-    Track3(input$Track3)
-    Track4(input$Track4)
-    Track5(input$Track5)
-    Track6(input$Track6)
-    
-    pdf_path = tempfile(fileext = ".pdf")
-    generateCircosPlot(Chr_Info(), SW_data(), pdf_path, Track3(), Track4(), Track5(), Track6())
-    
-    output$downloadCircosplot = renderUI({
-      if (Circostitle2() == "Circos Plot"){
-        downloadButton("Circosplot", "Download Plot")
-      }
+    tryCatch({
+      Track3(input$Track3)
+      Track4(input$Track4)
+      Track5(input$Track5)
+      Track6(input$Track6)
+      
+      pdf_path = tempfile(fileext = ".pdf")
+      generateCircosPlot(Chr_Info(), SW_data(), pdf_path, Track3(), Track4(), Track5(), Track6())
+      
+      output$downloadCircosplot = renderUI({
+        if (Circostitle2() == "Circos Plot"){
+          downloadButton("Circosplot", "Download Plot")
+        }
+      })
+      
+      output$Circosplot = downloadHandler(
+        filename = "Circos_Plot.pdf",
+        content = function(file) {
+          shinyjs::show("CircosStatus")
+          file.copy(pdf_path, file)
+          shinyjs::hide("CircosStatus")
+        }
+      )
+      
+      shinyjs::hide("CircosStatus")
+      Circostitle2("Circos Plot")
+      guide_Circos("The Circos plot is complete!\nPlease download the Circos plot and review the results.")
+      
+    }, error = function(e){
+      shinyjs::hide("CircosStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
     })
-    
-    output$Circosplot = downloadHandler(
-      filename = "Circos_Plot.pdf",
-      content = function(file) {
-        shinyjs::show("CircosStatus")
-        file.copy(pdf_path, file)
-        shinyjs::hide("CircosStatus")
-      }
-    )
-    
-    shinyjs::hide("CircosStatus")
-    Circostitle2("Circos Plot")
-    guide_Circos("The Circos plot is complete!\nPlease download the Circos plot and review the results.")
   })
   
   observeEvent(input$resetCircos, {
@@ -701,6 +793,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     guide_Circos("The 'Sliding Window' analysis is complete. \nPlease select parameters for each track, then click the 'Run Circos Plot' button.")
   })
   
+  # ---- Text  ----
+  
   output$Circosplotinfo = renderText({
     if (Circostitle2() == "Circos Plot"){
       paste0("Track 1 & 2: ", input$Track1, "\n",
@@ -710,11 +804,15 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
              "Track 6: ", Track6(), "\n")
     }
   })
+  
   output$guide_Circos = renderUI({ div(class = "guide-text-block",  guide_Circos()) })
   output$Circostitle1 = renderText({ Circostitle1() })
   output$Circostitle2 = renderText({ Circostitle2() })
   
-  ##### Genetic Distance #####
+  #### Genetic Distance ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_GT = renderUI({
     if (!is.null(df())){ choices = c("data.frame file" = "df") } else { choices = "" }
     selectInput("FileforGT", "Dataset for genetic distance:", choices)
@@ -733,73 +831,80 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   
   observeEvent(input$groupfile5, {
     req(input$groupfile5)
-    groupfile = read.csv(input$groupfile5$datapath)
-    groupInfo4 = groupfile$Group
-    groupInfo4(groupInfo4)
+    tryCatch({
+      groupfile = read.csv(input$groupfile5$datapath)
+      if (is.null(df())) {
+        stop("Dataset is not loaded")
+      }
+      if (nrow(groupfile) != nrow(df())) {
+        stop("Sample number in Group Info. does not match dataset")
+      }
+      groupInfo4(groupfile$Group)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      groupInfo4(NULL)
+      showNotification(paste("Fail:", e$message), type = "error", duration = 10)
+    })
   })
+  
+  
+  output$GT_digits_slider = renderUI({
+    if (!is.null(GTdf())) {
+      sliderInput("GT_digits", "Digits", min = 0, max = 6, value = 4, step = 1, width = "400px")
+    }
+  })
+  
+  # ---- Core Functions ----
   
   observeEvent(input$runGT, {
     req(input$FileforGT, df(), groupInfo4())
     shinyjs::show("GTStatus")
-    GT_data = cbind(groupInfo4(), df())
-    GT = genet.dist(GT_data, diploid = TRUE, method = GT_method_choice[input$GT_method])
-    GT.mat = as.matrix(GT) %>% round(digits = 4)
-    GTmatrix = GT.mat[order(as.numeric(rownames(GT.mat))), order(as.numeric(colnames(GT.mat)))]
-    rownames(GTmatrix) = colnames(GTmatrix) = paste("Group", colnames(GTmatrix))
-    GTmatrix(GTmatrix)
-    ind = which(upper.tri(GTmatrix, diag = FALSE), arr.ind = TRUE)
-    GTdf = data.frame(
-      Pair1 = colnames(GTmatrix)[ind[, 2]],
-      Pair2 = rownames(GTmatrix)[ind[, 1]],
-      GeneticDistance = GTmatrix[ind]
-    )
-    GTdf(GTdf)
-    GTdf$Pair1 = factor(GTdf$Pair1, levels = unique(GTdf$Pair1))
-    GTdf$Pair2 = factor(GTdf$Pair2, levels = unique(GTdf$Pair2))
-    GTdf$GeneticDistance[GTdf$GeneticDistance < 0] = 0
-    shinyjs::hide("GTStatus")
-    GTtitle1("Genetic Distance Plot")
-    GTtitle2("Genetic Distance Matrix")
-    guide_GT("Genetic distance analysis is complete.")
-    output$GTresults = renderTable({ GTmatrix() }, rownames = TRUE)
-    pre_results = pre_results()
-    pre_results[[30]] = "## Genetic Diversity"
-    pre_results[[37]] = paste0("### Genetic Distance (between pairs of groups)")
-    combined = apply(GTdf[, c("Pair1", "Pair2", "GeneticDistance")], 1, function(row) {
-      paste0(row[1], "-", row[2], ": ", row[3])
+    
+    tryCatch({
+      GT_data = cbind(groupInfo4(), df())
+      GT = genet.dist(GT_data, diploid = TRUE, method = GT_method_choice[input$GT_method])
+      GT.mat = as.matrix(GT) %>% round(digits = 4)
+      GTmatrix = GT.mat[order(as.numeric(rownames(GT.mat))), order(as.numeric(colnames(GT.mat)))]
+      rownames(GTmatrix) = colnames(GTmatrix) = paste("Group", colnames(GTmatrix))
+      GTmatrix(GTmatrix)
+      ind = which(upper.tri(GTmatrix, diag = FALSE), arr.ind = TRUE)
+      GTdf = data.frame(
+        Pair1 = colnames(GTmatrix)[ind[, 2]],
+        Pair2 = rownames(GTmatrix)[ind[, 1]],
+        GeneticDistance = GTmatrix[ind]
+      )
+      GTdf(GTdf)
+      GTdf$Pair1 = factor(GTdf$Pair1, levels = unique(GTdf$Pair1))
+      GTdf$Pair2 = factor(GTdf$Pair2, levels = unique(GTdf$Pair2))
+      GTdf$GeneticDistance[GTdf$GeneticDistance < 0] = 0
+      shinyjs::hide("GTStatus")
+      GTtitle1("Genetic Distance Plot")
+      GTtitle2("Genetic Distance Matrix")
+      guide_GT("Genetic distance analysis is complete.")
+      output$GTresults = renderTable({ GTmatrix() }, rownames = TRUE)
+      pre_results = pre_results()
+      pre_results[[30]] = "## Genetic Diversity"
+      pre_results[[37]] = paste0("### Genetic Distance (between pairs of groups)")
+      combined = apply(GTdf[, c("Pair1", "Pair2", "GeneticDistance")], 1, function(row) {
+        paste0(row[1], "-", row[2], ": ", row[3])
+      })
+      text = paste0("Methodology: Group-Group Pairwise ", input$GT_method, "\n",
+                    paste(combined, collapse = "; ")
+      )
+      pre_results[[38]] = paste(text)
+      pre_results(pre_results)
+      
+    }, error = function(e){
+      shinyjs::hide("GTStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
     })
-    text = paste0("Methodology: Group-Group Pairwise ", input$GT_method, "\n",
-                  paste(combined, collapse = "; ")
-                  )
-    pre_results[[38]] = paste(text)
-    pre_results(pre_results)
-    
-    output$DGTplot = downloadHandler(
-      filename = function() {
-        paste0("Genetic_Distance_Plot-", input$GT_method, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("GTStatus")
-        pdf(file, width = 7, height = 7)
-        print(GTplot())
-        dev.off()
-        shinyjs::hide("GTStatus")
-      }
-    )
-    
-    output$DGTresult = downloadHandler(
-      filename = paste0("Genetic_Distance_Matrix-", input$GT_method, ".csv"),
-      content = function(file) {
-        shinyjs::show("GTStatus")
-        write.csv(GTmatrix(), file, row.names = TRUE)
-        shinyjs::hide("GTStatus")
-      }
-    )
   })
   
   observeEvent(input$resetGT, {
     GTmatrix(NULL)
     GTdf(NULL)
+    GTplot(NULL)
+    shinyjs::hide("GTStatus")
     showNotification("Data have been reset.")
     output$GTresults = renderTable({ NULL })
     groupInfo4(NULL)
@@ -811,13 +916,19 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     guide_GT("To run the genetic distance analysis, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Group Info. file.")
     })
   
+  # ---- Show Plot  ----
+  
   output$GTplot = renderPlot({
     req(GTdf())
     if (guide_GT() == "Genetic distance analysis is complete.") {
       mid = (max(GTdf()[, 3]) - min(GTdf()[, 3])) / 2
-      GTplot = ggplot(GTdf(), aes(x = Pair1, y = Pair2, fill = GeneticDistance)) +
+      
+      df_tmp = GTdf()
+      digits_tmp = ifelse(is.null(input$GT_digits), 4, input$GT_digits)
+      df_tmp$label = round(df_tmp$GeneticDistance, digits = digits_tmp)
+      GTplot = ggplot(df_tmp, aes(x = Pair1, y = Pair2, fill = GeneticDistance)) +
         geom_tile() +
-        geom_text(aes(label = GeneticDistance), color = "black", size = 4.5) +
+        geom_text(aes(label = label), color = "black", size = 4.5) +
         scale_fill_gradient2(low = "white", mid = "#f19372", high = "#b53c12", midpoint = mid, name = input$GT_method) +
         scale_x_discrete(expand = c(0, 0)) +
         scale_y_discrete(expand = c(0, 0), position = "right") +
@@ -836,11 +947,72 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     }
   })
   
+  # ---- Download Plot  ----
+  
   output$download_GT_plot = renderUI({
-    if (!is.null(GTdf())) {
-      downloadButton("DGTplot", "Download Plot")
+    if (guide_GT() == "Genetic distance analysis is complete.") {
+      actionButton(
+        inputId = "show_download_GT_plot", 
+        label = tagList(shiny::icon("download"), "Download Plot"), 
+        class = "AI1-action-button"
+      )
     }
   })
+  
+  observeEvent(input$show_download_GT_plot, {
+    showModal(
+      modalDialog(
+        title = "Download Plot Settings",
+        fluidRow(
+          column(6,
+                 numericInput("dl_gt_width", "Width", value = 7, min = 4, max = 30, step = 1),
+                 numericInput("dl_gt_height", "Height", value = 7, min = 4, max = 30, step = 1),
+                 selectInput("dl_gt_unit", "Unit", choices = c("inches" = "in", "cm" = "cm"), selected = "in")
+          ),
+          column(6,
+                 selectInput("dl_gt_format", "File format", choices = c("PDF" = "pdf", "PNG" = "png", "JPEG" = "jpeg"), selected = "pdf"),
+                 conditionalPanel(
+                   condition = "input.dl_gt_format == 'png' || input.dl_gt_format == 'jpeg'",
+                   numericInput("dl_gt_dpi", "Resolution (DPI)", value = 300, min = 72, max = 600, step = 10)
+                 )
+          )
+        ),
+        footer = tagList(
+          downloadButton("DGTplot", "Download"),
+          modalButton("Cancel")
+        )
+      )
+    )
+  })
+  
+  output$DGTplot = downloadHandler(
+    filename = function() {
+      ext = input$dl_gt_format
+      paste0("Genetic_Distance_Plot-", input$GT_method, ".", ext)
+    },
+    content = function(file) {
+      shinyjs::show("GTStatus")
+      req(GTplot())
+      
+      width = input$dl_gt_width
+      height = input$dl_gt_height
+      units = input$dl_gt_unit
+      device = input$dl_gt_format
+      dpi = if (!is.null(input$dl_gt_dpi)) input$dl_gt_dpi else 300
+      
+      if (device == "pdf") {
+        ggsave(file, plot = GTplot(), device = "pdf", width = width, height = height, units = units)
+      } else if (device == "jpeg") {
+        ggsave(file, plot = GTplot(), device = "jpeg", width = width, height = height, units = units, dpi = dpi)
+      } else {
+        ggsave(file, plot = GTplot(), device = "png", width = width, height = height, units = units, dpi = dpi)
+      }
+      shinyjs::hide("GTStatus")
+      removeModal()
+    }
+  )
+  
+  # ---- Download Table  ----
   
   output$download_GT_result = renderUI({
     if (GTtitle2() == "Genetic Distance Matrix") {
@@ -848,11 +1020,27 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     }
   })
   
+  output$DGTresult = downloadHandler(
+    filename = function(){
+      paste0("Genetic_Distance_Matrix-", input$GT_method, ".csv")
+    },
+    content = function(file) {
+      shinyjs::show("GTStatus")
+      write.csv(GTmatrix(), file, row.names = TRUE)
+      shinyjs::hide("GTStatus")
+    }
+  )
+  
+  # ---- Text  ----
+  
   output$guide_GT = renderUI({ div(class = "guide-text-block", guide_GT()) })
   output$GTtitle1 = renderText({ GTtitle1() })
   output$GTtitle2 = renderText({ GTtitle2() })
   
-  ##### AMOVA #####
+  #### AMOVA ####
+  
+  # ---- Select File ----
+  
   output$fileSelection_AMOVA = renderUI({
     if (!is.null(gl())){ choices = c("genlight file" = "gl") } else { choices = "" }
     selectInput("FileforAMOVA", "Dataset for AMOVA:", choices)
@@ -867,80 +1055,102 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
            "Group Info.: ", group_info)
   })
   
+  # ---- Core Functions ----
+  
   observeEvent(input$runAMOVA, {
     req(input$FileforAMOVA, gl()@pop)
     shinyjs::show("AMOVAStatus")
     AMOVA_data = switch(input$FileforAMOVA, "gl" = gl())
-    strata(AMOVA_data) = data.frame(pop = pop(AMOVA_data))
-    result = poppr.amova(AMOVA_data, ~pop)
-    amova.result(result)
-    name = c("Group-total: ", "Samples-group: ", "Samples-total: ", "")
-    AMOVA_res = data.frame(
-      Source_of_variance = c("Among groups", "Among individual within groups", "Within individuals", "Total"),
-      df = result$results$Df,
-      Sum_of_squares = round(result$results$`Sum Sq`, 2),
-      Variance_components = round(result$componentsofcovariance$Sigma, 2),
-      Variance_percentage = round(result$componentsofcovariance$`%`, 2),
-      Phi_statistics = paste0(name, c(round(result$statphi$Phi, 4)[c(3,2,1)], ""))
-    )
-    row.names(AMOVA_res) = NULL
-    AMOVA_res(AMOVA_res)
-    shinyjs::hide("AMOVAStatus")
-    AMOVAtitle1("AMOVA Variance")
-    AMOVAtitle3("AMOVA Table")
-    guide_AMOVA("AMOVA is complete. You can now select the number of permutations for the test.")
-    output$AMOVAresults = renderTable({ AMOVA_res() }, rownames = FALSE)
-    pre_results = pre_results()
-    pre_results[[30]] = "## Genetic Diversity"
-    pre_results[[39]] = paste0("### Analysis of Molecular Variance (AMOVA)")
-    pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
-                               "Estimated variance percentage (%): " , "\n",
-                               "Among groups: ", AMOVA_res$Variance_percentage[1], "\n",
-                               "Among individual within groups: ", AMOVA_res$Variance_percentage[2], "\n",
-                               "Within individuals: ", AMOVA_res$Variance_percentage[3])
-    pre_results(pre_results)
+    tryCatch({
+      strata(AMOVA_data) = data.frame(pop = pop(AMOVA_data))
+      result = poppr.amova(AMOVA_data, ~pop)
+      amova.result(result)
+      name = c("Group-total: ", "Samples-group: ", "Samples-total: ", "")
+      AMOVA_res = data.frame(
+        Source_of_variance = c("Among groups", "Among individual within groups", "Within individuals", "Total"),
+        df = result$results$Df,
+        Sum_of_squares = round(result$results$`Sum Sq`, 2),
+        Variance_components = round(result$componentsofcovariance$Sigma, 2),
+        Variance_percentage = round(result$componentsofcovariance$`%`, 2),
+        Phi_statistics = paste0(name, c(round(result$statphi$Phi, 4)[c(3,2,1)], ""))
+      )
+      row.names(AMOVA_res) = NULL
+      AMOVA_res(AMOVA_res)
+      shinyjs::hide("AMOVAStatus")
+      AMOVAtitle1("AMOVA Variance")
+      AMOVAtitle3("AMOVA Table")
+      guide_AMOVA("AMOVA is complete. You can now select the number of permutations for the test.")
+      output$AMOVAresults = renderTable({ AMOVA_res() }, rownames = FALSE)
+      pre_results = pre_results()
+      pre_results[[30]] = "## Genetic Diversity"
+      pre_results[[39]] = paste0("### Analysis of Molecular Variance (AMOVA)")
+      pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
+                                 "Estimated variance percentage (%): " , "\n",
+                                 "Among groups: ", AMOVA_res$Variance_percentage[1], "\n",
+                                 "Among individual within groups: ", AMOVA_res$Variance_percentage[2], "\n",
+                                 "Within individuals: ", AMOVA_res$Variance_percentage[3])
+      pre_results(pre_results)
+    
+    }, error = function(e){
+      shinyjs::hide("AMOVAStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetAMOVA, {
     AMOVA_res(NULL)
-    showNotification("Data have been reset.")
     amova.result(NULL)
+    AMOVAvarplot(NULL)
     AMOVAtitle1("")
     AMOVAtitle3("")
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
+    shinyjs::hide("AMOVAStatus")
+    showNotification("Data have been reset.")
     guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page ")
     })
   
   observeEvent(input$runTest, {
     req(amova.result())
     shinyjs::show("AMOVAStatus")
-    test = randtest(amova.result(), nrepet = input$nperm)
-    amova.test(test)
-    AMOVA_res = cbind(AMOVA_res(), p_value = c(paste("<", test$pvalue), ""))
-    AMOVA_res(AMOVA_res)
-    shinyjs::hide("AMOVAStatus")
-    AMOVAtitle2("AMOVA Test")
-    guide_AMOVA("AMOVA is complete.")
-    output$AMOVAresults = renderTable({ AMOVA_res() }, rownames = FALSE)
-    pre_results = pre_results()
-    pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
-                               "Estimated variance percentage (%) and p-value of population strata: " , "\n",
-                               "P-values were calculated using a randomization test with", input$nperm, "permutations", "\n",
-                               "Among groups: ", AMOVA_res$Variance_percentage[1], ", p-value: ", AMOVA_res$p_value[1], "\n",
-                               "Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2], "\n",
-                               "Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])
-    pre_results(pre_results)
+    
+    tryCatch({
+      test = randtest(amova.result(), nrepet = input$nperm)
+      amova.test(test)
+      AMOVA_res = cbind(AMOVA_res(), p_value = c(paste("<", test$pvalue), ""))
+      AMOVA_res(AMOVA_res)
+      shinyjs::hide("AMOVAStatus")
+      AMOVAtitle2("AMOVA Test")
+      guide_AMOVA("AMOVA is complete.")
+      output$AMOVAresults = renderTable({ AMOVA_res() }, rownames = FALSE)
+      pre_results = pre_results()
+      pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
+                                 "Estimated variance percentage (%) and p-value of population strata: " , "\n",
+                                 "P-values were calculated using a randomization test with", input$nperm, "permutations", "\n",
+                                 "Among groups: ", AMOVA_res$Variance_percentage[1], ", p-value: ", AMOVA_res$p_value[1], "\n",
+                                 "Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2], "\n",
+                                 "Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])
+      pre_results(pre_results)
+    
+    }, error = function(e){
+      shinyjs::hide("AMOVAStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetTest, {
     amova.result(NULL)
     amova.test(NULL)
+    AMOVA_res(NULL)
+    AMOVAvarplot(NULL)
+    shinyjs::hide("AMOVAStatus")
     showNotification("Data have been reset.")
     AMOVAtitle2("")
     AMOVAtitle3("")
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
     guide_AMOVA("To run AMOVA, the input data must be a genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page after you have both the data.frame and Group Info. files.")
   })
+  
+  # ---- Show Plot  ----
   
   output$AMOVAvarplot = renderPlot({
     req(AMOVA_res())
@@ -965,6 +1175,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       plot(amova.test())
     }
   })
+  
+  # ---- Download Plot  ----
   
   output$download_AMOVA_plot = renderUI({
     if (AMOVAtitle1() == "AMOVA Variance") {
@@ -1000,6 +1212,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     }
   )
   
+  # ---- Download Table  ----
+  
   output$download_AMOVA_results = renderUI({
     if (AMOVAtitle3() == "AMOVA Table") {
       downloadButton("AMOVAResults", "Download AMOVA Table")
@@ -1014,6 +1228,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       shinyjs::hide("AMOVAStatus")
     }
   )
+  
+  # ---- Text  ----
   
   output$guide_AMOVA = renderUI({ div(class = "guide-text-block", guide_AMOVA()) })
   output$AMOVAtitle1 = renderText({ AMOVAtitle1() })

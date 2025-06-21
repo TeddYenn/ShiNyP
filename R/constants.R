@@ -40,9 +40,9 @@ pval_adj_method_choice = c("Bonferroni" = "bonferroni",
 #' @export
 AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
                     # "DeepSeek-R1" = "deepseek-reasoner", -> Waiting time too long!
-                    "Gemini 2.0 Flash" = "gemini-2.0-flash",
                     "Gemini 2.0 Flash (API Free)" = "gemini-2.0-flash",
-                    "Gemini 2.0 Flash-Lite" = "gemini-2.0-flash-lite",
+                    "Gemini 2.5 Flash" = "gemini-2.5-flash",
+                    "Gemini 2.5 Flash-Lite" = "gemini-2.5-flash-lite-preview-06-17",
                     "o4-mini" = "o4-mini",
                     "o3-mini" = "o3-mini",
                     # "o1" = "o1", -> Waiting time too long!

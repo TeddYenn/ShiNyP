@@ -1,8 +1,17 @@
 #' Launch the ShiNyP Shiny app
 #'
 #' @export
+# This file is part of ShiNyP
+#
+# ShiNyP is free R/Shiny package/web-app: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation.
+
 run_ShiNyP = function() {
   ShiNyP_ui = tagList(
+    tags$head(
+      tags$title("ShiNyP")
+    ),
     CSS_UI(),
     CSS_UI_Bot(),
     HTML1_UI_Bot(),
@@ -16,7 +25,7 @@ run_ShiNyP = function() {
       inputId = "ai-fab",
       label = NULL,
       icon = icon("comment-dots"),
-      style = "position: fixed; right:30px; bottom:30px; z-index:1050; background:#0C1844;color:white;width:60px;height:60px;border-radius:50%;border:none;font-size:32px;box-shadow:0 4px 10px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;"
+      style = "position: fixed; right:30px; bottom:30px; z-index:1050; background:#34495e;color:white;width:50px;height:50px;border-radius:30%;border:none;font-size:28px;box-shadow:0 4px 10px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;"
     ),
     tags$div(
       id = "ai-chat-panel",
@@ -25,15 +34,15 @@ run_ShiNyP = function() {
       tags$div(class = "ai-resizer bottom"),
       tags$div(class = "ai-resizer left"),
       tags$div(
-        id = "ai-chat-header",
-        tags$em("🐣 ShiNyP 🇦🇮"),
+        id = "ai-chat-header", 
+        tags$em("🐣 𝖲𝗁𝗂𝖭𝗒𝖯 𝖠𝖨"),
         tags$button(id = "ai-chat-close", icon("circle-xmark"), style = "border:none; background:transparent; color:white; font-size:20px;")
       ),
       tags$div(
         id = "ai-chat-messages", 
         tags$span(
           style = "color: #888;", 
-          "Try asking: How to get 'Group Info' file in ShiNyP?"
+          "Try asking: Draft an academic-style figure legend for DAPC scatter plot."
         )
       ),
       tags$div(
@@ -43,8 +52,8 @@ run_ShiNyP = function() {
       )
     ),
     navbarPage(
-      title = HTML("<strong><em>ShiNyP</em></strong>"),
-      theme = bslib::bs_theme(bootswatch = "zephyr", bg = "#f3f1e5", fg = "#0C1844"),
+      title = HTML('<img src="https://github.com/TeddYenn/ShiNyP/tree/main/inst/app/www/ShiNyP-icon_20250510.png" width="65">'),
+      theme = bslib::bs_theme(bootswatch = "zephyr", bg = "#f3f1e5", fg = "#34495e"),
       Page_0_Home_UI(),
       Page_1_Data_Input_UI(),
       Page_2_Data_QC_UI(),

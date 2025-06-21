@@ -90,6 +90,7 @@ Page_3_Data_Transform_UI = function() {
 #' @title Page_3_Data_Transform_Server
 #' @export
 Page_3_Data_Transform_Server = function(input, output, session) {
+  
   output$fileSelection3 = renderUI({
     if (!is.null(QCData()) && !is.null(VCFdf())){
       choices = c(
@@ -148,7 +149,7 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       if (!is.null(groupInfo1())) {
         group_vec = as.vector(groupInfo1())
         if (length(group_vec) != nrow(data)) {
-          stop("Length of Group Info. does not match the number of samples in data.frame.")
+          stop("Sample number in Group Info. does not match dataset")
         }
         gl_obj = new("genlight", data)
         pop(gl_obj) = group_vec
@@ -231,7 +232,7 @@ Page_3_Data_Transform_Server = function(input, output, session) {
         # Defensive: Group info length must match sample size
         group1 = as.vector(T2_Group1Info())
         if (length(group1) != nInd(gl_obj)) {
-          stop("Group information does not match the number of samples.")
+          stop("Sample number in Group Info. does not match dataset")
         }
         pop(gl_obj) = group1
         gl(gl_obj)

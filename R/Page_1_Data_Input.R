@@ -97,7 +97,7 @@ Page_1_Data_Input_UI = function(input, output, session) {
 #' @title Page_1_Data_Input_Server
 #' @export
 Page_1_Data_Input_Server = function(input, output, session) {
-  ##### Page 1-1: VCF #####
+  #### Page 1-1: VCF ####
   observeEvent(input$file1, {
     if (!is.null(input$file1)) {
       guide_input("Now waiting for input VCF file... (Please click the 'Input VCF file' button)")
@@ -499,7 +499,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
   output$input2 = renderText({ input2() })
   output$input3 = renderText({ input3() })
   
-  ##### Page 1-2: data.frame/genlight #####
+  #### Page 1-2: data.frame/genlight ####
   # ---- data.frame ----
   output$uploaddf = renderUI({
     fileInput("input_df", "", multiple = F, accept = c(".rds"))

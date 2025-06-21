@@ -113,22 +113,18 @@ CSS_UI = function() {
       }
 
       .AIReport-tab .custom-h4 {
-        color: #112288;
+        color: #212121;
         font-weight: bold;
         font-size: 24px;
       }
-
-      .AIReport-tab #AI_response1 {
-        background-color: #ffffff;
-        border: 1px solid #cccccc;
-        padding: 20px;
-        margin-top: 20px;
-        border-radius: 5px;
-        box-shadow: 0 0 5px #cccccc;
-        white-space: pre-wrap;
+      
+      .AIReport-tab .ai-response-container {
+        position: relative;
       }
 
+      .AIReport-tab #AI_response1,
       .AIReport-tab #AI_response2 {
+        color: #00939b;
         background-color: #ffffff;
         border: 1px solid #cccccc;
         padding: 20px;
@@ -136,6 +132,34 @@ CSS_UI = function() {
         border-radius: 5px;
         box-shadow: 0 0 5px #cccccc;
         white-space: pre-wrap;
+        max-height: 500px;
+        overflow-y: auto;
+        transition: box-shadow 0.3s, border-color 0.3s, background-color 0.3s;
+      }
+
+      .AIReport-tab #AI_response1:hover,
+      .AIReport-tab #AI_response2:hover {
+        color: #ffffff !important;
+        border-color: #00c3ce;
+        box-shadow: 0 0 8px rgba(0, 122, 204, 0.8);
+        background-color: #34495e;
+      }
+      
+      #AIStatus {
+        display: none;
+      }
+
+      #AIStatus .loading-dots span {
+        animation: blink 1s infinite;
+        opacity: 0;
+      }
+      #AIStatus .loading-dots span:nth-child(2) { animation-delay: .2s; }
+      #AIStatus .loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+      @keyframes blink {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
       }
     "))
   )

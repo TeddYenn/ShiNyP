@@ -45,8 +45,8 @@ RUN Rscript -e "BiocManager::install(c(\
 ), force = TRUE)"
 
 # Copy local tar.gz package and install it
-COPY ShiNyP_1.0.0.tar.gz /tmp/
-RUN Rscript -e "remotes::install_local('/tmp/ShiNyP_1.0.0.tar.gz', force = TRUE)" \
+COPY ShiNyP_1.1.0.tar.gz /tmp/
+RUN Rscript -e "remotes::install_local('/tmp/ShiNyP_1.1.0.tar.gz', force = TRUE)" \
   > /ShiNyP_install.log 2>&1 || (cat /ShiNyP_install.log && false)
 
 # Start the ShiNyP app

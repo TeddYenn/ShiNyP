@@ -7,7 +7,7 @@ CSS_UI_Bot = function() {
         right: 30px;
         bottom: 30px;
         z-index: 1050;
-        background: #0C1844;
+        background: #34495e;
         color: white;
         width: 60px; height: 60px;
         border-radius: 50%;
@@ -59,7 +59,7 @@ CSS_UI_Bot = function() {
       #ai-chat-header {
         flex: 0 0 auto;
         height: 48px;
-        background: #0C1844;
+        background: #34495e;
         color: #fff;
         padding: 10px 15px;
         font-size: 18px;
@@ -115,7 +115,7 @@ CSS_UI_Bot = function() {
         padding: 2px 10px;
         border-radius: 6px;
         border: none;
-        background: #0C1844;
+        background: #34495e;
         color: #fff;
         cursor: pointer;
         font-weight: bold;
@@ -161,6 +161,13 @@ HTML1_UI_Bot = function() {
             $("#ai_chat_send").click();
             return false;
           }
+        });
+        
+        // Send message to Shiny and clear input on button click
+        $("#ai_chat_send").on("click", function(){
+          var msg = $("#ai_chat_input").val();
+          Shiny.setInputValue("ai_chat_input", msg, {priority: "event"});
+          $("#ai_chat_input").val("");
         });
 
         // Auto-scroll on panel resize
@@ -301,8 +308,28 @@ HTML3_UI_Bot = function() {
 
 # Shiny custom handlers
 HTML4_UI_Bot = function() {
-  tags$script(HTML(
-    ' 
+  tags$head(
+    tags$style(HTML(
+      '
+      .ai-thinking-dots span {
+        opacity: 0.2;
+        animation: ai-blink 1.4s infinite both;
+        font-size: 1.2em;
+        transition: opacity 0.2s;
+        padding: 0 2px;
+      }
+      .ai-thinking-dots span:nth-child(1) { animation-delay: 0s; }
+      .ai-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+      .ai-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+      @keyframes ai-blink {
+        0%, 80%, 100% { opacity: 0.2; }
+        40% { opacity: 1; }
+      }
+      '
+    )),
+    tags$script(HTML(
+      '
       // AI Thinking
       Shiny.addCustomMessageHandler("addThinking", function(msg) {
         var m = document.getElementById("ai-chat-messages");
@@ -326,7 +353,7 @@ HTML4_UI_Bot = function() {
         var tDiv = document.getElementById("ai-thinking-msg");
         if (tDiv) tDiv.remove();
       });
-      
+
       // Shiny custom handler: add new message to chat window
       Shiny.addCustomMessageHandler("addMsg", function(msg) {
         // Handle typing/streaming message (single, updatable message)
@@ -357,7 +384,7 @@ HTML4_UI_Bot = function() {
         // Always scroll to latest message
         m.scrollTop = m.scrollHeight;
       });
-      
+
       // Streaming: update typing message (keep content in a single bubble)
       Shiny.addCustomMessageHandler("updateTyping", function(msg) {
         var typingDiv = document.getElementById("ai-typing-msg");
@@ -376,6 +403,7 @@ HTML4_UI_Bot = function() {
           typingDiv.id = ""; // Remove the id so a new stream can start next time
         }
       });
-    '
-  ))
+      '
+    ))
+  )
 }

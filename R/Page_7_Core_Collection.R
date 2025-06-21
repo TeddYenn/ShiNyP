@@ -111,9 +111,11 @@ Page_7_Core_Collection_UI = function() {
 #' @title Page_7_Core_Collection_Server
 #' @export
 Page_7_Core_Collection_Server = function(input, output, session) {
-  ##### Page 7: Core Collection #####
-  ##### Core Sample Set #####
+  
+  #### Core Sample Set ####
+  
   # ---- Select File ----
+  
   output$fileSelection_CoreSample = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -124,6 +126,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Core Functions ----
+  
   observeEvent(input$runCoreSample, {
     tryCatch({
       req(input$FileforCoreSample)
@@ -218,6 +221,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Show Plot  ----
+  
   output$CoreSampleplot = renderPlot({
     req(input$coverage, input$diff, core_sample_coverage())
     if (CoreSampletitle2() == "Coverage Plot of Core Sample Set") {
@@ -256,6 +260,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Download Plot  ----
+  
   output$download_core_sample_plot = renderUI({
     if (CoreSampletitle2() == "Coverage Plot of Core Sample Set") {
       actionButton(
@@ -296,7 +301,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     filename = function() {
       ext = input$dl_core_format
       cov = if (!is.null(input$coverage)) input$coverage else "coverage"
-      paste0("Core_Sample_Plot-", cov, ".", ext)
+      paste0("Core_Sample_Plot-", cov, "%.", ext)
     },
     content = function(file) {
       shinyjs::show("CoreSampleStatus")
@@ -320,6 +325,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   )
   
   # ---- Download Table  ----
+  
   output$download_core_sample_dataset = renderUI({
     if (CoreSampletitle1() == "Core Sample Set") {
       downloadButton("Dcore_sample_dataset", "Download data.frame of Core Samples Set")
@@ -327,7 +333,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$Dcore_sample_dataset = downloadHandler(
-    filename = paste0("data.frame_", dim(core_sample_dataset())[1], "_", dim(core_sample_dataset())[2], "SNPs_", "Core_Sample_Set.rds"),
+    filename = function(){
+      paste0("data.frame_", dim(core_sample_dataset())[1], "_", dim(core_sample_dataset())[2], "SNPs_", "Core_Sample_Set.rds")
+    },
     content = function(file) {
       shinyjs::show("CoreSampleStatus")
       saveRDS(core_sample_dataset(), file)
@@ -342,7 +350,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$Dcore_sample_coverage = downloadHandler(
-    filename = "Core_Sample_Coverage_Data.csv",
+    paste0("Core_Sample_Coverage_Data-", input$coverage, "%.csv"),
     content = function(file) {
       shinyjs::show("CoreSampleStatus")
       write.csv(core_sample_coverage(), file, row.names = FALSE)
@@ -357,7 +365,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$D_core_sample_info = downloadHandler(
-    filename = "Core_Sample_List.csv",
+    filename = function(){
+      paste0("Core_Sample_List-", input$coverage, "%.csv")
+    },
     content = function(file) {
       shinyjs::show("CoreSampleStatus")
       write.csv(core_sample_info(), file, row.names = FALSE)
@@ -369,8 +379,10 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$CoreSampletitle1 = renderText({ CoreSampletitle1() })
   output$CoreSampletitle2 = renderText({ CoreSampletitle2() })
   
-  ##### Core SNP Set #####
+  #### Core SNP Set ####
+  
   # ---- Select File ----
+  
   output$fileSelection_CoreSNP = renderUI({
     if (!is.null(df())){
       choices = c("data.frame file" = "df")
@@ -386,8 +398,19 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   
   observeEvent(input$Site_Info5, {
     req(input$Site_Info5)
-    Site_Info = readRDS(input$Site_Info5$datapath)
-    Site_Info(Site_Info)
+    tryCatch({
+      Site_Info_obj = readRDS(input$Site_Info5$datapath)
+      if (!is.data.frame(Site_Info_obj)) stop("Not a data.frame file.")
+      required_cols = c("Chr", "Pos", "Marker")
+      missing_cols = setdiff(required_cols, names(Site_Info_obj))
+      if (length(missing_cols) > 0) stop(paste("Site Info file is missing required columns:",
+                                               paste(missing_cols, collapse = ", ")))
+      Site_Info(Site_Info_obj)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Site_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$Chr_Info3 = renderUI({
@@ -395,8 +418,18 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   observeEvent(input$Chr_Info3, {
-    Chr_Info = read.csv(input$Chr_Info3$datapath)
-    Chr_Info(Chr_Info)
+    req(input$Chr_Info3)
+    tryCatch({
+      Chr_Info_obj = read.csv(input$Chr_Info3$datapath, stringsAsFactors = FALSE)
+      if (!is.data.frame(Chr_Info_obj)) stop("Not a CSV data.frame.")
+      if (!is.numeric(Chr_Info_obj$Start) || !is.numeric(Chr_Info_obj$End))
+        stop("The 'Start' and 'End' columns in Chromosome Info must be numeric.")
+      Chr_Info(Chr_Info_obj)
+      showNotification("Uploaded successfully", type = "message")
+    }, error = function(e) {
+      Chr_Info(NULL)
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   output$dapc_Upload = renderUI({
@@ -404,6 +437,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Core Functions ----
+  
   observeEvent(input$runCoreSNP, {
     tryCatch({
       # --- Basic requirement checks ---
@@ -604,6 +638,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Show Plot  ----
+  
   output$CoreSNPplot = renderPlot({
     req(selected_Site_Info())
     if (CoreSNPtitle2() == "Distribution of Core SNPs") {
@@ -655,6 +690,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   # ---- Download Plot  ----
+  
   output$download_core_SNP_plot = renderUI({
     if (CoreSNPtitle2() == "Distribution of Core SNPs") {
       actionButton(
@@ -694,7 +730,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   output$DCoreSNP_plot = downloadHandler(
     filename = function() {
       ext = input$dl_coreSNP_format
-      paste0("Core_SNP_Plot.", ext)
+      paste0("Core_SNP_Plot-", input$CoreSNPmethod, ext)
     },
     content = function(file) {
       shinyjs::show("CoreSNPStatus")
@@ -718,6 +754,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   )
   
   # ---- Download Table  ----
+  
   output$download_core_SNP_dataset = renderUI({
     if (CoreSNPtitle1() == "Core SNP Set") {
       downloadButton("Dcore_SNP_dataset", "Download data.frame")
@@ -725,11 +762,13 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$Dcore_SNP_dataset = downloadHandler(
-    filename = paste0("data.frame_", 
-                      nrow(core_SNP_dataset()), "_", 
-                      ncol(core_SNP_dataset()), 
-                      "SNPs_", 
-                      "Core_SNP_Set.rds"),
+    filename = function(){
+      paste0("data.frame_", 
+             nrow(core_SNP_dataset()), "_", 
+             ncol(core_SNP_dataset()),
+             "SNPs_", 
+             "Core_SNP_Set.rds")
+    },
     content = function(file) {
       shinyjs::show("CoreSNPStatus")
       saveRDS(core_SNP_dataset(), file)
@@ -744,7 +783,9 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$D_core_SNP_info = downloadHandler(
-    filename = "Core_SNP_List.rds",
+    filename = function(){
+      paste0("Core_SNP_List-", input$CoreSNPmethod, ".rds")
+    },
     content = function(file) {
       shinyjs::show("CoreSNPStatus")
       saveRDS(core_SNP_info(), file)
@@ -759,11 +800,13 @@ Page_7_Core_Collection_Server = function(input, output, session) {
   })
   
   output$D_CoreSNP_site_info = downloadHandler(
-    filename = paste0("Site_Info_", 
-                      nrow(core_SNP_dataset()), "_", 
-                      ncol(core_SNP_dataset()), 
-                      "SNPs_", 
-                      "Core_SNP_Set.rds"),
+    filename = function(){
+      paste0("Site_Info_", 
+             nrow(core_SNP_dataset()), "_", 
+             ncol(core_SNP_dataset()), 
+             "SNPs_", 
+             "Core_SNP_Set.rds")
+    },
     content = function(file) {
       shinyjs::show("CoreSNPStatus")
       saveRDS(selected_Site_Info(), file)
