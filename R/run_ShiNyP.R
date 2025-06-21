@@ -52,7 +52,7 @@ run_ShiNyP = function() {
       )
     ),
     navbarPage(
-      title = HTML('<img src="https://github.com/TeddYenn/ShiNyP/tree/main/inst/app/www/ShiNyP-icon_20250510.ico" width="65">'),
+      title = HTML('<img src="https://raw.githubusercontent.com/TeddYenn/ShiNyP/main/inst/app/www/ShiNyP-icon_20250510.ico" width="65">'),
       theme = bslib::bs_theme(bootswatch = "zephyr", bg = "#f3f1e5", fg = "#34495e"),
       Page_0_Home_UI(),
       Page_1_Data_Input_UI(),
