@@ -2,7 +2,7 @@
 
 This README file provides a step-by-step guide for reproducing the core collection and selection scan analyses described in our study. 
 
-The input data and output files can be download from [Zenodo repository](https://zenodo.org/records/14806044) under **Case Studies Datasets (HGDP).zip** folder.
+The input data and output files can be downloaded from [Zenodo repository](https://zenodo.org/records/14806044) under **Case Studies Datasets (HGDP).zip** folder.
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)

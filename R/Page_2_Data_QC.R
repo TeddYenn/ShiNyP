@@ -213,9 +213,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     if (length(rm.sample)>0){
       rm.sample = as.numeric(rm.sample)
       data = data[-rm.sample, ]
-    } else{
-      data = data
-    }
+    } 
     QCData(data)
     df(data)
     SampleQC_sample(dim(data)[1])
@@ -430,8 +428,6 @@ Page_2_Data_QC_Server = function(input, output, session) {
     if (length(rm.loc)>0){
       rm.loc = as.numeric(rm.loc)
       data = data[, -rm.loc]
-    } else{
-      data = data
     }
     QCData(data)
     df(data)

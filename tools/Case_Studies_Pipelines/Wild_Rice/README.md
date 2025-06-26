@@ -2,7 +2,7 @@
 
 This README file provides a step-by-step guide for reproducing the population genetic analyses described in our study. 
 
-The input data and output files can be download from [Zenodo repository](https://zenodo.org/records/14806044) under **Case Studies Datasets (Wild Rice).zip** folder.
+The input data and output files can be downloaded from [Zenodo repository](https://zenodo.org/records/14806044) under **Case Studies Datasets (Wild Rice).zip** folder.
 
 1. [Overview](#overview)  
 2. [Prerequisites](#prerequisites)

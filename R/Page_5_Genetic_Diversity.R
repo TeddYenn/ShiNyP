@@ -235,6 +235,10 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     
     tryCatch({
       GD_data = switch(input$FileforGD, "df" = df())
+      if (any(colSums(is.na(GD_data)) == nrow(GD_data))) {
+        stop("The QC for SNP missing rate should be performed first, ensuring only SNPs with valid data are retained.")
+      }
+
       if (!is.null(groupInfo3())) {
         popgen = popgen2(GD_data, groupInfo3())
         
@@ -731,16 +735,17 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
   })
   
   # ---- Core Functions ----
+
+  observeEvent(input$Track3, { Track3(input$Track3) })
+  observeEvent(input$Track4, { Track4(input$Track4) })
+  observeEvent(input$Track5, { Track5(input$Track5) })
+  observeEvent(input$Track6, { Track6(input$Track6) })
   
   observeEvent(input$runCircos, {
-    req(SW_data(), Chr_Info(), input$Track3)
+    req(SW_data(), Chr_Info(), Track3())
     shinyjs::show("CircosStatus")
     
     tryCatch({
-      Track3(input$Track3)
-      Track4(input$Track4)
-      Track5(input$Track5)
-      Track6(input$Track6)
       
       pdf_path = tempfile(fileext = ".pdf")
       generateCircosPlot(Chr_Info(), SW_data(), pdf_path, Track3(), Track4(), Track5(), Track6())

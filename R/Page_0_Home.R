@@ -9,7 +9,7 @@ Page_0_Home_UI = function() {
            fluidPage(
              tags$h3(HTML("<em>ShiNyP</em>: SNP Analysis and Visualization Platform"),
                      style = "color: #34495e; font-weight: bold;"),
-             p("Yen-Hsiang Huang", br(),
+             p("Yen-Hsiang Huang, Chung-Feng Kao", br(),
                "National Chung-Hsing University (NCHU), Taiwan"), 
              # checkpoint
              tags$h6(HTML("<em>ShiNyP</em>  v1.1.0 under AGPL-3.0"),
