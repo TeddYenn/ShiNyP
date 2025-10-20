@@ -66,6 +66,35 @@ CSS_UI_Bot = function() {
         font-weight: bold;
         display: flex; justify-content: space-between; align-items: center;
       }
+      
+      #ai-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .ai-header-btn {
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .ai-header-btn:hover {
+        background: #e5ecf4;
+      }
+
+      .ai-header-btn i {
+        font-size: 16px;
+        color: #0077b6;
+      }
 
       /* Message Display Area */
       #ai-chat-messages {
@@ -152,6 +181,10 @@ HTML1_UI_Bot = function() {
         // Close chat panel when close button is clicked
         $("#ai-chat-close").on("click", function(){
           $("#ai-chat-panel").fadeOut();
+        });
+
+        $(function () {
+          $(\'[data-toggle="tooltip"]\').tooltip();
         });
 
         // Send message on Enter key in input box

@@ -1,7 +1,7 @@
 Package: ShiNyP
 Type: Package
 Title: An R/Shiny platform for genome-wide SNP analysis and visualization with AI-assisted features
-Version: 1.1.0
+Version: 1.1.1
 Author: Yen-Hsiang Huang
 Maintainer: Yen-Hsiang Huang <teddyhuangyh@gmail.com>
 Description: User Guide: https://teddyenn.github.io/ShiNyP-guide; Publication: Huang, Y.-H., Chen, L.-Y., Septiningsih, E. M., Kao, P.-H., & Kao, C.-F. (2025). ShiNyP: Unlocking SNP-based population genetics—AI-assisted platform for rapid and interactive visual exploration. Molecular Biology and Evolution, 42(6), msaf117. https://doi.org/10.1093/molbev/msaf117

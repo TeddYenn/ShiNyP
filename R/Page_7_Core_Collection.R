@@ -28,7 +28,7 @@ Page_7_Core_Collection_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_CoreSample"),
-                          div(id = "CoreSampleStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "CoreSampleStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(4,
@@ -93,7 +93,7 @@ Page_7_Core_Collection_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_CoreSNP"),
-                          div(id = "CoreSNPStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "CoreSNPStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("CoreSNPtitle1")),
                           verbatimTextOutput("CoreSNPres"),
@@ -136,13 +136,13 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       data = df()
       if (is.null(data) || !is.data.frame(data)) {
         shinyjs::hide("CoreSampleStatus")
-        showNotification("Error: The input data is not available or is not a data frame.", type = "error")
+        showNotification("Fail: The input data is not available or is not a data frame.", type = "error")
         return()
       }
       
       if (nrow(data) < 2 || ncol(data) < 2) {
         shinyjs::hide("CoreSampleStatus")
-        showNotification("Error: The input data must contain at least two samples and two SNPs.", type = "error")
+        showNotification("Fail: The input data must contain at least two samples and two SNPs.", type = "error")
         return()
       }
       
@@ -152,7 +152,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       
       if (is.null(core_sample$coverage.table) || is.null(core_sample$coreset)) {
         shinyjs::hide("CoreSampleStatus")
-        showNotification("Error: Core set result is invalid or incomplete.", type = "error")
+        showNotification("Fail: Core set result is invalid or incomplete.", type = "error")
         return()
       }
       
@@ -187,10 +187,10 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       )
       pre_results[[53]] = text
       pre_results(pre_results)
-      
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("CoreSampleStatus")
-      showNotification(paste("Error:", e$message), type = "error")
+      showNotification(paste("Fail:", e$message), type = "error")
       return()
     })
   })
@@ -452,17 +452,17 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       # --- General data checks ---
       if (is.null(df_data) || !is.data.frame(df_data)) {
         shinyjs::hide("CoreSNPStatus")
-        showNotification("Error: Genotype data is not available or not in a valid data.frame format.", type = "error")
+        showNotification("Fail: Genotype data is not available or not in a valid data.frame format.", type = "error")
         return()
       }
       if (ncol(df_data) < 2 || nrow(df_data) < 2) {
         shinyjs::hide("CoreSNPStatus")
-        showNotification("Error: The input data must have at least two samples and two SNPs.", type = "error")
+        showNotification("Fail: The input data must have at least two samples and two SNPs.", type = "error")
         return()
       }
       if (is.null(site_info) || !is.data.frame(site_info)) {
         shinyjs::hide("CoreSNPStatus")
-        showNotification("Error: SNP site information (Site_Info) is missing or invalid.", type = "error")
+        showNotification("Fail: Site Info. is missing or invalid.", type = "error")
         return()
       }
       selected_SNPs = character(0)
@@ -474,13 +474,13 @@ Page_7_Core_Collection_Server = function(input, output, session) {
         # Data check for DAPC input
         if (is.null(input$CoreSNPdata$datapath) || !file.exists(input$CoreSNPdata$datapath)) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: DAPC result file not found.", type = "error")
+          showNotification("Fail: DAPC result file not found.", type = "error")
           return()
         }
         DAPC = readRDS(input$CoreSNPdata$datapath)
         if (is.null(DAPC$var.contr) || is.null(DAPC$eig)) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: DAPC object is incomplete or invalid.", type = "error")
+          showNotification("Fail: DAPC object is incomplete or invalid.", type = "error")
           return()
         }
         loading = DAPC$var.contr
@@ -489,7 +489,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
         ID_retain_loc = which(duplicated(ID_trim) == TRUE)
         if (length(ID_retain_loc) == 0) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: No duplicated SNP IDs found in DAPC loadings. Check the DAPC results.", type = "error")
+          showNotification("Fail: No duplicated SNP IDs found in DAPC loadings. Check the DAPC results.", type = "error")
           return()
         }
         row.names(loading) = ID_trim
@@ -510,7 +510,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       } else if (method_chosen == "random_percentage") {
         if (is.null(input$random_percentage) || is.na(input$random_percentage)) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: Please specify the percentage for random SNP selection.", type = "error")
+          showNotification("Fail: Please specify the percentage for random SNP selection.", type = "error")
           return()
         }
         pct = input$random_percentage / 100
@@ -518,7 +518,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
         sample_size = round(total_snps * pct)
         if (sample_size < 1) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: The selected percentage results in zero SNPs.", type = "error")
+          showNotification("Fail: The selected percentage results in zero SNPs.", type = "error")
           return()
         }
         selected_SNPs = sample(colnames(df_data), sample_size)
@@ -528,14 +528,14 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       } else if (method_chosen == "random_density") {
         if (is.null(input$random_density) || is.na(input$random_density) || input$random_density <= 0) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: Please provide a valid SNP density value (bp per SNP).", type = "error")
+          showNotification("Fail: Please provide a valid SNP density value (bp per SNP).", type = "error")
           return()
         }
         req(Chr_Info())
         chr_info = Chr_Info()
         if (is.null(chr_info) || ncol(chr_info) < 3) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: Chromosome information (Chr_Info) is missing or invalid.", type = "error")
+          showNotification("Fail: Chr Info. is missing or invalid.", type = "error")
           return()
         }
         bp_per_snp = input$random_density
@@ -555,11 +555,11 @@ Page_7_Core_Collection_Server = function(input, output, session) {
         
         if (length(selected_SNPs) == 0) {
           shinyjs::hide("CoreSNPStatus")
-          showNotification("Error: No SNPs were selected by random density. Please check your parameters.", type = "error")
+          showNotification("Fail: No SNPs were selected by random density. Please check your parameters.", type = "error")
           return()
         }
         text = "Methodology: Random density-based selection. SNPs are selected at regular intervals based on their density within each chromosome."
-        
+        showNotification("Run Successfully", type = "message")
       } else {
         shinyjs::hide("CoreSNPStatus")
         showNotification("Error", type = "error")
@@ -569,7 +569,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       # --- Subset and check selected SNPs ---
       if (length(selected_SNPs) == 0) {
         shinyjs::hide("CoreSNPStatus")
-        showNotification("Error: No SNPs selected. Please check your selection parameters.", type = "error")
+        showNotification("Fail: No SNPs selected. Please check your selection parameters.", type = "error")
         return()
       }
       subset_data = df_data[, selected_SNPs, drop = FALSE]
@@ -608,7 +608,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
       pre_results(pre_results)
     }, error = function(e) {
       shinyjs::hide("CoreSNPStatus")
-      showNotification(paste("Error:", e$message), type = "error")
+      showNotification(paste("Fail:", e$message), type = "error")
       return()
     })
   })
@@ -619,7 +619,7 @@ Page_7_Core_Collection_Server = function(input, output, session) {
     CoreSNPtitle2("")
     selected_Site_Info(NULL)
     showNotification("Data have been reset.")
-    guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run Core SNP' button.")
+    guide_CoreSNP("To run core SNP set, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info. and ▶️ Chromosome Info file (in CSV). \nPlease click the 'Run Core SNP' button.")
     })
   
   output$CoreSNPfileInfo = renderText({

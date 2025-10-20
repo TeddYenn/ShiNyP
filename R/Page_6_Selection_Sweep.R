@@ -27,7 +27,7 @@ Page_6_Selection_Sweep_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_pcadapt"),
-                          div(id = "pcadaptStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "pcadaptStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(4,
@@ -86,7 +86,7 @@ Page_6_Selection_Sweep_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_OutFLANK"),
-                          div(id = "OutFLANKStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "OutFLANKStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(4,
@@ -157,7 +157,7 @@ Page_6_Selection_Sweep_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_IBS"),
-                          div(id = "IBSStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "IBSStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           verbatimTextOutput("IBSres"),
                           div(class = "title-text-style", textOutput("IBStitle1")),
@@ -186,7 +186,7 @@ Page_6_Selection_Sweep_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_Manhattan"),
-                          div(id = "ManhattanStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "ManhattanStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(3,
@@ -408,7 +408,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       pcadapttitle4("Histogram of Test Statistics")
       pcadapttitle5("Significant SNPs")
       guide_pcadapt("The pcadapt analysis is complete.")
-      
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("pcadaptStatus")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -750,17 +750,38 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   # ---- Select File ----
   
   output$fileSelection_OutFLANK = renderUI({
-    if (!is.null(gl())){ choices = c("genlight file" = "gl") } else { choices = "" }
+    choices = list()
+    if (!is.null(gi()) && !is.null(gl())) {
+      choices = list("genind file" = "gi", "genlight file" = "gl")
+    } else if (!is.null(gl())) {
+      choices = list("genlight file" = "gl")
+    } else if (!is.null(gi())) {
+      choices = list("genind file" = "gi")
+    }
     selectInput("FileforOutFLANK", "Dataset for OutFLANK:", choices)
   })
   
   output$OutFLANKfileInfo = renderText({
-    req(gl())
-    group_info = ifelse(nPop(gl())>1, "Added", "NaN \n**Warning** Not available!")
-    paste0("Type: ", class(gl()), "\n",
-           "Number of samples: ", nInd(gl()), "\n",
-           "Number of SNPs: ", nLoc(gl()), "\n",
-           "Group Info.: ", group_info)
+    req(input$FileforOutFLANK)
+    if (input$FileforOutFLANK == "gl") {
+      req(gl())
+      group_info = ifelse(nPop(gl()) > 1, "Added", "NaN \n**Warning** Not available!")
+      paste0(
+        "Type: ", class(gl()), "\n",
+        "Number of samples: ", nInd(gl()), "\n",
+        "Number of SNPs: ", nLoc(gl()), "\n",
+        "Group Info.: ", group_info
+      )
+    } else if (input$FileforOutFLANK == "gi") {
+      req(gi())
+      group_info = ifelse(nPop(gi()) > 1, "Added", "NaN \n**Warning** Not available!")
+      paste0(
+        "Type: ", class(gi()), "\n",
+        "Number of samples: ", nInd(gi()), "\n",
+        "Number of SNPs: ", nLoc(gi()), "\n",
+        "Group Info.: ", group_info
+      )
+    }
   })
   
   output$Site_Info3 = renderUI({
@@ -772,8 +793,9 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     tryCatch({
       Site_Info = readRDS(input$Site_Info3$datapath)
       
-      if (is.null(gl())) stop("Main genotype data is not loaded.")
-      if (!nLoc(gl()) == dim(Site_Info)[1]) {
+      if (is.null(gl()) && is.null(gi())) stop("Main genotype data is not loaded.")
+      n_snp = if (!is.null(gl())) nLoc(gl()) else nLoc(gi())
+      if (n_snp != dim(Site_Info)[1]) {
         stop("Column length of Site Info. do not match those of SNP data.")
       }
       required_cols = c("Chr", "Pos", "Marker")
@@ -827,11 +849,20 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   # ---- Core Functions ----
   
   observeEvent(input$runOutFLANK, {
-    req(input$FileforOutFLANK, gl()@pop, SNP_Info())
+    req(input$FileforOutFLANK, SNP_Info())
+    if (input$FileforOutFLANK == "gl") {
+      req(gl(), gl()@pop)
+    } else if (input$FileforOutFLANK == "gi") {
+      req(gi(), gi()@pop)
+    }
     shinyjs::show("OutFLANKStatus")
     
     tryCatch({
-      data = switch(input$FileforOutFLANK, "gl" = gl())
+      data = if (input$FileforOutFLANK == "gl") {
+        gl()
+      } else {
+        gi()
+      }
       outflank = gl.outflank(data, plot = FALSE)
       outflank(outflank)
       
@@ -910,7 +941,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       OutFLANKtitle4("Histogram of FST")
       OutFLANKtitle5("Significant SNPs")
       guide_OutFLANK("The OutFLANK analysis is complete.")
-      
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("OutFLANKStatus")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -918,7 +949,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
   })
   
   observeEvent(input$resetOutFLANK, {
-    guide_OutFLANK("To run OutFLANK, the input data must be in ✅ genlight file with 'Group Info.' \nYou also need to upload a ▶️ Site Info file (in RDS).\nPlease click the 'Run OutFLANK' button.")
+    guide_OutFLANK("To run OutFLANK, the input data must be in ✅ genlight or ✅ genind format with 'Group Info.' \nYou also need to upload a ▶️ Site Info file (in RDS).\nPlease click the 'Run OutFLANK' button.")
     OutFLANKfileInfo("")
     OutFLANKtitle1("")
     OutFLANKtitle2("")
@@ -1364,6 +1395,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       IBStitle1("Chromosome Ideogram")
       IBStitle2("Sliding Window Data")
       guide_IBS("The IBS analysis is complete.")
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("IBSStatus")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -1381,7 +1413,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
     output$Chr_Info2 = renderUI({
       fileInput("Chr_Info2", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
-    guide_IBS("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease click the 'Run IBS' button.")
+    guide_IBS("To run IBS, the input data must be in ✅ data.frame format. \nYou also need to upload the ▶️ Site Info file (in RDS) and ▶️ Chromosome Info file (in CSV). \nPlease click the 'Run IBS' button.")
   })
   
   output$IBSres = renderText({
@@ -1708,6 +1740,7 @@ Page_6_Selection_Sweep_Server = function(input, output, session) {
       ManhattanPlot1("Manhattan Plot")
       shinyjs::hide("ManhattanStatus")
       guide_Manhattan("You can customize the Manhattan plot and then click the ▶️ 'Run Manhattan Plot' button again.")
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("ManhattanStatus")
       showNotification(paste("Fail: ", e$message), type = "error")

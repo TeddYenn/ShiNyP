@@ -18,7 +18,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_PCA"),
-                          div(id = "PCAStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "PCAStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(6,
@@ -64,7 +64,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_DAPC"),
-                          div(id = "DAPCStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "DAPCStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(5,
@@ -108,7 +108,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_UPGMA"),
-                          div(id = "UPGMAStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "UPGMAStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("UPGMAtitle1")),
                           uiOutput("Layout"),
@@ -131,7 +131,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_NJ"),
-                          div(id = "NJStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "NJStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("NJtitle1")),
                           uiOutput("NJLayout"),
@@ -157,7 +157,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_Kinship"),
-                          div(id = "KinshipStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "KinshipStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("Kinshiptitle1")),
                           plotOutput("Kinship", width = "800px", height = "800px"),
@@ -182,7 +182,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_scatter"),
-                          div(id = "ScatterStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "ScatterStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(4,
@@ -239,7 +239,7 @@ Page_4_Population_Structure_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_Tree"),
-                          div(id = "TreeStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "TreeStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(3,
@@ -308,34 +308,35 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   observeEvent(input$runPCA, {
     req(input$FileforPCA)
-    shinyjs::show("PCAStatus")
-    pca_data = switch(input$FileforPCA, "df" = df())
-    pca_data[] = lapply(pca_data, function(x) replace(x, is.na(x), 0))
-    pca_data = pca_data[, apply(pca_data, 2, var) > 0]
-    pca_result = prcomp(pca_data, scale = T)
-    pca_result(pca_result)
-    sd = pca_result$sdev
-    total_variance = sum(sd)
-    variance_percent = sd / total_variance * 100
-    PCA_SD = data.frame(
-      PC = paste0("PC", seq_along(sd)),
-      Standard_deviations = sd,
-      Proportion_of_explained_variance = variance_percent,
-      Cumulative_proportion_of_explained_variance = c(0, cumsum(variance_percent)[1:length(sd)-1])
-    )
-    PCA_Trans(as.data.frame(pca_result$x))
-    PCA_SD(PCA_SD)
-    shinyjs::hide("PCAStatus")
-    PCAtitle1("PCA Scatter Plot")
-    PCAtitle2("PC Explained Variance Plot")
-    guide_PCA("The PCA is complete. \nPlease select the PCs for the X and Y axes of the 2D PCA plot.\nTry adjusting the number of PCs and observe the explained variance plot.")
-    pre_results = pre_results()
-    pre_results[[19]] = "## Population Structure"
-    pre_results[[20]] = "### Principal Component Analysis (PCA)"
-    PCA_cum = cumsum(PCA_SD$Proportion_of_explained_variance)
-    thresholds = c(10, 25, 50, 75, 80, 90, 99)
-    pcs = sapply(thresholds, function(thresh) which(PCA_cum >= thresh)[1])
-    text = paste0("Top 15 PCs explained variance (%), PC 1 to PC 15: ", paste(round(PCA_SD$Proportion_of_explained_variance[1:15], 2), collapse = ", "), "\n",
+    tryCatch({
+      shinyjs::show("PCAStatus")
+      pca_data = switch(input$FileforPCA, "df" = df())
+      pca_data[] = lapply(pca_data, function(x) replace(x, is.na(x), 0))
+      pca_data = pca_data[, apply(pca_data, 2, var) > 0]
+      pca_result = prcomp(pca_data, scale = T)
+      pca_result(pca_result)
+      sd = pca_result$sdev
+      total_variance = sum(sd)
+      variance_percent = sd / total_variance * 100
+      PCA_SD = data.frame(
+        PC = paste0("PC", seq_along(sd)),
+        Standard_deviations = sd,
+        Proportion_of_explained_variance = variance_percent,
+        Cumulative_proportion_of_explained_variance = c(0, cumsum(variance_percent)[1:length(sd)-1])
+      )
+      PCA_Trans(as.data.frame(pca_result$x))
+      PCA_SD(PCA_SD)
+      shinyjs::hide("PCAStatus")
+      PCAtitle1("PCA Scatter Plot")
+      PCAtitle2("PC Explained Variance Plot")
+      guide_PCA("The PCA is complete. \nPlease select the PCs for the X and Y axes of the 2D PCA plot.\nTry adjusting the number of PCs and observe the explained variance plot.")
+      pre_results = pre_results()
+      pre_results[[19]] = "## Population Structure"
+      pre_results[[20]] = "### Principal Component Analysis (PCA)"
+      PCA_cum = cumsum(PCA_SD$Proportion_of_explained_variance)
+      thresholds = c(10, 25, 50, 75, 80, 90, 99)
+      pcs = sapply(thresholds, function(thresh) which(PCA_cum >= thresh)[1])
+      text = paste0("Top 15 PCs explained variance (%), PC 1 to PC 15: ", paste(round(PCA_SD$Proportion_of_explained_variance[1:15], 2), collapse = ", "), "\n",
                   pcs[1], " PCs explain 10% total variance", "\n",
                   pcs[2], " PCs explain 25% total variance", "\n",
                   pcs[3], " PCs explain 50% total variance", "\n",
@@ -344,8 +345,18 @@ Page_4_Population_Structure_Server = function(input, output, session) {
                   pcs[6], " PCs explain 90% total variance", "\n",
                   pcs[7], " PCs explain 99% total variance", "\n"
                   )
-    pre_results[[21]] = text
-    pre_results(pre_results)
+      pre_results[[21]] = text
+      pre_results(pre_results)
+      showNotification("Run Successfully", type = "message")
+    }, error = function(e) {
+      shinyjs::hide("PCAStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+      PCAtitle1("")
+      PCAtitle2("")
+      guide_PCA("Please check the input data and try again.")
+      PCA_Trans(NULL)
+      PCA_SD(NULL)
+    })
   })
   
   observeEvent(input$resetPCA, {
@@ -355,7 +366,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     PCAtitle1("")
     PCAtitle2("")
     showNotification("Data have been reset.")
-    guide_PCA("To run PCA, the input data must be in ✅ data.frame format. ")
+    guide_PCA("To run PCA, the input data must be in ✅ data.frame format. \nPlease click the 'Run PCA' button.")
     })
   
   # ---- Plot Setting ----
@@ -371,6 +382,16 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     if (PCAtitle1() == "PCA Scatter Plot"){
       pca_result = pca_result()
       selectInput("pc2", "Select PC for Y-axis:", choices = paste0("PC", seq_along(pca_result$sdev)), selected = "PC2")
+    }
+  })
+
+  output$PCA_help_icon = renderUI({
+    if (PCAtitle1() == "PCA Scatter Plot") {
+      bslib::tooltip(
+        tags$span("?", class = "help-icon"),
+        PCA_plot_tip(),
+        placement = "left"
+      )
     }
   })
   
@@ -707,59 +728,71 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   observeEvent(input$runDAPC1, {
     req(input$FileforDAPC, input$npca, input$Maxgrp)
-    shinyjs::show("DAPCStatus")
-    if (input$FileforDAPC == "gi"){
-      DAPC1 = find.clusters(gi(), max.n = input$Maxgrp, n.pca = input$npca, scale = FALSE, choose = FALSE)
-    }else if (input$FileforDAPC == "gl"){
-      DAPC1 = find.clusters(gl(), max.n = input$Maxgrp, n.pca = input$npca, scale = FALSE, choose = FALSE)
-    }
-    DAPC1(DAPC1)
-    lowest = as.numeric(which(DAPC1$Kstat == min(DAPC1$Kstat)))
-    updateSliderInput(session, "grp", min = 3, max = 35, value = lowest, step = 1)
+    tryCatch({
+      shinyjs::show("DAPCStatus")
+      if (input$FileforDAPC == "gi"){
+        DAPC1 = find.clusters(gi(), max.n = input$Maxgrp, n.pca = input$npca, scale = FALSE, choose = FALSE)
+      } else if (input$FileforDAPC == "gl"){
+        DAPC1 = find.clusters(gl(), max.n = input$Maxgrp, n.pca = input$npca, scale = FALSE, choose = FALSE)
+      }
+      DAPC1(DAPC1)
+      lowest = as.numeric(which(DAPC1$Kstat == min(DAPC1$Kstat)))
+      updateSliderInput(session, "grp", min = 3, max = 35, value = lowest, step = 1)
     
-    shinyjs::hide("DAPCStatus")
-    DAPCtitle1("Bayesian Information Criterion (BIC) Plot")
-    guide_DAPC("STEP I is complete. \nPlease select the number of clusters (K) for STEP II.")
+      shinyjs::hide("DAPCStatus")
+      DAPCtitle1("Bayesian Information Criterion (BIC) Plot")
+      guide_DAPC("STEP I is complete. \nPlease select the number of clusters (K) for STEP II.")
+      showNotification("Step 1: Run Successfully", type = "message")
+    }, error = function(e){
+      shinyjs::hide("DAPCStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$runDAPC2, {
     req(input$FileforDAPC, input$npca, input$grp)
-    shinyjs::show("DAPCStatus")
-    req(input$FileforDAPC, input$npca, input$Maxgrp)
-    shinyjs::show("DAPCStatus")
-    if (input$FileforDAPC == "gi"){
-      DAPC2 = find.clusters(gi(), n.clust = input$grp, n.pca = input$npca, scale = FALSE, choose = FALSE)
-      DAPC2 = dapc(gi(), pop = DAPC2$grp, n.pca = input$grp-1, n.da = input$grp-1)
-    }else if (input$FileforDAPC == "gl"){
-      DAPC2 = find.clusters(gl(), n.clust = input$grp, n.pca = input$npca, scale = FALSE, choose = FALSE)
-      DAPC2 = dapc(gl(), pop = DAPC2$grp, n.pca = input$grp-1, n.da = input$grp-1)
-    }
-    DAPC2(DAPC2)
-    DAPC_Trans = as.data.frame(DAPC2$tab)
-    DAPC_Trans(DAPC_Trans)
-    DAPC_pop = data.frame("ID" = row.names(DAPC_Trans), "Group" = DAPC2$assign)
-    DAPC_pop(DAPC_pop)
+    tryCatch({
+      shinyjs::show("DAPCStatus")
+      req(input$FileforDAPC, input$npca, input$Maxgrp)
+      shinyjs::show("DAPCStatus")
+      if (input$FileforDAPC == "gi"){
+        DAPC2 = find.clusters(gi(), n.clust = input$grp, n.pca = input$npca, scale = FALSE, choose = FALSE)
+        DAPC2 = dapc(gi(), pop = DAPC2$grp, n.pca = input$grp-1, n.da = input$grp-1)
+      } else if (input$FileforDAPC == "gl"){
+        DAPC2 = find.clusters(gl(), n.clust = input$grp, n.pca = input$npca, scale = FALSE, choose = FALSE)
+        DAPC2 = dapc(gl(), pop = DAPC2$grp, n.pca = input$grp-1, n.da = input$grp-1)
+      }
+      DAPC2(DAPC2)
+      DAPC_Trans = as.data.frame(DAPC2$tab)
+      DAPC_Trans(DAPC_Trans)
+      DAPC_pop = data.frame("ID" = row.names(DAPC_Trans), "Group" = DAPC2$assign)
+      DAPC_pop(DAPC_pop)
     
-    shinyjs::hide("DAPCStatus")
-    DAPCtitle2("Density Plot of First Discriminant Function")
-    DAPCtitle3("Density Plot of Second Discriminant Function")
-    DAPCtitle4("DAPC Scatter Plot")
-    DAPCtitle5("DAPC Membership Probability Plot")
-    guide_DAPC("DAPC is complete. \nPlease review the results.")
-    DAPC1 = DAPC1()
+      shinyjs::hide("DAPCStatus")
+      DAPCtitle2("Density Plot of First Discriminant Function")
+      DAPCtitle3("Density Plot of Second Discriminant Function")
+      DAPCtitle4("DAPC Scatter Plot")
+      DAPCtitle5("DAPC Membership Probability Plot")
+      guide_DAPC("DAPC is complete. \nPlease review the results.")
+      DAPC1 = DAPC1()
     
-    pre_results = pre_results()
-    pre_results[[19]] = "## Population Structure"
-    pre_results[[22]] = "### Discriminant Analysis of Principal Components (DAPC)"
-    text = paste0(
-      "BIC values, K = 1 to ", length(DAPC1$Kstat), ": ", paste(round(as.numeric(DAPC1$Kstat), 2), collapse = ", "), "\n",
-      "The samples were divided into ", length(table(DAPC2$assign)), " groups based on the lowest BIC value at K = ", length(table(DAPC2$assign)), "\n",
-      "Group sizes, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(as.numeric(table(DAPC2$assign)), collapse = ", "), "\n",
-      "The centroid of each group at first discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,1], 2), collapse = ", "), "\n",
-      "The centroid of each group at second discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,2], 2), collapse = ", "), "\n"
-    )
-    pre_results[[23]] = text
-    pre_results(pre_results)
+      pre_results = pre_results()
+      pre_results[[19]] = "## Population Structure"
+      pre_results[[22]] = "### Discriminant Analysis of Principal Components (DAPC)"
+      text = paste0(
+        "BIC values, K = 1 to ", length(DAPC1$Kstat), ": ", paste(round(as.numeric(DAPC1$Kstat), 2), collapse = ", "), "\n",
+        "The samples were divided into ", length(table(DAPC2$assign)), " groups based on the lowest BIC value at K = ", length(table(DAPC2$assign)), "\n",
+        "Group sizes, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(as.numeric(table(DAPC2$assign)), collapse = ", "), "\n",
+        "The centroid of each group at first discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,1], 2), collapse = ", "), "\n",
+        "The centroid of each group at second discriminant function, Group 1 to Group ", length(table(DAPC2$assign)), ": ", paste(round(DAPC2$grp.coord[,2], 2), collapse = ", "), "\n"
+      )
+      pre_results[[23]] = text
+      pre_results(pre_results)
+      showNotification("Step 2: Run Successfully", type = "message")
+    }, error = function(e){
+      shinyjs::hide("DAPCStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetDAPC1, {
@@ -1284,37 +1317,30 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   observeEvent(input$runUPGMA, {
     req(input$FileforUPGMA, input$sample)
-    shinyjs::show("UPGMAStatus")
+    tryCatch({
+      shinyjs::show("UPGMAStatus")
+      UPGMA_data = switch(input$FileforUPGMA, "gl" = gl())
+      tree = aboot(UPGMA_data, tree = "upgma",
+                    distance = bitwise.dist,
+                    sample = input$sample,
+                    showtree = F)
+      tree(tree)
     
-    UPGMA_data = switch(input$FileforUPGMA, "gl" = gl())
-    tree = aboot(UPGMA_data, tree = "upgma",
-                 distance = bitwise.dist,
-                 sample = input$sample,
-                 showtree = F)
-    tree(tree)
-    
-    shinyjs::hide("UPGMAStatus")
-    UPGMAtitle1("UPGMA Phylogenetic Tree")
-    guide_UPGMA("The UPGMA analysis is complete. \nTry adjusting the layout style and observe the UPGMA phylogenetic tree.")
-    
-    output$DUPGMAplot = downloadHandler(
-      filename = function() {
-        paste0("UPGMA_Plot-", input$sample, "bootstraps-Layout_", input$Layout, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("UPGMAStatus")
-        Layout = Tree_layout_choice[input$Layout]
-        ggsave(file, plot = ggtree(tree(), layout = Layout) + geom_tiplab(hjust = -0.1, align = TRUE, linesize = 0.5, size = 2), device = "pdf", width = 12, height = 12)
-        shinyjs::hide("UPGMAStatus")
-      }
-    )
+      shinyjs::hide("UPGMAStatus")
+      UPGMAtitle1("UPGMA Phylogenetic Tree")
+      guide_UPGMA("The UPGMA analysis is complete. \nTry adjusting the layout style and observe the UPGMA phylogenetic tree.")
+      showNotification("Run Successfully", type = "message")
+    }, error = function(e){
+      shinyjs::hide("UPGMAStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetUPGMA, {
     UPGMAtitle1("")
     tree(NULL)
     showNotification("Data have been reset.")
-    guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. ")
+    guide_UPGMA("To run the UPGMA phylogenetic tree, the input data must be in ✅ genlight format. \nPlease click the 'Run UPGMA' button.")
     })
   
   output$Layout = renderUI({
@@ -1336,6 +1362,18 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       downloadButton("DUPGMAplot", "Download Plot")
     }
   })
+
+  output$DUPGMAplot = downloadHandler(
+    filename = function() {
+      paste0("UPGMA_Plot-", input$sample, "bootstraps-Layout_", input$Layout, ".pdf")
+    },
+    content = function(file) {
+      shinyjs::show("UPGMAStatus")
+      Layout = Tree_layout_choice[input$Layout]
+      ggsave(file, plot = ggtree(tree(), layout = Layout) + geom_tiplab(hjust = -0.1, align = TRUE, linesize = 0.5, size = 2), device = "pdf", width = 12, height = 12)
+      shinyjs::hide("UPGMAStatus")
+    }
+  )
   
   output$download_UPGMA_result = renderUI({
     if (UPGMAtitle1() == "UPGMA Phylogenetic Tree") {
@@ -1385,7 +1423,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     shinyjs::hide("NJStatus")
     NJtitle1("NJ Phylogenetic Tree")
     guide_NJ("The NJ tree is complete. \nTry adjusting the layout style and observe the NJ phylogenetic tree.")
-    
+    showNotification("Run Successfully", type = "message")
+
     output$DNJplot = downloadHandler(
       filename = function() {
         paste0("NJ_Plot-Layout_", input$NJLayout, ".pdf")
@@ -1403,7 +1442,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     NJtree(NULL)
     NJtitle1("")
     showNotification("Data have been reset.")
-    guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.")
+    guide_NJ("To run the NJ phylogenetic tree, the input data must be in ✅ genlight format.\nPlease click the 'Run NJ' button.")
     })
   
   output$NJLayout = renderUI({
@@ -1475,38 +1514,30 @@ Page_4_Population_Structure_Server = function(input, output, session) {
   
   observeEvent(input$runKinship, {
     req(input$FileforKinship, input$Kinship_method)
-    shinyjs::show("KinshipStatus")
+
+    tryCatch({
+      shinyjs::show("KinshipStatus")
+      Kinship_data = switch(input$FileforKinship, "df" = df())
+      Kinship_data[] = lapply(Kinship_data, function(x) replace(x, is.na(x), 0))
+      Kinship_data = as.matrix(Kinship_data)
+      KinshipMatrix = kinship(Kinship_data, method = input$Kinship_method, MAF = NULL, denominator = NULL)
     
-    Kinship_data = switch(input$FileforKinship, "df" = df())
-    Kinship_data[] = lapply(Kinship_data, function(x) replace(x, is.na(x), 0))
-    Kinship_data = as.matrix(Kinship_data)
-    KinshipMatrix = kinship(Kinship_data, method = input$Kinship_method, MAF = NULL, denominator = NULL)
-    
-    if (!is.null(groupInfo2())){
-      group_pos = lapply(sort(unique(groupInfo2())), function(x) which(groupInfo2() == x))
-      rank = unlist(group_pos)
-      KinshipMatrix = KinshipMatrix[, rank]
-      KinshipMatrix = KinshipMatrix[rank, ]
-    }
-    KinshipMatrix(KinshipMatrix)
-    
-    shinyjs::hide("KinshipStatus")
-    Kinshiptitle1("Kinship Matrix")
-    guide_Kinship("The kinship analysis is complete.")
-    
-    output$DKinshipplot = downloadHandler(
-      filename = function() {
-        paste0("Kinship_Matrix_Plot-Method_", input$Kinship_method, ".pdf")
-      },
-      content = function(file) {
-        shinyjs::show("KinshipStatus")
-        pdf(file, width = 10, height = 10)
-        plot_popkin(KinshipMatrix(), titles = "Kinship Matrix", names = F, ylab = "",
-                    col_n = 100, oma = 0.5, mar_pad = 0.1, leg_width = 0.1, leg_title = "")
-        dev.off()
-        shinyjs::hide("KinshipStatus")
+      if (!is.null(groupInfo2())){
+        group_pos = lapply(sort(unique(groupInfo2())), function(x) which(groupInfo2() == x))
+        rank = unlist(group_pos)
+        KinshipMatrix = KinshipMatrix[, rank]
+        KinshipMatrix = KinshipMatrix[rank, ]
       }
-    )
+      KinshipMatrix(KinshipMatrix)
+    
+      shinyjs::hide("KinshipStatus")
+      Kinshiptitle1("Kinship Matrix")
+      guide_Kinship("The kinship analysis is complete.")
+      showNotification("Run Successfully", type = "message")
+    }, error = function(e){
+      shinyjs::hide("KinshipStatus")
+      showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
+    })
   })
   
   observeEvent(input$resetKinship, {
@@ -1516,7 +1547,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       fileInput("groupfile2", "Group Info. (optional)", multiple = F, accept = c(".csv"))
     })
     showNotification("Data have been reset.")
-    guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional.")
+    guide_Kinship("To run the kinship matrix, the input data must be in ✅ data.frame format. \nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Run Kinship' button.")
     })
   
   
@@ -1533,6 +1564,20 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       downloadButton("DKinshipplot", "Download Plot")
     }
   })
+
+  output$DKinshipplot = downloadHandler(
+    filename = function() {
+      paste0("Kinship_Matrix_Plot-Method_", input$Kinship_method, ".pdf")
+    },
+    content = function(file) {
+      shinyjs::show("KinshipStatus")
+      pdf(file, width = 10, height = 10)
+      plot_popkin(KinshipMatrix(), titles = "Kinship Matrix", names = F, ylab = "",
+                  col_n = 100, oma = 0.5, mar_pad = 0.1, leg_width = 0.1, leg_title = "")
+      dev.off()
+      shinyjs::hide("KinshipStatus")
+    }
+  )
   
   output$download_Kinship_result = renderUI({
     if (Kinshiptitle1() == "Kinship Matrix") {
@@ -1692,6 +1737,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       scatter2D("2D Scatter Plot")
       scatter3D("3D Scatter Plot")
       guide_scatter("You can customize the scatter plot and then click the ▶️ 'Run Scatter Plot' button again.")
+      showNotification("Run Successfully", type = "message")
       
     }, error = function(e) {
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -1709,7 +1755,7 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     Plot3D(NULL)
     scatter2D("")
     scatter3D("")
-    guide_scatter("This page allows you to customize scatter plot. You can upload: \n✅ PCA Object (in RDS), or\n✅ DAPC Object (in RDS), and\n✅ Group and Other Info. (in CSV).\nOnce your files are uploaded, click the 'Run Scatter Plot' button.")
+    guide_scatter("This page allows you to customize a scatter plot. You can upload: \n✅ PCA Object (in RDS), or\n✅ DAPC Object (in RDS), and\n✅ Group and Other Info. (in CSV).\nOnce your files are uploaded, click the 'Run Scatter Plot' button.")
     output$scatter_Upload = renderUI({
       fileInput("scatterdata1", "", multiple = F, accept = c(".rds"))
     })
@@ -1979,7 +2025,8 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       TreePlot(plot4)
       TreePlot1("Phylogenetic Tree Plot")
       guide_Tree("You can customize the tree plot and then click the ▶️ 'Run Tree Plot' button again.")
-      
+      showNotification("Run Successfully", type = "message")
+
     }, error = function(e) {
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
       TreePlot(NULL)

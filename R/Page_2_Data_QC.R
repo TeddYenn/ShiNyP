@@ -34,13 +34,13 @@ Page_2_Data_QC_UI = function() {
                           uiOutput("download_sampleQC_Site_info"),
                           tags$hr(),
                           uiOutput("progressUI"),
-                          div(class = "title-text-style", textOutput("samplemissing1")),
-                          div(id = "samplemissingStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("samplemissing1")),
+                          div(id = "samplemissingStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("samplemissing2"),
                           plotOutput("samplemissing3", width = "800px", height = "350px"),
                           tags$hr(),
-                          div(class = "title-text-style", textOutput("sampleh1")),
-                          div(id = "samplehStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("sampleh1")),
+                          div(id = "samplehStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("sampleh2"),
                           plotOutput("sampleh3", width = "800px", height = "350px"),
                           tags$hr(),
@@ -85,24 +85,23 @@ Page_2_Data_QC_UI = function() {
                           uiOutput("download_SNPQC_Site_info"),
                           tags$hr(),
                           uiOutput("progressUI"),
-                          div(class = "title-text-style", textOutput("missing1")),
-                          div(id = "missingStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("missing1")),
+                          div(id = "missingStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("missing2"),
                           plotOutput("missing3", width = "800px", height = "350px"),
                           tags$hr(),
-                          div(class = "title-text-style", textOutput("maf1")),
-                          div(id = "mafStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("maf1")),
+                          div(id = "mafStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("maf2"),
                           plotOutput("maf3", width = "800px", height = "350px"),
                           tags$hr(),
-                          textOutput("h1"),
-                          tags$style("#h1 { font-size: 20px; font-weight: bold; color: #853717;}"),
-                          div(id = "hStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("h1")),
+                          div(id = "hStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("h2"),
                           plotOutput("h3", width = "800px", height = "350px"),
                           tags$hr(),
-                          div(class = "title-text-style", textOutput("HWE1")),
-                          div(id = "hweStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(class = "title-text-style", uiOutput("HWE1")),
+                          div(id = "hweStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tableOutput("HWE2"),
                           plotOutput("HWE3", width = "800px", height = "380px"),
                           tags$hr(),
@@ -126,7 +125,7 @@ Page_2_Data_QC_UI = function() {
                         mainPanel(
                           uiOutput("guide_SNPdensity"),
                           uiOutput("progressUI"),
-                          div(id = "SNPdensityStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "SNPdensityStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           verbatimTextOutput("SNPdensity_result1"),
                           div(class = "title-text-style", textOutput("SNPdensity1")),
@@ -154,70 +153,73 @@ Page_2_Data_QC_Server = function(input, output, session) {
   
   output$SampleQCfileInfo = renderText({
     req(VCFdf(), input$selectedFile)
-    if (input$selectedFile == "VCFdf"){
-      paste0("Number of samples: ", dim(VCFdf())[1], "\n",
-             "Number of SNPs: ", dim(VCFdf())[2], "\n",
+    if (input$selectedFile == "QCData" && is.null(QCData())) {
+      paste("Not available for 'SNP Post-QC Data'!")
+    } else {
+      data = if (input$selectedFile == "VCFdf") VCFdf() else QCData()
+      prefix = if (input$selectedFile == "VCFdf") "" else "Post-QC Data (Updated)\n"
+      paste0(prefix,
+             "Number of samples: ", nrow(data), "\n",
+             "Number of SNPs: ", ncol(data), "\n",
              "Type: data.frame")
-    }else if (input$selectedFile == "QCData"){
-      if (is.null(QCData())){
-        paste("Not available for 'SNP Post-QC Data'!")
-      }else {
-        paste0("Post-QC Data (Updated)", "\n",
-               "Number of samples: ", dim(QCData())[1], "\n",
-               "Number of SNPs: ", dim(QCData())[2], "\n",
-               "Type: data.frame")
-      }
     }
   })
   
   observeEvent(input$sampleQCmissing, {
-    if (input$selectedFile == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("samplemissingStatus")
-      rate = rowSums(is.na(VCFdf())) / dim(VCFdf())[2]
-    } else if (input$selectedFile == "QCData"){
-      req(QCData())
-      shinyjs::show("samplemissingStatus")
-      rate = rowSums(is.na(QCData())) / dim(QCData())[2]
-    }
+    data = if (input$selectedFile == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("samplemissingStatus")
+    rate = rowSums(is.na(data)) / ncol(data)
     samplemissingrate(rate)
-    samplemissing1("Summary of Sample Missing Rate")
+    samplemissing1("Sample Missing Rate")
+
+    if (all(rate == 0, na.rm = TRUE)) {
+      samplemissing1("Sample Missing Rate \n*all values are 0")
+    } else{
+      samplemissing1("Sample Missing Rate")
+    }
+    
     samplemissing2(stat2summary(samplemissingrate()))
     shinyjs::hide("samplemissingStatus")
+    showNotification("Run Successfully - Sample Missing Rate", type = "message")
   })
-  
+
   observeEvent(input$sampleQCH, {
-    if (input$selectedFile == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("samplehStatus")
-      rate = rowSums(VCFdf() == 1, na.rm = TRUE)/(dim(VCFdf())[2]-rowSums(is.na(VCFdf())))
-    } else if (input$selectedFile == "QCData"){
-      req(QCData())
-      shinyjs::show("samplehStatus")
-      rate = rowSums(QCData() == 1, na.rm = TRUE)/(dim(QCData())[2]-rowSums(is.na(QCData())))
-    }
+    data = if (input$selectedFile == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("samplehStatus")
+    mat = as.matrix(data)
+    rate = rowSums(mat == 1, na.rm = TRUE) / (ncol(mat) - rowSums(is.na(mat)))
     sampleh(rate)
-    sampleh1("Summary of Sample Heterozygosity Rate")
+    if (all(rate == 0, na.rm = TRUE)) {
+      sampleh1("Sample Heterozygosity Rate \n*all values are 0")
+    } else{
+      sampleh1("Sample Heterozygosity Rate")
+    }
+
     sampleh2(stat2summary(sampleh()))
     shinyjs::hide("samplehStatus")
+    showNotification("Run Successfully - Sample Heterozygosity Rate", type = "message")
   })
   
   observeEvent(input$sampleQC, {
-    req(samplemissingrate(), sampleh(), Site_Info())
-    if (input$selectedFile == "VCFdf") {
-      data = VCFdf()
-    } else {
-      data = QCData()
+    if (is.null(Site_Info())) {
+      showNotification("Site Info is required. Please upload it using any 'Site Info' upload box.",
+                       type = "error")
+      return(NULL)
     }
-    rm.sample = union(which(samplemissingrate() > input$sampleThrMR), which(sampleh() > input$sampleThrH))
-    if (length(rm.sample)>0){
-      rm.sample = as.numeric(rm.sample)
+    req(samplemissingrate(), sampleh())
+
+    data = if (input$selectedFile == "VCFdf") VCFdf() else QCData()
+    rm.sample = union(which(samplemissingrate() > input$sampleThrMR),
+                      which(sampleh() > input$sampleThrH))
+    if (length(rm.sample) > 0) {
       data = data[-rm.sample, ]
-    } 
+    }
     QCData(data)
     df(data)
-    SampleQC_sample(dim(data)[1])
-    SampleQC_SNP(dim(data)[2])
+    SampleQC_sample(nrow(data))
+    SampleQC_SNP(ncol(data))
     
     Site_Info(Site_Info())
     guide_sampleQC("Sample quality control is complete. \nYou will receive the Post-QC Data (in data.frame) when you download the file.")
@@ -226,9 +228,11 @@ Page_2_Data_QC_Server = function(input, output, session) {
     pre_results[[6]] = "## Data QC"
     pre_results[[7]] = "### Sample QC"
     pre_results[[8]] = paste0("Removed samples with ", "missing rate > ", input$sampleThrMR ," and heterozygosity rate > ", input$sampleThrH)
-    pre_results[[9]] = paste0("Number of samples: ", dim(QCData())[1])
-    pre_results[[10]] = paste0("Number of SNPs: ", dim(QCData())[2])
+    pre_results[[9]] = paste0("Number of samples: ", nrow(QCData()))
+    pre_results[[10]] = paste0("Number of SNPs: ", ncol(QCData()))
     pre_results(pre_results)
+    
+    showNotification("Run Successfully", type = "message")
     
     output$DsampleQC = downloadHandler(
       filename = function() {
@@ -318,85 +322,84 @@ Page_2_Data_QC_Server = function(input, output, session) {
   
   output$SNPQCfileInfo = renderText({
     req(VCFdf(), input$selectedFile2)
-    if (input$selectedFile2 == "VCFdf"){
-      paste0("Number of samples: ", dim(VCFdf())[1], "\n",
-             "Number of SNPs: ", dim(VCFdf())[2], "\n",
+    if (input$selectedFile2 == "QCData" && is.null(QCData())) {
+      paste("Not available for 'Sample Post-QC Data'!")
+    } else {
+      data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
+      prefix = if (input$selectedFile2 == "VCFdf") "" else "Post-QC Data (Updated)\n"
+      paste0(prefix,
+             "Number of samples: ", nrow(data), "\n",
+             "Number of SNPs: ", ncol(data), "\n",
              "Type: data.frame")
-    }else if (input$selectedFile2 == "QCData"){
-      if (is.null(QCData())){
-        paste("Not available for 'Sample Post-QC Data'!")
-      }else {
-        paste0("Post-QC Data (Updated)", "\n",
-               "Number of samples: ", dim(QCData())[1], "\n",
-               "Number of SNPs: ", dim(QCData())[2], "\n",
-               "Type: data.frame")
-      }
     }
   })
   
   observeEvent(input$QCmissing, {
-    if (input$selectedFile2 == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("missingStatus")
-      rate = colSums(is.na(VCFdf()))/(dim(VCFdf())[1])
-    } else if (input$selectedFile2 == "QCData"){
-      req(QCData())
-      shinyjs::show("missingStatus")
-      rate = colSums(is.na(QCData()))/(dim(QCData())[1])
-    }
+    data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("missingStatus")
+    rate = colSums(is.na(data)) / nrow(data)
     missingrate(rate)
-    missing1("Summary of SNP Missing Rate")
+
+    if (all(rate == 0, na.rm = TRUE)) {
+      missing1("SNP Missing Rate \n*all values are 0")
+    } else{
+      missing1("SNP Missing Rate")
+    }
     missing2(stat2summary(missingrate()))
     shinyjs::hide("missingStatus")
+    showNotification("Run Successfully - SNP Missing Rate", type = "message")
   })
   
   observeEvent(input$QCMAF, {
-    if (input$selectedFile2 == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("mafStatus")
-      rate = (colSums(VCFdf() == 1, na.rm = TRUE) + 2*colSums(VCFdf() == 2, na.rm = TRUE))/(2*(dim(VCFdf())[1]-colSums(is.na(VCFdf()))))
-    } else if (input$selectedFile2 == "QCData"){
-      req(QCData())
-      shinyjs::show("mafStatus")
-      rate = (colSums(QCData() == 1, na.rm = TRUE) + 2*colSums(QCData() == 2, na.rm = TRUE))/(2*(dim(QCData())[1]-colSums(is.na(QCData()))))
-    }
+    data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("mafStatus")
+    mat = as.matrix(data)
+    valid = nrow(mat) - colSums(is.na(mat))
+    rate = colSums(mat, na.rm = TRUE) / (2 * valid)
     rate = pmin(rate, 1 - rate)
     maf(rate)
-    maf1("Summary of SNP Minor Allele Frequency (MAF)")
+    maf1("SNP Minor Allele Frequency (MAF)")
     maf2(stat2summary(maf()))
     shinyjs::hide("mafStatus")
+    showNotification("Run Successfully - SNP MAF", type = "message")
   })
   
   observeEvent(input$QCH, {
-    if (input$selectedFile2 == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("hStatus")
-      rate = colSums(VCFdf() == 1, na.rm = TRUE)/(dim(VCFdf())[1]-colSums(is.na(VCFdf())))
-    } else if (input$selectedFile2 == "QCData"){
-      req(QCData())
-      shinyjs::show("hStatus")
-      rate = colSums(QCData() == 1, na.rm = TRUE)/(dim(QCData())[1]-colSums(is.na(QCData())))
-    }
+    data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("hStatus")
+    mat = as.matrix(data)
+    valid = nrow(mat) - colSums(is.na(mat))
+    rate = colSums(mat == 1, na.rm = TRUE) / valid
     h(rate)
-    h1("Summary of SNP Heterozygosity Rate")
+
+    if (all(rate == 0, na.rm = TRUE)) {
+      h1("SNP Heterozygosity Rate \n*all values are 0")
+    } else{
+      h1("SNP Heterozygosity Rate")
+    }
     h2(stat2summary(h()))
     shinyjs::hide("hStatus")
+    showNotification("Run Successfully - SNP Heterozygosity Rate", type = "message")
   })
   
   observeEvent(input$QCHWE, {
-    if (input$selectedFile2 == "VCFdf") {
-      req(VCFdf())
-      shinyjs::show("hweStatus")
-      hwe = hwe_test(VCFdf())
-    } else if (input$selectedFile2 == "QCData"){
-      req(QCData())
-      shinyjs::show("hweStatus")
-      hwe = hwe_test(QCData())
-    }
+    data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
+    req(data)
+    shinyjs::show("hweStatus")
+    hwe = hwe_test(data)
     HWE(hwe)
-    HWE1("Summary of SNP p-value for Hardy-Weinberg equilibrium (HWE)")
+
+    if (all(hwe < 0.00001, na.rm = TRUE)) {
+      HWE1("SNP p-value for Hardy-Weinberg equilibrium (HWE) \n*all values are 0")
+    } else{
+      HWE1("SNP p-value for Hardy-Weinberg equilibrium (HWE)")
+    }
     HWE2(stat2summary_HWE(HWE()))
     shinyjs::hide("hweStatus")
+    showNotification("Run Successfully - SNP HWE", type = "message")
   })
   
   output$doThrHWE = renderUI({
@@ -406,12 +409,14 @@ Page_2_Data_QC_Server = function(input, output, session) {
   })
   
   observeEvent(input$QC, {
-    req(missingrate(), maf(), h(), HWE(), Site_Info())
-    if (input$selectedFile2 == "VCFdf") {
-      data = VCFdf()
-    } else {
-      data = QCData()
+    if (is.null(Site_Info())) {
+      showNotification("Site Info is required. Please upload it using any 'Site Info' upload box.",
+                       type = "error")
+      return(NULL)
     }
+    req(missingrate(), maf(), h(), HWE())
+
+    data = if (input$selectedFile2 == "VCFdf") VCFdf() else QCData()
     if (input$doHWE == TRUE) {
       rm.loc = union(union(union(union(which(missingrate() > input$ThrMR),
                                        which(maf() < input$ThrMAF)),
@@ -424,15 +429,14 @@ Page_2_Data_QC_Server = function(input, output, session) {
                            which(h() > input$ThrH)),
                      which(h() < input$ThrH0))
     }
-    
-    if (length(rm.loc)>0){
-      rm.loc = as.numeric(rm.loc)
+
+    if (length(rm.loc) > 0){
       data = data[, -rm.loc]
     }
     QCData(data)
     df(data)
-    SNPQC_sample(dim(data)[1])
-    SNPQC_SNP(dim(data)[2])
+    SNPQC_sample(nrow(data))
+    SNPQC_SNP(ncol(data))
     Site_Info = Site_Info()[-rm.loc, ]
     Site_Info(Site_Info)
     guide_QC("SNP quality control is complete. \nYou will receive the Post-QC Data (in data.frame) when you download the file.")
@@ -445,9 +449,11 @@ Page_2_Data_QC_Server = function(input, output, session) {
     } else{
       pre_results[[12]] = paste0("Removed SNPs with ", "missing rate > ", input$ThrMR ,", MAF < ", input$ThrMAF, ", heterozygosity rate < ", input$ThrH0, ", and heterozygosity rate > ", input$ThrH)
     }
-    pre_results[[13]] = paste0("Number of samples: ", dim(QCData())[1])
-    pre_results[[14]] = paste0("Number of SNPs: ", dim(QCData())[2])
+    pre_results[[13]] = paste0("Number of samples: ", nrow(QCData()))
+    pre_results[[14]] = paste0("Number of SNPs: ", ncol(QCData()))
     pre_results(pre_results)
+
+    showNotification("Run Successfully", type = "message")
     
     output$DsnpQC = downloadHandler(
       filename = function() {
@@ -457,6 +463,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
         saveRDS(QCData(), file)
         shinyjs::hide("missingStatus")
       })
+  
     
     output$DSNPQCSite = downloadHandler(
       filename = function() {
@@ -645,7 +652,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
       SNPdensity1("SNP Density Plot")
       SNPdensity2("SNP Density across All Chromosome")
       guide_SNPdensity("The SNP density analysis is complete.")
-      
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("SNPdensityStatus")
       showNotification(paste("Fail: ", e$message), type = "error")
@@ -666,7 +673,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
     output$Chr_Info0 = renderUI({
       fileInput("Chr_Info0", "Chromosome Info.* (required)", multiple = F, accept = c(".csv"))
     })
-    guide_SNPdensity("Need to upload the ▶️ Site Info file (in RDS format) and ▶️ Chromosome Info file (in CSV format). \nPlease select the optimal window size and step, then click the 'Summary' button.")
+    guide_SNPdensity("Need to upload the ▶️ Site Info file (in RDS) and ▶️ Chromosome Info file (in CSV). \nPlease select the optimal window size and step, then click the 'Summary' button.")
     })
   
   output$SNPdensity_result1 = renderText({
@@ -692,7 +699,7 @@ Page_2_Data_QC_Server = function(input, output, session) {
                     )
       pre_results = pre_results()
       pre_results[[2]] = "## Data Input"
-      pre_results[[15]] = paste0("### Summary of SNP Density", "\n", text)
+      pre_results[[15]] = paste0("### SNP Density", "\n", text)
       pre_results(pre_results)
       paste0(text)
     }

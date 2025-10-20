@@ -27,7 +27,7 @@ Page_5_Genetic_Diversity_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_GD"),
-                          div(id = "GDStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "GDStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           div(class = "title-text-style", textOutput("GDtitle1")),
                           plotOutput("GDplot", width = "900px", height = "350px"),
@@ -66,7 +66,7 @@ Page_5_Genetic_Diversity_UI = function() {
                             uiOutput("Chr_Info"), # Track 1-2
                             "Upload: Chromosome Info. (CSV)"
                           ),
-                          selectInput("Track1", "Track 1 & 2: Chromosome Info.", choices = "Chromosome Info."), # Track 1
+                          selectInput("Track1", "Track 1 & 2: Chromosome Info. (Mb)", choices = "Chromosome Info. (Mb)"), # Track 1
                           uiOutput("Track3"), # Track 3-6
                           actionButton("addTrack", "Add Track", class = "S-action-button"),
                           actionButton("runCircos", "Run Circos Plot", class = "run-action-button"),
@@ -74,7 +74,7 @@ Page_5_Genetic_Diversity_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_Circos"),
-                          div(id = "CircosStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "CircosStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           uiOutput("progressUI"),
                           div(class = "title-text-style", textOutput("Circostitle1")),
@@ -106,7 +106,7 @@ Page_5_Genetic_Diversity_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_GT"),
-                          div(id = "GTStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "GTStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(6,
@@ -142,7 +142,7 @@ Page_5_Genetic_Diversity_UI = function() {
                           width = 3),
                         mainPanel(
                           uiOutput("guide_AMOVA"),
-                          div(id = "AMOVAStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+                          div(id = "AMOVAStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                           tags$hr(),
                           fluidRow(
                             column(6,
@@ -297,6 +297,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
         pre_results[[34]] = paste0("The number of exclusive allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,8], collapse = ", "))
         pre_results[[35]] = paste0("The number of fixed allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,9], collapse = ", "))
         pre_results(pre_results)
+        showNotification("Run Successfully", type = "message")
       } else{
         popgen = popgen2(GD_data)
         if (!is.null(Site_Info())){
@@ -352,7 +353,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$Parameter = renderUI({})
     shinyjs::hide("GDStatus")
     showNotification("Data have been reset.")
-    guide_GD("To analyze genetic diversity, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Site Info file (in RDS format).\nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Analysis' button.")
+    guide_GD("To analyze genetic diversity, the input data must be in ✅ data.frame format.\nYou also need to upload a ▶️ Site Info file (in RDS).\nThe 'Group Info' CSV file from DAPC analysis is optional. \nPlease click the 'Analysis' button.")
     })
   
   # ---- Setting ----
@@ -654,7 +655,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       shinyjs::hide("CircosStatus")
       guide_Circos("The 'Sliding Window' analysis is complete. \nPlease select parameters for each track, then click the 'Run Circos Plot' button.")
       Circostitle1("Sliding Window Data")
-      
+      showNotification("Step 1: Run Successfully", type = "message")
+
       output$SWresults = DT::renderDataTable({
         DT::datatable(SW_data(), options = list(pageLength = 5))
       })
@@ -670,7 +672,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$SWresults = DT::renderDataTable({ DT::datatable(NULL) })
     shinyjs::hide("CircosStatus")
     showNotification("Data have been reset.")
-    guide_Circos("To run the sliding window analysis, you need to run 'Diversity Parameter' first! \nPlease select the optimal window size and step, then click the 'Run Sliding Window' button.")
+    guide_Circos("To run the sliding window analysis, you need to run 'Diversity Parameter' first! \nPlease select the optimal window size, then click the 'Run Sliding Window' button.")
   })
   
   # ---- Download Table  ----
@@ -768,7 +770,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       shinyjs::hide("CircosStatus")
       Circostitle2("Circos Plot")
       guide_Circos("The Circos plot is complete!\nPlease download the Circos plot and review the results.")
-      
+      showNotification("Step 2: Run Successfully", type = "message")
+
     }, error = function(e){
       shinyjs::hide("CircosStatus")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -868,7 +871,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     tryCatch({
       GT_data = cbind(groupInfo4(), df())
       GT = genet.dist(GT_data, diploid = TRUE, method = GT_method_choice[input$GT_method])
-      GT.mat = as.matrix(GT) %>% round(digits = 4)
+      GT.mat = as.matrix(GT) %>% round(digits = 6)
       GTmatrix = GT.mat[order(as.numeric(rownames(GT.mat))), order(as.numeric(colnames(GT.mat)))]
       rownames(GTmatrix) = colnames(GTmatrix) = paste("Group", colnames(GTmatrix))
       GTmatrix(GTmatrix)
@@ -890,6 +893,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       pre_results = pre_results()
       pre_results[[30]] = "## Genetic Diversity"
       pre_results[[37]] = paste0("### Genetic Distance (between pairs of groups)")
+      showNotification("Run Successfully", type = "message")
+
       combined = apply(GTdf[, c("Pair1", "Pair2", "GeneticDistance")], 1, function(row) {
         paste0(row[1], "-", row[2], ": ", row[3])
       })
@@ -898,6 +903,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       )
       pre_results[[38]] = paste(text)
       pre_results(pre_results)
+      showNotification("Run Successfully", type = "message")
       
     }, error = function(e){
       shinyjs::hide("GTStatus")
@@ -1095,6 +1101,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
                                  "Among individual within groups: ", AMOVA_res$Variance_percentage[2], "\n",
                                  "Within individuals: ", AMOVA_res$Variance_percentage[3])
       pre_results(pre_results)
+      showNotification("Step 1: Success", type = "message")
     
     }, error = function(e){
       shinyjs::hide("AMOVAStatus")
@@ -1111,8 +1118,8 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
     shinyjs::hide("AMOVAStatus")
     showNotification("Data have been reset.")
-    guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page ")
-    })
+    guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page.")
+  })
   
   observeEvent(input$runTest, {
     req(amova.result())
@@ -1135,6 +1142,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
                                  "Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2], "\n",
                                  "Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])
       pre_results(pre_results)
+      showNotification("Step 2: Success", type = "message")
     
     }, error = function(e){
       shinyjs::hide("AMOVAStatus")
@@ -1152,7 +1160,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
     AMOVAtitle2("")
     AMOVAtitle3("")
     output$AMOVAresults = renderTable({ NULL }, rownames = FALSE)
-    guide_AMOVA("To run AMOVA, the input data must be a genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page after you have both the data.frame and Group Info. files.")
+    guide_AMOVA("To run AMOVA, the input data must be in ✅ genlight file with 'Group Info.' \nYou can obtain this genlight file from the 'Data Transform' page.")
   })
   
   # ---- Show Plot  ----

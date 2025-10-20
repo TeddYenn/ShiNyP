@@ -12,11 +12,7 @@
 
 
 > [!NOTE] 
-> **🆕 _ShiNyP_ v1.1.0  is now available!**
-> - Enhanced AI report features.
-> - Enhanced *ShiNyP AI* chatbot.
-> - Made UI/UX improvements.
-> - Fixed several bugs.
+> **🆕 _ShiNyP_ v1.1.1  is now available!**
 
 <br>
 

@@ -144,17 +144,13 @@ CSS_UI = function() {
         box-shadow: 0 0 8px rgba(0, 122, 204, 0.8);
         background-color: #34495e;
       }
-      
-      #AIStatus {
-        display: none;
-      }
 
-      #AIStatus .loading-dots span {
+      .loading-dots span {
         animation: blink 1s infinite;
         opacity: 0;
       }
-      #AIStatus .loading-dots span:nth-child(2) { animation-delay: .2s; }
-      #AIStatus .loading-dots span:nth-child(3) { animation-delay: .4s; }
+      .loading-dots span:nth-child(2) { animation-delay: .2s; }
+      .loading-dots span:nth-child(3) { animation-delay: .4s; }
 
       @keyframes blink {
         0% { opacity: 0; }

@@ -213,7 +213,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
       
       showNotification("Uploaded successfully", type = "message")
     } else {
-      showNotification("Unsupported template file type.", type = "error")
+      showNotification("Fail: Unsupported template file type.", type = "error")
     }
   })
   
@@ -357,7 +357,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
                       "*This report was generated with the assistance of AI model and is for informational purposes only.*", "\n", "\n",
                       "*It should not be considered as professional advice or a basis for decision-making.*", "\n", "\n",
                       "*Please review and validate the content thoroughly before use.*")
-      showNotification("Request successfully", type = "message")
+      showNotification("Request Successfully", type = "message")
       AI_report(NULL)
       AI_report(report)
       AItitle2("Here's Your AI Report!")

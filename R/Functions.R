@@ -56,8 +56,8 @@ diploidize_genotype = function(gt_str) {
 #' @title vcf2Site_Info
 #' @export
 vcf2Site_Info = function(VCF) {
-  Site_Info = VCF[, c(1:3)]
-  colnames(Site_Info) = c("Chr", "Pos", "Marker")
+  Site_Info = VCF[, c(1:5)]
+  colnames(Site_Info) = c("Chr", "Pos", "Marker", "Ref", "Alt")
   return(Site_Info)
 }
 
@@ -788,8 +788,8 @@ parse_sections = function(text) {
 #' @title llama_retrieve_answer
 #' @export
 llama_retrieve_answer <- function(query_text) {
-  api_key <- "llx-He8NGNKtO1ASA1ObE2yDOsWX2CB2J7x0ArJxEPVQCDFNUG1C"
-  endpoint_url <- "https://api.cloud.llamaindex.ai/api/v1/pipelines/b9f96382-4d56-485e-9462-1f9088586fc1/retrieve"
+  api_key <- "llx-UwNIf51ZaC1v0F9pmZH1MWeWUbfWE2o2waprBQ70Y4AQ1F48"
+  endpoint_url <- "https://api.cloud.llamaindex.ai/api/v1/pipelines/2558b3ba-5702-46a2-9598-bdd273e46f9d/retrieve"
   
   response <- POST(
     url = endpoint_url,

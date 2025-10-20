@@ -10,7 +10,7 @@
 run_ShiNyP = function() {
   ShiNyP_ui = tagList(
     tags$head(
-      tags$title("ShiNyP")
+      tags$title("ShiNyP: Unlocking SNP-Based Population Genetics")
     ),
     CSS_UI(),
     CSS_UI_Bot(),
@@ -35,8 +35,17 @@ run_ShiNyP = function() {
       tags$div(class = "ai-resizer left"),
       tags$div(
         id = "ai-chat-header", 
+        style = "display: flex; justify-content: space-between; align-items: center; background: #34495e; color: white; height: 48px; padding: 0 16px; border-top-left-radius: 20px; border-top-right-radius: 20px;",
         tags$em("🐣 𝖲𝗁𝗂𝖭𝗒𝖯 𝖠𝖨"),
-        tags$button(id = "ai-chat-close", icon("circle-xmark"), style = "border:none; background:transparent; color:white; font-size:20px;")
+        tags$div(
+          id = "ai-header-actions",
+          style = "display: flex; align-items: center; gap: 10px;",
+          tags$button(id = "ai-chat-help", icon("circle-question"), 
+            `data-toggle` = "tooltip",
+            title = "The AI assistant will respond to your inquiry. For optimal results, we recommend keeping your questions brief, specific, and focused on relevant keywords. This chat is NOT monitored.",
+            style = "border:none; background:transparent; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;"),
+          tags$button(id = "ai-chat-close", icon("circle-xmark"), style = "border:none; background:transparent; color:white; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;")
+        )
       ),
       tags$div(
         id = "ai-chat-messages", 

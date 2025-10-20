@@ -75,12 +75,12 @@ Page_3_Data_Transform_UI = function() {
                tags$hr(),
                uiOutput("progressUI"),
                div(class = "title-text-style", textOutput("Cstatus2")),
-               div(id = "glStatus", style = "color: red; font-weight: bold;", "It may take a while..."),
+               div(id = "glStatus", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                verbatimTextOutput("CTable2"),
                uiOutput("download_gl"),
                tags$br(),
                div(class = "title-text-style", textOutput("Cstatus3")),
-               div(id = "gl2Status", style = "color: red; font-weight: bold;", "It may take a while..."),
+               div(id = "gl2Status", style = "color: red; font-weight: bold;", HTML("It may take a while <span class='loading-dots'><span>•</span><span>•</span><span>•</span></span>")),
                verbatimTextOutput("CTable3"),
                uiOutput("download_gl2"),
                width = 9)
@@ -156,10 +156,17 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       } else {
         gl_obj = new("genlight", data)
       }
+      if (!is.null(Site_Info())) {
+        chrom_vec <- Site_Info()[,1]
+        pos_vec   <- Site_Info()[,2]
+        gl_obj$chromosome <- if(is.null(chrom_vec)) NULL else as.factor(chrom_vec)
+        gl_obj$position   <- if(is.null(pos_vec)) NULL else as.integer(pos_vec)
+      }
       gl(gl_obj)
       Cstatus2("data.frame to genlight")
       shinyjs::hide("glStatus")
       guide_C("The data.frame has been transformed to genlight format.")
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("glStatus")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)
@@ -375,7 +382,7 @@ Page_3_Data_Transform_Server = function(input, output, session) {
       output$Cstatus3 = renderText({ Cstatus3() })
       shinyjs::hide("gl2Status")
       guide_C("The data has been transformed.")
-      
+      showNotification("Run Successfully", type = "message")
     }, error = function(e) {
       shinyjs::hide("gl2Status")
       showNotification(paste("Fail: ", e$message), type = "error", duration = 10)

@@ -105,7 +105,7 @@ Structure your report in clear, concise sections with integrated conclusions, hi
 #' @title KEY
 #' @description KEY
 #' @export
-KEY = "AIzaSyBCblK9s5AZo5WmT5UeQutpmg13mG0jblw"
+KEY = "AIzaSyBaTHJTqCXAdaU_11L01CWTjIYe-mHYaEQ"
 
 #' @title Report Structuring Prompt
 #' @description Prompt for Report Structuring

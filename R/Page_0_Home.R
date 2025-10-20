@@ -12,7 +12,7 @@ Page_0_Home_UI = function() {
              p("Yen-Hsiang Huang, Chung-Feng Kao", br(),
                "National Chung-Hsing University (NCHU), Taiwan"), 
              # checkpoint
-             tags$h6(HTML("<em>ShiNyP</em>  v1.1.0 under AGPL-3.0"),
+             tags$h6(HTML("<em>ShiNyP</em>  v1.1.1 under AGPL-3.0"),
                      style = "color: #34495e; font-weight: bold;"),
              br(),
                #"For any inquiries, please email us at: ",
