@@ -311,18 +311,29 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     tryCatch({
       shinyjs::show("PCAStatus")
       pca_data = switch(input$FileforPCA, "df" = df())
-      pca_data[] = lapply(pca_data, function(x) replace(x, is.na(x), 0))
+      pca_data[] = lapply(pca_data, function(x) {
+        if (is.numeric(x)) {
+          mean_value = mean(x, na.rm = TRUE)
+          if (is.na(mean_value)) {
+            mean_value = 0
+          }
+          replace(x, is.na(x), mean_value)
+        } else {
+          x
+        }
+      })
       pca_data = pca_data[, apply(pca_data, 2, var) > 0]
       pca_result = prcomp(pca_data, scale = T)
       pca_result(pca_result)
       sd = pca_result$sdev
-      total_variance = sum(sd)
-      variance_percent = sd / total_variance * 100
+      eigenvalues = sd^2
+      total_variance = sum(eigenvalues)
+      variance_percent = eigenvalues / total_variance * 100
       PCA_SD = data.frame(
         PC = paste0("PC", seq_along(sd)),
         Standard_deviations = sd,
         Proportion_of_explained_variance = variance_percent,
-        Cumulative_proportion_of_explained_variance = c(0, cumsum(variance_percent)[1:length(sd)-1])
+        Cumulative_proportion_of_explained_variance = cumsum(variance_percent)
       )
       PCA_Trans(as.data.frame(pca_result$x))
       PCA_SD(PCA_SD)
@@ -1612,17 +1623,34 @@ Page_4_Population_Structure_Server = function(input, output, session) {
     
     if (length(data) < 7) {
       scatter_file("PCA")
-      pcs = paste0("PC", seq_along(data$sdev))
-      scatter_data(data$x[, 1:3, drop = FALSE])
+      coords = data$x
+      axis_prefix = "PC"
     } else {
       scatter_file("DAPC")
-      pcs = paste0("LD", seq_along(data$eig))
-      scatter_data(data$ind.coord[, 1:3, drop = FALSE])
+      coords = data$ind.coord
+      axis_prefix = "LD"
     }
+
+    coords = coords %||% matrix(nrow = 0, ncol = 0)
+    total_cols = ncol(coords) %||% 0
+    pcs = paste0(axis_prefix, seq_len(total_cols))
+    n_axes = min(3, total_cols)
+    scatter_data(coords[, seq_len(n_axes), drop = FALSE])
+
+    select_axis = function(idx) {
+      if (length(pcs) >= idx) {
+        pcs[idx]
+      } else if (length(pcs) > 0) {
+        pcs[length(pcs)]
+      } else {
+        NULL
+      }
+    }
+
     showNotification("Uploaded successfully", type = "message")
-    updateSelectInput(session, "Scatter_xvar", choices = pcs, selected = pcs[1])
-    updateSelectInput(session, "Scatter_yvar", choices = pcs, selected = pcs[2])
-    updateSelectInput(session, "Scatter_zvar", choices = pcs, selected = pcs[3])
+    updateSelectInput(session, "Scatter_xvar", choices = pcs, selected = select_axis(1))
+    updateSelectInput(session, "Scatter_yvar", choices = pcs, selected = select_axis(2))
+    updateSelectInput(session, "Scatter_zvar", choices = pcs, selected = select_axis(3))
   })
   
   output$scatter_fileInfo = renderText({
@@ -1675,11 +1703,29 @@ Page_4_Population_Structure_Server = function(input, output, session) {
       zvar = extract_axis_number(input$Scatter_zvar) %||% 3
       
       if (scatter_file() == "PCA") {
-        mat = scatter_object()$x[, c(xvar, yvar, zvar)]
-        var_exp = round(scatter_object()$sdev[c(xvar, yvar, zvar)] / sum(scatter_object()$sdev) * 100, 2)
+        total_axes = ncol(scatter_object()$x)
       } else {
-        mat = scatter_object()$ind.coord[, c(xvar, yvar, zvar)]
-        var_exp = round(scatter_object()$pca.eig[c(xvar, yvar, zvar)] / sum(scatter_object()$pca.eig) * 100, 2)
+        total_axes = ncol(scatter_object()$ind.coord)
+      }
+
+      if (is.null(total_axes) || total_axes == 0) {
+        stop("The uploaded object does not contain any axes to plot.")
+      }
+
+      axis_idx = pmax(1, pmin(c(xvar, yvar, zvar), total_axes))
+
+      if (scatter_file() == "PCA") {
+        mat = scatter_object()$x[, axis_idx, drop = FALSE]
+        eig_vals = scatter_object()$sdev
+      } else {
+        mat = scatter_object()$ind.coord[, axis_idx, drop = FALSE]
+        eig_vals = scatter_object()$pca.eig
+      }
+
+      if (length(eig_vals) == 0 || sum(eig_vals) == 0) {
+        var_exp = rep(0, 3)
+      } else {
+        var_exp = round(eig_vals[axis_idx] / sum(eig_vals) * 100, 2)
       }
       
       group_labels = as.character(df_info[, col_idx])

@@ -213,11 +213,34 @@ Page_2_Data_QC_Server = function(input, output, session) {
     data = if (input$selectedFile == "VCFdf") VCFdf() else QCData()
     rm.sample = union(which(samplemissingrate() > input$sampleThrMR),
                       which(sampleh() > input$sampleThrH))
-    if (length(rm.sample) > 0) {
+    removed_samples = length(rm.sample)
+    if (removed_samples > 0) {
       data = data[-rm.sample, ]
     }
     QCData(data)
     df(data)
+    if (removed_samples > 0) {
+      any_groupInfo = any(c(
+        !is.null(groupInfo1()),
+        !is.null(groupInfo2()),
+        !is.null(groupInfo3()),
+        !is.null(groupInfo4()),
+        !is.null(groupfile4()),
+        !is.null(T2_Group1Info()),
+        !is.null(T2_Group2Info())
+      ))
+      groupInfo1(NULL)
+      groupInfo2(NULL)
+      groupInfo3(NULL)
+      groupInfo4(NULL)
+      groupfile4(NULL)
+      T2_Group1Info(NULL)
+      T2_Group2Info(NULL)
+      if (any_groupInfo) {
+        showNotification("Sample QC removed individuals. Please re-upload Group Info files.",
+                         type = "warning", duration = 10)
+      }
+    }
     SampleQC_sample(nrow(data))
     SampleQC_SNP(ncol(data))
     
