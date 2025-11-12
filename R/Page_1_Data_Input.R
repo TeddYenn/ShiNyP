@@ -241,14 +241,18 @@ Page_1_Data_Input_Server = function(input, output, session) {
           vcf = NULL
           if (grepl("\\.vcf$", input$file1$name, ignore.case = TRUE)) {
             # Read VCF
+            header_line = grep("^#?CHROM\\b", readLines(input$file1$datapath, n = 2000))[1]
+
             vcf = tryCatch({
-              fread(input$file1$datapath, header = TRUE, sep = "\t")
+              fread(input$file1$datapath, header = TRUE, sep = "\t", skip = header_line - 1, check.names = FALSE)
             }, error = function(e) stop("Failed to read VCF file. Please check the file content and format."))
             
           } else if (grepl("\\.gz$", input$file1$name, ignore.case = TRUE)) {
             # Read compressed VCF
+            header_line = grep("^#?CHROM\\b", readLines(input$file1$datapath, n = 2000))[1]
+
             vcf = tryCatch({
-              fread(input$file1$datapath, header = TRUE, sep = "\t")
+              fread(input$file1$datapath, header = TRUE, sep = "\t", skip = header_line - 1, check.names = FALSE)
             }, error = function(e) stop("Failed to read compressed VCF (.gz) file. Please check the file content and format."))
             
           } else if (grepl("\\.rds$", input$file1$name, ignore.case = TRUE)) {
@@ -267,9 +271,17 @@ Page_1_Data_Input_Server = function(input, output, session) {
           }
           
           # --- Basic content check ---
-          if (ncol(vcf) < 2) stop("Input file does not contain sufficient samples.")
-          if (!any(c("ID", "#CHROM", "POS") %in% names(vcf))) {
+          required_cols = c("ID", "#CHROM", "POS")
+          if (!any(required_cols %in% names(vcf))) {
             stop("Missing required columns (e.g., 'ID', '#CHROM', 'POS'). Please check your file format.")
+          }
+          
+          sample_cols = setdiff(
+            names(vcf),
+            c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT")
+          )
+          if (length(sample_cols) == 0) {
+            stop("Input file does not contain any sample genotype columns.")
           }
           
           incProgress(0.1, message = "Processing data...")
