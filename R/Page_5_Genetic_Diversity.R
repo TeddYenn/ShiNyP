@@ -1137,7 +1137,7 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
       pre_results = pre_results()
       pre_results[[40]] = paste0("Methodology: AMOVA quantifies genetic variation at hierarchical levels by extending ANOVA to genetic data. It partitions total variance into three components: among groups, among individuals within groups, and within individuals.", "\n",
                                  "Estimated variance percentage (%) and p-value of population strata: " , "\n",
-                                 "P-values were calculated using a randomization test with", input$nperm, "permutations", "\n",
+                                 "P-values were calculated using a randomization test with ", input$nperm, " permutations", "\n",
                                  "Among groups: ", AMOVA_res$Variance_percentage[1], ", p-value: ", AMOVA_res$p_value[1], "\n",
                                  "Among individual within groups: ", AMOVA_res$Variance_percentage[2], ", p-value: ", AMOVA_res$p_value[2], "\n",
                                  "Within individuals: ", AMOVA_res$Variance_percentage[3], ", p-value: ", AMOVA_res$p_value[3])

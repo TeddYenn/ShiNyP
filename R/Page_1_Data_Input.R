@@ -124,6 +124,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
     removeModal()
     if (input$demoFile == "Chicken") {
       showModal(modalDialog(
+        easyClose = TRUE,
         title = "Data Source",
         p("Tan, X., Zhang, J., Dong, J., Huang, M., Li, Q., Wang, H., ... & Wang, D. (2024). Whole-genome variants dataset of 209 local chickens from China. Scientific Data, 11(1), 169.", 
           br(),
@@ -141,6 +142,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
       
     } else if (input$demoFile == "Wild rice") {
       showModal(modalDialog(
+        easyClose = TRUE,
         title = "Data Source",
         p("Kajiya-Kanegae, H., Ohyanagi, H., Ebata, T., Tanizawa, Y., Onogi, A., Sawada, Y., ... & Sato, Y. (2021). OryzaGenome2.1: Database of diverse genotypes in wild Oryza species. Rice, 14, 1-8.", br(),
           tags$a(href = "https://doi.org/10.1186/s12284-021-00468-x", target = "_blank",
@@ -156,6 +158,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
       ))
     } else if (input$demoFile == "Human #HGDP") {
       showModal(modalDialog(
+        easyClose = TRUE,
         title = "Data Source",
         p("Bergström, A., McCarthy, S. A., Hui, R., Almarri, M. A., Ayub, Q., Danecek, P., ... & Tyler-Smith, C. (2020). Insights into human genetic variation and population history from 929 diverse genomes. Science, 367(6484), eaay5012.", br(),
           tags$a(href = "https://doi.org/10.1126/science.aay5012", target = "_blank", 
@@ -172,6 +175,7 @@ Page_1_Data_Input_Server = function(input, output, session) {
       ))
     } else if (input$demoFile == "Yeast") {
       showModal(modalDialog(
+        easyClose = TRUE,
         title = "Data Source",
         p("Peter, J., De Chiara, M., Friedrich, A., Yue, J. X., Pflieger, D., Bergström, A., ... & Schacherer, J. (2018). Genome evolution across 1,011 Saccharomyces cerevisiae isolates. Nature, 556(7701), 339-344.", br(),
           tags$a(href = "https://doi.org/10.1038/s41586-018-0030-5", target = "_blank",
@@ -189,7 +193,6 @@ Page_1_Data_Input_Server = function(input, output, session) {
   })
   
   observeEvent(input$select_demo, {
-    removeModal()
     shinyjs::show("inputStatus")
     withProgress(message = 'Processing data...', value = 0.05, {
       if (input$demoFile == "Chicken"){
