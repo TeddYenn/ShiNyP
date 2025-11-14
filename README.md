@@ -4,9 +4,11 @@
 # _ShiNyP_: SNP Analysis and Visualization Platform
 
 
-![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)
-![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Ubuntu-release.yaml?label=R-CMD-check)
-![Version](https://img.shields.io/github/r-package/v/TeddYenn/ShiNyP?label=ShiNyP&color=blue)
+[![CI](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-Windows-latest.yaml)](https://github.com/TeddYenn/ShiNyP/actions/workflows/R-CMD-check-Windows-latest.yaml)
+[![R-CMD-check](https://img.shields.io/github/actions/workflow/status/TeddYenn/ShiNyP/R-CMD-check-macOS_Ubuntu-release.yaml?label=R-CMD-check)](https://github.com/TeddYenn/ShiNyP/actions/workflows/R-CMD-check-macOS_Ubuntu-release.yaml)
+
+[![Version](https://img.shields.io/github/r-package/v/TeddYenn/ShiNyP?label=ShiNyP&color=blue)](https://github.com/TeddYenn/ShiNyP/releases)
+[![DOI](https://img.shields.io/badge/DOI-10.1093%2Fmolbev%2Fmsaf117-blue.svg?link=https%3A%2F%2Fdoi.org%2F10.1093%2Fmolbev%2Fmsaf117)](https://doi.org/10.1093/molbev/msaf117)
 
 <!-- badges: end -->
 
