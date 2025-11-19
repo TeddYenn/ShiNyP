@@ -53,7 +53,7 @@ AI_Bot_Server <- function(input, output, session) {
           system_prompt = system_prompt,
           base_url = "https://generativelanguage.googleapis.com/v1beta/",
           api_key = KEY,
-          model = "gemini-2.5-flash-lite-preview-06-17",
+          model = "gemini-2.5-flash-lite",
           echo = "none"
         )
         coro::loop(for (chunk in chat_instance$stream(user_msg)) {

@@ -290,7 +290,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
           api_args = list(timeout = 1200, max_tokens = 1000, stream = TRUE),
           echo = "text"
         )
-      } else if (model %in% c("gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite-preview-06-17")){
+      } else if (model %in% c("gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite")){
         chat = chat_google_gemini(
           system_prompt = Start,
           base_url = "https://generativelanguage.googleapis.com/v1beta/",
