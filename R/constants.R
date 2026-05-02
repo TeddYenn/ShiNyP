@@ -39,23 +39,13 @@ pval_adj_method_choice = c("Bonferroni" = "bonferroni",
 #' @description A named character vector for AI Model keywords
 #' @export
 AI_model_choice = c("DeepSeek-V3" = "deepseek-chat",
-                    # "DeepSeek-R1" = "deepseek-reasoner", -> Waiting time too long!
-                    "Gemini 2.0 Flash (API Free)" = "gemini-2.0-flash",
+                    "Gemini 3 Flash" = "gemini-3-flash-preview",
                     "Gemini 2.5 Flash" = "gemini-2.5-flash",
-                    "Gemini 2.5 Flash-Lite" = "gemini-2.5-flash-lite-preview-06-17",
-                    "o4-mini" = "o4-mini",
-                    "o3-mini" = "o3-mini",
-                    # "o1" = "o1", -> Waiting time too long!
-                    # "o1-mini" = "o1-mini", -> Discard 
-                    # "GPT-4.5 Preview" = "gpt-4.5-preview",
-                    "GPT-4.1" = "gpt-4.1",
-                    "GPT-4.1 mini" = "gpt-4.1-mini",
-                    "GPT-4.1 nano" = "gpt-4.1-nano",
-                    "GPT-4o" = "gpt-4o",
-                    "GPT-4o mini" = "gpt-4o-mini"
-                    # "GPT-4 Turbo" = "gpt-4-turbo", -> Discard 
-                    # "GPT-4" = "gpt-4", -> Discard 
-                    # "GPT-3.5 Turbo" = "gpt-3.5-turbo" -> Discard 
+                    "Gemini 2.5 Flash-Lite" = "gemini-2.5-flash-lite",
+                    "GPT-5.5" = "gpt-5.5",
+                    "GPT-5" = "gpt-5",
+                    "GPT-5 mini" = "gpt-5-mini",
+                    "GPT-4.1" = "gpt-4.1"
                     )
 
 #' @title Color Choices
@@ -101,11 +91,6 @@ Data_Interpretation_Prompt =
     - Explain the rationale, representativeness, and applications (e.g., conservation, breeding) of the core collection.
 
 Structure your report in clear, concise sections with integrated conclusions, highlighting statistical significance, assumptions, limitations, and omitting any sections without data."
-
-#' @title KEY
-#' @description KEY
-#' @export
-KEY = "AIzaSyBaTHJTqCXAdaU_11L01CWTjIYe-mHYaEQ"
 
 #' @title Report Structuring Prompt
 #' @description Prompt for Report Structuring

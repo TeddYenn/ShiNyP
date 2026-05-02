@@ -1,4 +1,4 @@
-#' Launch the ShiNyP Shiny app
+ #' Launch the ShiNyP Shiny app
 #'
 #' @export
 # This file is part of ShiNyP

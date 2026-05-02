@@ -49,13 +49,43 @@ AI_Bot_Server <- function(input, output, session) {
       
       # 6. Streaming Gemini reply (with tryCatch)
       tryCatch({
-        chat_instance <- chat_google_gemini(
-          system_prompt = system_prompt,
-          base_url = "https://generativelanguage.googleapis.com/v1beta/",
-          api_key = KEY,
-          model = "gemini-2.5-flash-lite",
-          echo = "none"
-        )
+        req(ai_user_model())
+        model_name = ai_user_model()
+        model_code = AI_model_choice[model_name]
+        key = ai_user_api_key()
+        
+        if (is.null(key)) {
+          stop("API key is missing. Please upload your API key on the Home page first.")
+        }
+        
+        chat_instance = NULL
+        if (model_code %in% c("gpt-5.5", "gpt-5", "gpt-5-mini", "gpt-4.1")){
+          chat_instance = chat_openai(
+            system_prompt = system_prompt,
+            base_url = "https://api.openai.com/v1",
+            api_key = key,
+            model = model_code,
+            echo = "none"
+          )
+        } else if (model_code %in% c("deepseek-chat")){
+          chat_instance = chat_deepseek(
+            system_prompt = system_prompt,
+            base_url = "https://api.deepseek.com",
+            api_key = key,
+            model = model_code,
+            api_args = list(timeout = 1200, max_tokens = 1000, stream = TRUE),
+            echo = "none"
+          )
+        } else if (model_code %in% c("gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite")){
+          chat_instance = chat_google_gemini(
+            system_prompt = system_prompt,
+            base_url = "https://generativelanguage.googleapis.com/v1beta/",
+            api_key = key,
+            model = model_code,
+            echo = "none"
+          )
+        }
+        
         coro::loop(for (chunk in chat_instance$stream(user_msg)) {
           ai_reply <- paste0(ai_reply, as.character(chunk))
           session$sendCustomMessage("updateTyping", list(msg = ai_reply))

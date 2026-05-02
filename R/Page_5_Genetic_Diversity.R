@@ -274,12 +274,16 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
         
         fst_matrix = matrix(0, nrow = length(ngroup), ncol = length(ngroup))
         rownames(fst_matrix) = colnames(fst_matrix) = paste("Group", ngroup)
-        for (i in 1:nrow(fst_data)) {
-          row = as.numeric(fst_data$Comparison1[i])
-          col = as.numeric(fst_data$Comparison2[i])
-          value = fst_data$Fst[i]
-          fst_matrix[row, col] = value
-          fst_matrix[col, row] = value
+        if (nrow(fst_data) > 0) {
+          for (i in seq_len(nrow(fst_data))) {
+            row_name = paste("Group", fst_data$Comparison1[i])
+            col_name = paste("Group", fst_data$Comparison2[i])
+            value = fst_data$Fst[i]
+            if (row_name %in% rownames(fst_matrix) && col_name %in% colnames(fst_matrix)) {
+              fst_matrix[row_name, col_name] = value
+              fst_matrix[col_name, row_name] = value
+            }
+          }
         }
         fst_matrix(fst_matrix)
         output$Type = renderUI({
@@ -291,11 +295,11 @@ Page_5_Genetic_Diversity_Server = function(input, output, session) {
         GDtitle3("Genetic Diversity Statistics by Group")
         pre_results = pre_results()
         pre_results[[30]] = "## Genetic Diversity"
-        pre_results[[31]] = paste0("The average observed heterozygosity (Ho) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,3], collapse = ", "))
-        pre_results[[32]] = paste0("The average expected heterozygosity (He) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,2], collapse = ", "))
-        pre_results[[33]] = paste0("The average Unbiased pi diversity (Pi) of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,6], collapse = ", "))
-        pre_results[[34]] = paste0("The number of exclusive allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,8], collapse = ", "))
-        pre_results[[35]] = paste0("The number of fixed allele of each group, Group 1 to Group ", length(group_stat[,2])-1, ": ", paste(group_stat[-1,9], collapse = ", "))
+        pre_results[[31]] = paste0("The average observed heterozygosity (Ho) of each group, Group 1 to Group ", nrow(group_stat)-1, ": ", paste(group_stat[-1,3], collapse = ", "))
+        pre_results[[32]] = paste0("The average expected heterozygosity (He) of each group, Group 1 to Group ", nrow(group_stat)-1, ": ", paste(group_stat[-1,2], collapse = ", "))
+        pre_results[[33]] = paste0("The average Unbiased pi diversity (Pi) of each group, Group 1 to Group ", nrow(group_stat)-1, ": ", paste(group_stat[-1,6], collapse = ", "))
+        pre_results[[34]] = paste0("The number of exclusive allele of each group, Group 1 to Group ", nrow(group_stat)-1, ": ", paste(group_stat[-1,8], collapse = ", "))
+        pre_results[[35]] = paste0("The number of fixed allele of each group, Group 1 to Group ", nrow(group_stat)-1, ": ", paste(group_stat[-1,9], collapse = ", "))
         pre_results(pre_results)
         showNotification("Run Successfully", type = "message")
       } else{

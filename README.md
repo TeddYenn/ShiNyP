@@ -14,7 +14,7 @@
 
 
 > [!NOTE] 
-> **🆕 _ShiNyP_ v1.1.1  is now available!**
+> **🆕 _ShiNyP_ v1.2.0  is now available!**
 
 <br>
 
@@ -151,6 +151,7 @@ If you encounter any issues or have suggestions for new features, please submit 
 - Apr 2025: Release v0.2.0.
 - May 2025: Release v1.0.0.
 - Jun 2025: Release v1.1.0.
+- May 2026: Release v1.2.0.
 
 <br>
 <br>

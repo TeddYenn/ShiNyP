@@ -36,12 +36,6 @@ Page_8_AI_Report_UI = function() {
                    column(3,
                           tags$h4("2. AI-Driven Report", class = "custom-h4"),
                           bslib::tooltip(
-                            selectInput("AI_model", "AI model:", 
-                                        choices = names(AI_model_choice), 
-                                        selected = "Gemini 2.0 Flash (API Free)"),
-                            "Choose an LLM-based model"
-                          ),
-                          bslib::tooltip(
                             selectInput("AI_prompt", "AI task:",
                                         choices = c("Summary Request", "Data Interpretation", "Report Structuring", "Idea Expansion", "Custom Template"),
                                         selected = "Data Interpretation"),
@@ -62,10 +56,7 @@ Page_8_AI_Report_UI = function() {
                                         selected = "English"),
                             "Select the report language"
                           ),
-                          bslib::tooltip(
-                            uiOutput("AI_api_key"),
-                            "Upload a .txt file containing your API key", placement = "top"
-                          ),
+                          p("API key is managed on the Home page (AI Activation block).", style = "font-size: 13px; color: #6c757d;"),
                           actionButton("runAIreport", "Get Report", class = "AI1-action-button"),
                           actionButton("AIreport_Reset", "Reset", class = "AI2-action-button"),
                           div(
@@ -157,34 +148,6 @@ Page_8_AI_Report_Server = function(input, output, session) {
     }
   )
   
-  #### API #### 
-  
-  observeEvent(input$AI_model, {
-    if (input$AI_model == "Gemini 2.0 Flash (API Free)") {
-      showModal(modalDialog(
-        title = "API Not Required",
-        tagList(
-          p("The selected model ", tags$b("does not require"), " an API key."),
-          p("You can proceed without uploading one.")
-        ),
-        easyClose = TRUE,
-        footer = modalButton("Close")
-      ))
-    } else {
-      showModal(modalDialog(
-        title = "API Key Required",
-        tagList(
-          p("The selected model (", input$AI_model, ") ", tags$b("requires "), "a valid API key."),
-          p("Please upload your API key"),
-          p(tags$a(href = "https://teddyenn.github.io/ShiNyP-guide/sec-ai-report.html#how-to-get-the-api-key", 
-                   "How to get the API Key - ShiNyP User Guide", target = "_blank"))
-        ),
-        easyClose = TRUE,
-        footer = modalButton("Close")
-      ))
-    }
-  }, ignoreInit = TRUE)
-  
   #### STEP 2 ####
   
   observeEvent(input$AI_prompt, {
@@ -217,20 +180,17 @@ Page_8_AI_Report_Server = function(input, output, session) {
     }
   })
   
-  output$AI_api_key = renderUI({
-    fileInput("AI_api_key", "API key file:", multiple = FALSE, accept = c(".txt"))
-  })
-  
-  observeEvent(input$AI_api_key, {
-    req(input$AI_api_key)
-    showNotification("Uploaded successfully", type = "message")
-  })
-  
   observeEvent(input$runAIreport, {
     req(preliminary_results())
+    if (is.null(ai_user_api_key())) {
+      showNotification("Please upload your API key on the Home page first.", type = "error", duration = 5)
+      return()
+    }
+
     shinyjs::show("AIStatus")
     
     tryCatch({
+      key = ai_user_api_key()
       
       if (input$AI_prompt == "Summary Request"){
         Role = "You are a professional researcher assisting me in interpreting data, summarizing findings, and generating novel research ideas based on my SNP analysis."
@@ -264,16 +224,9 @@ Page_8_AI_Report_Server = function(input, output, session) {
         )
       }
       
-      if (input$AI_model == "Gemini 2.0 Flash (API Free)") {
-        key = KEY
-      } else{
-        req(input$AI_api_key$datapath)
-        key = readLines(input$AI_api_key$datapath, warn = FALSE)
-      }
+      model = AI_model_choice[ai_user_model()]
       
-      model = AI_model_choice[input$AI_model]
-      
-      if (model %in% c("o3-mini", "o4-mini")){
+      if (model %in% c("gpt-5.5", "gpt-5", "gpt-5-mini", "gpt-4.1")){
         chat = chat_openai(
           system_prompt = Start,
           base_url = "https://api.openai.com/v1",
@@ -290,7 +243,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
           api_args = list(timeout = 1200, max_tokens = 1000, stream = TRUE),
           echo = "text"
         )
-      } else if (model %in% c("gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-flash-lite")){
+      } else if (model %in% c("gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite")){
         chat = chat_google_gemini(
           system_prompt = Start,
           base_url = "https://generativelanguage.googleapis.com/v1beta/",
@@ -325,29 +278,29 @@ Page_8_AI_Report_Server = function(input, output, session) {
           paste(sections[["Core Collection"]], collapse = "\n")
         )
         
-        content = c()
+        content_list = list()
         topic = list(
           "Data Input, Data QC, and SNP dataset for downstream analysis",
           "Population Structure", "Genetic Diversity", "Selection Sweep", "Core Collection"
         )
         
         for (i in 1:5) {
-          if (length(sections[[i]]) != 0){
-            Role = paste("This document contains my preliminary results, organized into five sections. The current section focuses exclusively on the topic of '", topic[i], "'.",
-                         "Please exclusively expand on the topic '", topic[i], "'", "with detailed, relevant content, while maintaining the formal academic writing style established in the previous sections.",
+          if (nzchar(trimws(sections[[i]]))) {
+            current_role = paste("This document contains my preliminary results, organized into five sections. The current section focuses exclusively on the topic of '", topic[[i]], "'.",
+                         "Please exclusively expand on the topic '", topic[[i]], "'", "with detailed, relevant content, while maintaining the formal academic writing style established in the previous sections.",
                          Role)
             
-            message = paste(Role, "\n", sections[[i]])
-            content[i] = c(chat$chat(message), "\n\n\n")
-            
+            message = paste(current_role, "\n", sections[[i]])
+            content_list[[length(content_list) + 1]] = chat$chat(message)
           }
         }
+        content = unlist(content_list)
       }
       content = paste(content, collapse = "\n\n\n")
       
       report = paste0("---", "\n", "\n",
                       "───── ✅  Successful Request  ─────","\n", "\n",
-                      "- AI Model: ", input$AI_model, "\n",
+                      "- AI Model: ", ai_user_model(), "\n",
                       "- Task: ", input$AI_prompt, "\n",
                       "- Conversation Mode: ", input$AI_turn, "\n",
                       "- Report Language: ", input$AI_lang, "\n",
@@ -377,7 +330,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
   })
   
   output$DAI_report1 = downloadHandler(
-    filename = paste0("AI_Report-", input$AI_model, "-", input$AI_prompt,".txt"),
+    filename = paste0("AI_Report-", ai_user_model(), "-", input$AI_prompt,".txt"),
     content = function(file) {
       write.table(AI_report(), file, row.names = FALSE, col.names = FALSE, quote = FALSE)
     }
@@ -391,7 +344,7 @@ Page_8_AI_Report_Server = function(input, output, session) {
   
   output$DAI_report2 = downloadHandler(
     filename = function() {
-      paste0("AI_Report-", input$AI_model, "-", input$AI_prompt, "-", input$AI_turn, "-", input$AI_lang, ".docx")
+      paste0("AI_Report-", ai_user_model(), "-", input$AI_prompt, "-", input$AI_turn, "-", input$AI_lang, ".docx")
     },
     content = function(file) {
       temp_rmd = tempfile(fileext = ".Rmd")
@@ -425,9 +378,6 @@ Page_8_AI_Report_Server = function(input, output, session) {
   observeEvent(input$AIreport_Reset, {
     AI_report(NULL)
     AItitle2("")
-    output$AI_api_key = renderUI({
-      fileInput("AI_api_key", "API key file:", multiple = FALSE, accept = c(".txt"))
-    })
     output$AI_template = renderUI({
       fileInput("AI_template_file", "Template file:", multiple = FALSE, accept = c(".txt"))
     })
