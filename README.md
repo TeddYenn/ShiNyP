@@ -65,7 +65,7 @@ For detailed instructions on each feature, please visit ➡️ [**User Guide**](
    ```R
    install.packages("BiocManager")
    BiocManager::install(version = "3.21") # Use the version that matches your R
-   BiocManager::install(c("qvalue", "SNPRelate", "ggtree", "snpStats"), force = TRUE)
+   BiocManager::install(c("qvalue", "SNPRelate", "ggtree", "snpStats", "LEA"), force = TRUE)
    ```
 ### 2️⃣ Install the _ShiNyP_ Package
    ```R
